@@ -23,11 +23,15 @@
 
         "ql/mcp-common": "~1.0",
         "psr/log":       "*",
-        "slim/slim":     "~2.6",
 
-        "symfony/config":               "~2.6",
-        "symfony/dependency-injection": "^2.6.3",
-        "symfony/yaml":                 "~2.6"
+        "slim/slim":                            "^3.0@RC",
+
+        "symfony/config":                       "~2.6",
+        "symfony/dependency-injection":         "^2.6.3",
+        "symfony/yaml":                         "~2.6",
+
+        "container-interop/container-interop":  "^1.1",
+        "acclimate/container":                  "^1.0"
     },
 
     "require-dev": {
