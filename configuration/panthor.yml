@@ -166,33 +166,38 @@ services:
 
     # slim accessors
 
-    #TODO: slim base level params are available from the acclimated container
     panthor.slim.environment:
         class: 'Slim\Environment'
-        factory: ['@slim', 'environment']
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['environment']
 
     panthor.slim.request:
         class: 'Slim\Http\Request'
-        factory: ['@slim', 'request']
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['request']
 
     panthor.slim.response:
         class: 'Slim\Http\Response'
-        properties:
-            cookies: '@slim.cookies'
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['response']
 
     panthor.slim.router:
         class: 'Slim\Router'
-        factory: ['@slim', 'router']
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['router']
 
     panthor.slim.route:
         class: 'Slim\Route'
         factory: ['@slim.router', 'getCurrentRoute']
 
-    #TODO: This can be preserved, needs updating
+    #TODO: This needs to be tested out to ensure I didn't seriously breake it!
     panthor.slim.cookies:
         class: 'QL\Panthor\Http\EncryptedCookies'
         arguments:
-            - @slim
             - @json
             - @cookie.encryption
             - %cookie.unencrypted%
