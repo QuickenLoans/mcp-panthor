@@ -1,6 +1,9 @@
 parameters:
     # Parameters overridden by application configuration
     routes: []
+
+    slim.settings: []
+
     slim.hooks:
         slim.before.router:
             - 'slim.hook.routes'
@@ -41,6 +44,7 @@ services:
     # application configuration
     ############################################################################
 
+    container:                      {parent: panthor.container}
     slim:                           {parent: panthor.slim}
     slim.configurator:              {parent: panthor.slim.configurator}
 
@@ -78,6 +82,54 @@ services:
 
     middleware.request_body:        {parent: panthor.middleware.request_body}
 
+    symfony.container:              {synthetic: true}
+
+    ############################################################################
+    # Acclimate
+    #
+    # Required parameters:
+    #
+    # %debug%
+    # %routes%
+    # %slim.hooks%
+    # %cookie.unencrypted%
+    # @symfony.container
+    #
+    ############################################################################
+
+    panthor.container:
+        class: Acclimate\Container\CompositeContainer
+        arguments:
+            - ["@panthor.slim.container", "@acclimate.symfony.container"]
+
+    acclimate.container:
+        class: Acclimate\Container\ContainerAcclimator
+
+    acclimate.symfony.container:
+        class: Acclimate\Container\ContainerAcclimator
+        factory: [@acclimate.container, acclimate]
+        arguments:
+            - @symfony.container
+
+    ############################################################################
+    # Slim 3
+    #
+    # Required parameters:
+    #
+    # @container
+    # %slim.settings%
+    #
+    ############################################################################
+
+    panthor.slim:
+        class: 'Slim\App'
+        arguments:
+            - @container
+    slim.container:
+        class: Slim\Container
+        arguments:
+            - %slim.settings%
+
     ############################################################################
     # Slim
     #
@@ -86,65 +138,80 @@ services:
     # %debug%
     # %routes%
     # %slim.hooks%
-    # %cookie.unencrypted%
     #
     ############################################################################
 
-    panthor.slim:
-        class: 'Slim\Slim'
-        arguments:
-            - debug: '%debug%'
-        configurator: ['@slim.configurator', 'configure']
-        properties:
-            response: @slim.response
+#   Slim no longer needs multiple middleware components *cough hooks*
+#
+#    panthor.slim:
+#        class: 'Slim\Slim'
+#        arguments:
+#            - debug: %debug%
+#        configurator: [@slim.configurator, 'configure']
+#        properties:
+#            response: @slim.response
+#
+#    panthor.slim.configurator:
+#        class: 'QL\Panthor\Bootstrap\SlimConfigurator'
+#        arguments: [@service_container, %slim.hooks%]
 
-    panthor.slim.configurator:
-        class: 'QL\Panthor\Bootstrap\SlimConfigurator'
-        arguments: ['@service_container', '%slim.hooks%']
-
+    #TODO: Update to run not as a hook or middleware but the thing that loads them.
     panthor.slim.hook.routes:
         class: 'QL\Panthor\Slim\RouteLoaderHook'
-        arguments: ['@service_container', '%routes%']
+        arguments: [@service_container, %routes%]
+
+    #TODO: Update into middleware
+    panthor.slim.hook.apacheAuthorization:
+        class: 'QL\Panthor\Slim\ApacheAuthorizationHeaderHook'
 
     # slim accessors
 
     panthor.slim.environment:
         class: 'Slim\Environment'
-        factory: ['@slim', 'environment']
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['environment']
 
     panthor.slim.request:
         class: 'Slim\Http\Request'
-        factory: ['@slim', 'request']
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['request']
 
     panthor.slim.response:
         class: 'Slim\Http\Response'
-        properties:
-            cookies: '@slim.cookies'
-
-    panthor.slim.cookies:
-        class: 'QL\Panthor\Http\EncryptedCookies'
-        arguments:
-            - '@slim'
-            - '@json'
-            - '@cookie.encryption'
-            - '%cookie.unencrypted%'
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['response']
 
     panthor.slim.router:
         class: 'Slim\Router'
-        factory: ['@slim', 'router']
+        factory_service: slim.container
+        factory_method: get
+        arguments: ['router']
 
     panthor.slim.route:
         class: 'Slim\Route'
         factory: ['@slim.router', 'getCurrentRoute']
 
+    #TODO: This needs to be tested out to ensure I didn't seriously breake it!
+    panthor.slim.cookies:
+        class: 'QL\Panthor\Http\EncryptedCookies'
+        arguments:
+            - @json
+            - @cookie.encryption
+            - %cookie.unencrypted%
+
     panthor.slim.route.parameters:
         class: 'na'
         factory: ['@slim.route', 'getParams']
 
+    #TODO: Panthor no longer has halt, the way to do this needs to be investigated
     panthor.slim.halt:
         class: 'QL\Panthor\Slim\Halt'
         arguments: ['@slim']
 
+    #TODO: The function this class Proxies no longer exists, ensure it hasn't moved or remove this
     panthor.slim.not.found:
         class: 'QL\Panthor\Slim\NotFound'
         arguments: ['@slim']
@@ -237,6 +304,7 @@ services:
     #
     ############################################################################
 
+    #TODO: Update this middleware to be Slim 3 compatible
     panthor.middleware.request_body:
         class: 'QL\Panthor\Middleware\RequestBodyMiddleware'
         arguments:
@@ -267,6 +335,7 @@ services:
     #
     ############################################################################
 
+    #TODO: Incompatible with Slim 3. Determine if needed, if so should prob be re-written as midware
     panthor.url:
         class: 'QL\Panthor\Utility\Url'
         arguments:

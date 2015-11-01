@@ -7,10 +7,8 @@
 
 namespace QL\Panthor\Http;
 
-use ArrayIterator;
 use QL\Panthor\Utility\Json;
 use Slim\Http\Cookies;
-use Slim\Slim;
 
 /**
  * Hi! You guys want some cookies?
@@ -22,11 +20,6 @@ use Slim\Slim;
  */
 class EncryptedCookies extends Cookies
 {
-    /**
-     * @type Slim
-     */
-    private $slim;
-
     /**
      * @type Json
      */
@@ -43,21 +36,19 @@ class EncryptedCookies extends Cookies
     private $unencryptedCookies;
 
     /**
-     * @param Slim $slim
      * @param Json $json
      * @param CookieEncryptionInterface $encryption
      * @param string[] $unencryptedCookies
      */
     public function __construct(
-        Slim $slim,
         Json $json,
         CookieEncryptionInterface $encryption,
         array $unencryptedCookies = []
     ) {
-        $this->slim = $slim;
         $this->json = $json;
         $this->encryption = $encryption;
 
+        parent::__construct($unencryptedCookies);
         $this->unencryptedCookies = $unencryptedCookies;
     }
 
@@ -70,10 +61,11 @@ class EncryptedCookies extends Cookies
      */
     public function getResponseCookie($key)
     {
-        if (!$cookie = parent::get($key)) {
+        if (!array_key_exists($key, $this->responseCookies)) {
             return null;
         }
 
+        $cookie = $this->responseCookies[$key];
         $value = array_key_exists('value', $cookie) ? $cookie['value'] : null;
 
         if ($value) {
@@ -90,20 +82,6 @@ class EncryptedCookies extends Cookies
     }
 
     /**
-     * {inheritdoc}
-     */
-    public function getIterator()
-    {
-        $sanitized = $this->all();
-
-        array_walk($sanitized, function(&$v, $key) {
-            $v = $this->getResponseCookie($key);
-        });
-
-        return new ArrayIterator($sanitized);
-    }
-
-    /**
      * Convenience method to centralize cookie handling (also so we dont have to pass Slim\Slim around as a dependency)
      *
      * @see Slim::deleteCookie
@@ -114,7 +92,7 @@ class EncryptedCookies extends Cookies
      */
     public function deleteCookie($name)
     {
-        return call_user_func_array([$this->slim, __FUNCTION__], func_get_args());
+        return call_user_func_array([$this, 'set'], [$name, null]);
     }
 
     /**
@@ -128,7 +106,7 @@ class EncryptedCookies extends Cookies
      */
     public function getCookie($name)
     {
-        if ($value = $this->slim->getCookie($name)) {
+        if ($value = parent::get($name)) {
             $decrypted = $this->encryption->decrypt($value);
 
             // Successful decryption
@@ -136,10 +114,6 @@ class EncryptedCookies extends Cookies
                 $decoded = $this->json->decode($decrypted);
                 if ($decoded !== null) {
                     return $decoded;
-                } else {
-                    // If json decode fails, just return the raw decrypted string. This is to maintain BC.
-                    // @todo remove in 3.0
-                    return $decrypted;
                 }
 
             // Allow straight value through if fails decryption and allowed to be unencrypted.
@@ -161,6 +135,6 @@ class EncryptedCookies extends Cookies
      */
     public function setCookie()
     {
-        return call_user_func_array([$this->slim, __FUNCTION__], func_get_args());
+        return call_user_func_array([$this, 'set'], func_get_args());
     }
 }
