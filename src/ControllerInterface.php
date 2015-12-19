@@ -7,12 +7,19 @@
 
 namespace QL\Panthor;
 
+use Slim\Http\Request;
+use Slim\Http\Response;
+
 interface ControllerInterface
 {
     /**
      * The primary action of this controller. Any return from this method is ignored.
      *
-     * @return null
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     *
+     * @return Response
      */
-    public function __invoke();
+    public function __invoke(Request $request, Response $response, $args);
 }

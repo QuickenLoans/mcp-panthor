@@ -8,7 +8,7 @@
 namespace QL\Panthor\Slim;
 
 use QL\Panthor\Exception;
-use Slim\Slim;
+use Slim\App;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -62,35 +62,53 @@ class RouteLoaderHook
     /**
      * Load routes into the application
      *
-     * @param Slim $slim
+     * @param App $slim
+     * @param array $routes
      *
      * @return null
      */
-    public function __invoke(Slim $slim)
+    public function __invoke(App $slim, $routes = null)
     {
-        foreach ($this->routes as $name => $details) {
+        if (is_null($routes)) {
+            $routes = $this->routes;
+        }
+        foreach ($routes as $name => $details) {
 
             $methods = $this->methods($details);
             $conditions = $this->nullable('conditions', $details);
+            $group = $this->nullable('group', $details);
             $url = $details['route'];
             $stack = $this->convertStackToCallables($details['stack']);
 
-            // Prepend the url to the stack
-            array_unshift($stack, $url);
+            if (!is_null($conditions)) {
+                $this->loadConditions($conditions, $url);
+            }
 
             // Create route
-            // Special note: slim is really stupid in the way it uses func_get_args EVERYWHERE
-            $route = call_user_func_array([$slim, 'map'], $stack);
-            call_user_func_array([$route, 'via'], $methods);
+            if (!is_null($group)) {
+                //Groups can't have methods, just their constituents.
+                $route = $slim->group($url, function () use ($slim, $group) {
+                    $this->__invoke($slim, $group);
+                });
 
-            // Add Name
-            $route->name($name);
+            } else {
+                $route = $slim->map($methods, $url, array_pop($stack));
+            }
 
-            // Add Conditions
-            if ($conditions) {
-                $route->conditions($conditions);
+            if (count($stack) > 0) {
+                array_map([$route, 'add'], $stack);
             }
         }
+    }
+
+    private function loadConditions($url, $conditions)
+    {
+        foreach ($conditions as $identifier => $regex) {
+            $identifier = sprintf('{%s}', $identifier);
+            $replacement = sprintf('{%s:%s}', $identifier, $regex);
+            $url = str_replace($identifier, $replacement, $url);
+        }
+        return $url;
     }
 
     /**
