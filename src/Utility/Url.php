@@ -122,9 +122,9 @@ class Url
      */
     public function redirectForURL($url, array $query = [], $code = 302)
     {
-        $this->response->headers->set('Location', $this->appendQueryString($url, $query));
+        $this->response = $this->response->withHeader('Location', $this->appendQueryString($url, $query));
 
-        call_user_func($this->halt, $code);
+        $this->response = $this->response->withStatus($code);
     }
 
     /**
