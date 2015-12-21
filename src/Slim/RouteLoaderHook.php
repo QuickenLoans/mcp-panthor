@@ -7,9 +7,9 @@
 
 namespace QL\Panthor\Slim;
 
-use QL\Panthor\Exception;
+use QL\Panthor\Exception\Exception;
 use Slim\App;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Interop\Container\ContainerInterface;
 
 /**
  * Convert a flat array into slim routes and attaches them to the slim application.
@@ -26,6 +26,11 @@ class RouteLoaderHook
     private $methods;
 
     /**
+     * @type App
+     */
+    private $slim;
+
+    /**
      * @type ContainerInterface
      */
     private $container;
@@ -39,8 +44,9 @@ class RouteLoaderHook
      * @param ContainerInterface $container
      * @param array $routes
      */
-    public function __construct(ContainerInterface $container, array $routes = [])
+    public function __construct(App $slim, ContainerInterface $container, array $routes = [])
     {
+        $this->slim = $slim;
         $this->container = $container;
         $this->routes = $routes;
 
@@ -59,6 +65,11 @@ class RouteLoaderHook
         $this->routes = array_merge($this->routes, $routes);
     }
 
+    public function __invoke()
+    {
+        $this->loadRoutes($this->slim, $this->routes);
+    }
+
     /**
      * Load routes into the application
      *
@@ -67,7 +78,7 @@ class RouteLoaderHook
      *
      * @return null
      */
-    public function __invoke(App $slim, $routes = null)
+    public function loadRoutes(App $slim, $routes = null)
     {
         if (is_null($routes)) {
             $routes = $this->routes;
@@ -75,20 +86,19 @@ class RouteLoaderHook
         foreach ($routes as $name => $details) {
 
             $methods = $this->methods($details);
-            $conditions = $this->nullable('conditions', $details);
             $group = $this->nullable('group', $details);
             $url = $details['route'];
-            $stack = $this->convertStackToCallables($details['stack']);
-
-            if (!is_null($conditions)) {
-                $this->loadConditions($conditions, $url);
+            $stack = $this->nullable('stack', $details);
+            if (!is_null($stack)) {
+                $stack = $this->convertStackToCallables($details['stack']);
             }
 
             // Create route
             if (!is_null($group)) {
                 //Groups can't have methods, just their constituents.
-                $route = $slim->group($url, function () use ($slim, $group) {
-                    $this->__invoke($slim, $group);
+                $access = $this;
+                $route = $slim->group($url, function () use ($slim, $group, $access) {
+                    $access->loadRoutes($slim, $group);
                 });
 
             } else {
@@ -120,9 +130,10 @@ class RouteLoaderHook
      */
     private function convertStackToCallables(array $stack)
     {
+        $container = $this->container;
         foreach ($stack as &$key) {
-            $key = function () use ($key) {
-                call_user_func($this->container->get($key));
+            $key = function ($req, $res, $var) use ($container, $key) {
+                call_user_func($container->get($key), $req, $res, $var);
             };
         }
 
@@ -139,7 +150,7 @@ class RouteLoaderHook
     {
         // No method matches ANY method
         if (!$methods = $this->nullable('method', $routeDetails)) {
-            return ['ANY'];
+            return ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT'];
         }
 
         if ($methods && !is_array($methods)) {

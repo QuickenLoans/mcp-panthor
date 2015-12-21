@@ -46,7 +46,7 @@ services:
 
     container:                      {parent: panthor.container}
     slim:                           {parent: panthor.slim}
-    slim.configurator:              {parent: panthor.slim.configurator}
+    #slim.configurator:              {parent: panthor.slim.configurator}
 
     slim.halt:                      {parent: panthor.slim.halt}
     slim.not.found:                 {parent: panthor.slim.not.found}
@@ -125,7 +125,7 @@ services:
         class: 'Slim\App'
         arguments:
             - @container
-    slim.container:
+    panthor.slim.container:
         class: Slim\Container
         arguments:
             - %slim.settings%
@@ -154,11 +154,17 @@ services:
 #    panthor.slim.configurator:
 #        class: 'QL\Panthor\Bootstrap\SlimConfigurator'
 #        arguments: [@service_container, %slim.hooks%]
+    panthor.slim.hook.response:
+        class: Slim\Http\Response
+        factory_service: panthor.slim.hook.routes
+        factory_method: __invoke
+        arguments:
+            - @slim.request
+            - @slim.response
 
-    #TODO: Update to run not as a hook or middleware but the thing that loads them.
     panthor.slim.hook.routes:
         class: 'QL\Panthor\Slim\RouteLoaderHook'
-        arguments: [@service_container, %routes%]
+        arguments: [@panthor.slim, @panthor.container, %routes%]
 
     #TODO: Update into middleware
     panthor.slim.hook.apacheAuthorization:
@@ -168,25 +174,25 @@ services:
 
     panthor.slim.environment:
         class: 'Slim\Environment'
-        factory_service: slim.container
+        factory_service: panthor.slim.container
         factory_method: get
         arguments: ['environment']
 
     panthor.slim.request:
         class: 'Slim\Http\Request'
-        factory_service: slim.container
+        factory_service: panthor.slim.container
         factory_method: get
         arguments: ['request']
 
     panthor.slim.response:
         class: 'Slim\Http\Response'
-        factory_service: slim.container
+        factory_service: panthor.slim.container
         factory_method: get
         arguments: ['response']
 
     panthor.slim.router:
         class: 'Slim\Router'
-        factory_service: slim.container
+        factory_service: panthor.slim.container
         factory_method: get
         arguments: ['router']
 
@@ -342,7 +348,6 @@ services:
             - '@slim.router'
             - '@slim.request'
             - '@slim.response'
-            - '@slim.halt'
 
     panthor.clock:
         class: 'QL\MCP\Common\Time\Clock'

@@ -8,7 +8,7 @@
 namespace QL\Panthor\Bootstrap;
 
 use Closure;
-use Slim\Slim;
+use Slim\App;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,11 +43,11 @@ class SlimConfigurator
     }
 
     /**
-     * @param Slim $slim
+     * @param App $slim
      *
      * @return null
      */
-    public function configure(Slim $slim)
+    public function configure(App $slim)
     {
         foreach ($this->hooks as $event => $hooks) {
             foreach ($hooks as $hook) {
@@ -59,12 +59,12 @@ class SlimConfigurator
     /**
      * Lazy loader for the actual hook services.
      *
-     * @param Slim $slim
+     * @param App $slim
      * @param string $key
      *
      * @return Closure
      */
-    private function hookClosure(Slim $slim, $key)
+    private function hookClosure(App $slim, $key)
     {
         return function() use ($slim, $key) {
             $service = $this->di->get($key);
