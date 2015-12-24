@@ -73,7 +73,7 @@ class RouteLoaderHookTest extends PHPUnit_Framework_TestCase
             ->with('derp')
             ->once();
 
-        $hook = new RouteLoaderHook($this->di, $routes);
+        $hook = new RouteLoaderMiddleware($this->di, $routes);
         $hook($this->slim);
     }
 
@@ -129,7 +129,7 @@ class RouteLoaderHookTest extends PHPUnit_Framework_TestCase
             ->with('derp')
             ->once();
 
-        $hook = new RouteLoaderHook($this->di);
+        $hook = new RouteLoaderMiddleware($this->di);
         $hook->addRoutes($routes);
         $hook($this->slim);
     }
@@ -186,7 +186,7 @@ class RouteLoaderHookTest extends PHPUnit_Framework_TestCase
             ->with('derp')
             ->once();
 
-        $hook = new RouteLoaderHook($this->di, $routes);
+        $hook = new RouteLoaderMiddleware($this->di, $routes);
 
         // This overwrites the previously set route
         $hook->addRoutes([

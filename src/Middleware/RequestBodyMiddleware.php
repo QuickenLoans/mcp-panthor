@@ -7,6 +7,9 @@
 
 namespace QL\Panthor\Middleware;
 
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\RequestException;
 use QL\Panthor\MiddlewareInterface;
 use QL\Panthor\Utility\Json;
@@ -74,17 +77,17 @@ class RequestBodyMiddleware implements MiddlewareInterface
      *
      * @return null
      */
-    public function __invoke()
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
-        $mediaType = $this->request->getMediaType();
+        $mediaType = $request->getHeader('contentType');// getMediaType();
         if ($mediaType === 'application/json') {
             $decoded = $this->handleJson();
 
         } else if ($mediaType === 'application/x-www-form-urlencoded') {
-            $decoded = $this->request->post();
+            $decoded = $request->getParsedBody();// post();
 
         } else if ($mediaType === 'multipart/form-data') {
-            $decoded = $this->request->post();
+            $decoded = $request->getParsedBody();//post();
 
         } else {
             throw new RequestException(static::ERR_UNSUPPORTED, static::ERR_UNSUPPORTED_CODE);
@@ -101,6 +104,7 @@ class RequestBodyMiddleware implements MiddlewareInterface
         }
 
         $this->di->set($this->serviceName, $decoded);
+        return $next($request, $response);
     }
 
     /**
@@ -144,7 +148,7 @@ class RequestBodyMiddleware implements MiddlewareInterface
      */
     protected function handleJson()
     {
-        $body = $this->request->getBody();
+        $body = $this->request->getBody()->getContents();
         $decoded = call_user_func($this->json, $body);
 
         if (!is_array($decoded)) {
