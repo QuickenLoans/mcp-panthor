@@ -5,8 +5,10 @@
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\Slim;
+namespace QL\Panthor\Middleware;
 
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\Exception\Exception;
 use Slim\App;
 use Interop\Container\ContainerInterface;
@@ -16,7 +18,7 @@ use Interop\Container\ContainerInterface;
  *
  * This hook should be attached to the "slim.before.router" event.
  */
-class RouteLoaderHook
+class RouteLoaderMiddleware
 {
     /**
      * A hash of valid http methods. The keys are the methods.
@@ -44,9 +46,9 @@ class RouteLoaderHook
      * @param ContainerInterface $container
      * @param array $routes
      */
-    public function __construct(App $slim, ContainerInterface $container, array $routes = [])
+    public function __construct(ContainerInterface $container, array $routes = [])
     {
-        $this->slim = $slim;
+        $this->slim = $container->get('panthor.slim');
         $this->container = $container;
         $this->routes = $routes;
 
@@ -65,9 +67,10 @@ class RouteLoaderHook
         $this->routes = array_merge($this->routes, $routes);
     }
 
-    public function __invoke()
+    public function __invoke(RequestInterface $request, ResponseInterface $response, $next)
     {
         $this->loadRoutes($this->slim, $this->routes);
+        return $next($request, $response);
     }
 
     /**
@@ -103,6 +106,7 @@ class RouteLoaderHook
 
             } else {
                 $route = $slim->map($methods, $url, array_pop($stack));
+                $route->setName($name);
             }
 
             if (count($stack) > 0) {
@@ -110,17 +114,6 @@ class RouteLoaderHook
             }
         }
     }
-
-    private function loadConditions($url, $conditions)
-    {
-        foreach ($conditions as $identifier => $regex) {
-            $identifier = sprintf('{%s}', $identifier);
-            $replacement = sprintf('{%s:%s}', $identifier, $regex);
-            $url = str_replace($identifier, $replacement, $url);
-        }
-        return $url;
-    }
-
     /**
      * Convert an array of keys to middleware callables
      *
@@ -133,7 +126,7 @@ class RouteLoaderHook
         $container = $this->container;
         foreach ($stack as &$key) {
             $key = function ($req, $res, $var) use ($container, $key) {
-                call_user_func($container->get($key), $req, $res, $var);
+                return call_user_func($container->get($key), $req, $res, $var);
             };
         }
 
@@ -150,18 +143,11 @@ class RouteLoaderHook
     {
         // No method matches ANY method
         if (!$methods = $this->nullable('method', $routeDetails)) {
-            return ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT'];
+            return array_keys($this->methods);
         }
 
         if ($methods && !is_array($methods)) {
             $methods = [$methods];
-        }
-
-        // check for invalid method types
-        foreach ($methods as $method) {
-            if (!isset($this->methods[$method])) {
-                throw new Exception(sprintf('Unknown HTTP method: %s', $method));
-            }
         }
 
         if ($methods === ['GET']) {

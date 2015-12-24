@@ -11,6 +11,7 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Exception\Stop;
 use Slim\Router;
+use Slim\Route;
 
 class Url
 {
@@ -55,7 +56,8 @@ class Url
      */
     public function currentRoute()
     {
-        if (!$route = $this->router->getCurrentRoute()) {
+        /** @var Route $route */
+        if (!$route = $this->request->getAttribute('route')) {
             return null;
         }
 
@@ -92,7 +94,7 @@ class Url
      */
     public function absoluteUrlFor($route, array $params = [], array $query = [])
     {
-        return $this->request->getUrl() . $this->urlFor($route, $params, $query);
+        return $this->request->getUri() . $this->urlFor($route, $params, $query);
     }
 
     /**
@@ -102,8 +104,6 @@ class Url
      * @param array $params
      * @param array $query
      * @param int $code
-     *
-     * @throws Stop
      */
     public function redirectFor($route, array $params = [], array $query = [], $code = 302)
     {
@@ -117,8 +117,6 @@ class Url
      * @param string $url
      * @param array $query
      * @param int $code
-     *
-     * @throws Stop
      */
     public function redirectForURL($url, array $query = [], $code = 302)
     {

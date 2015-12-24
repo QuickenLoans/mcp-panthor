@@ -2,11 +2,11 @@ parameters:
     # Parameters overridden by application configuration
     routes: []
 
-    slim.settings: []
+    slim.settings:
+        determineRouteBeforeAppMiddleware: true
 
-    slim.hooks:
-        slim.before.router:
-            - 'slim.hook.routes'
+    middleware:
+        - 'slim.middleware.routes'
 
     debug: false
     request.body.service: 'request.body'
@@ -46,9 +46,8 @@ services:
 
     container:                      {parent: panthor.container}
     slim:                           {parent: panthor.slim}
-    #slim.configurator:              {parent: panthor.slim.configurator}
+    slim.configurator:              {parent: panthor.slim.configurator}
 
-    slim.halt:                      {parent: panthor.slim.halt}
     slim.not.found:                 {parent: panthor.slim.not.found}
 
     slim.environment:               {parent: panthor.slim.environment}
@@ -60,7 +59,7 @@ services:
     slim.route:                     {parent: panthor.slim.route}
     slim.route.parameters:          {parent: panthor.slim.route.parameters}
 
-    slim.hook.routes:               {parent: panthor.slim.hook.routes}
+    slim.middleware.routes:         {parent: panthor.slim.middleware.routes}
 
     url:                            {parent: panthor.url}
     json:                           {parent: panthor.json}
@@ -91,7 +90,7 @@ services:
     #
     # %debug%
     # %routes%
-    # %slim.hooks%
+    # %slim.middleware%
     # %cookie.unencrypted%
     # @symfony.container
     #
@@ -125,6 +124,7 @@ services:
         class: 'Slim\App'
         arguments:
             - @container
+        configurator: [@slim.configurator, 'configure']
     panthor.slim.container:
         class: Slim\Container
         arguments:
@@ -137,40 +137,20 @@ services:
     #
     # %debug%
     # %routes%
-    # %slim.hooks%
+    # %slim.middleware%
     #
     ############################################################################
 
-#   Slim no longer needs multiple middleware components *cough hooks*
-#
-#    panthor.slim:
-#        class: 'Slim\Slim'
-#        arguments:
-#            - debug: %debug%
-#        configurator: [@slim.configurator, 'configure']
-#        properties:
-#            response: @slim.response
-#
-#    panthor.slim.configurator:
-#        class: 'QL\Panthor\Bootstrap\SlimConfigurator'
-#        arguments: [@service_container, %slim.hooks%]
-    panthor.slim.hook.response:
-        class: Slim\Http\Response
-        factory_service: panthor.slim.hook.routes
-        factory_method: __invoke
-        arguments:
-            - @slim.request
-            - @slim.response
+    panthor.slim.configurator:
+        class: 'QL\Panthor\Bootstrap\SlimConfigurator'
+        arguments: [@container, %middleware%]
 
-    panthor.slim.hook.routes:
-        class: 'QL\Panthor\Slim\RouteLoaderHook'
-        arguments: [@panthor.slim, @panthor.container, %routes%]
+    panthor.slim.middleware.routes:
+        class: 'QL\Panthor\Midlleware\RouteLoaderMiddleware'
+        arguments: [@container, %routes%]
 
-    #TODO: Update into middleware
-    panthor.slim.hook.apacheAuthorization:
-        class: 'QL\Panthor\Slim\ApacheAuthorizationHeaderHook'
-
-    # slim accessors
+    panthor.slim.middleware.apacheAuthorization:
+        class: 'QL\Panthor\Midlleware\ApacheAuthorizationHeaderMiddleware'
 
     panthor.slim.environment:
         class: 'Slim\Environment'
@@ -198,7 +178,10 @@ services:
 
     panthor.slim.route:
         class: 'Slim\Route'
-        factory: ['@slim.router', 'getCurrentRoute']
+        factory_service: slim.request
+        factory_method: getAttribute
+        arguments: ['route']
+#        factory: ['@slim.router', 'getCurrentRoute']
 
     #TODO: This needs to be tested out to ensure I didn't seriously breake it!
     panthor.slim.cookies:
@@ -212,15 +195,8 @@ services:
         class: 'na'
         factory: ['@slim.route', 'getParams']
 
-    #TODO: Panthor no longer has halt, the way to do this needs to be investigated
-    panthor.slim.halt:
-        class: 'QL\Panthor\Slim\Halt'
-        arguments: ['@slim']
-
-    #TODO: The function this class Proxies no longer exists, ensure it hasn't moved or remove this
     panthor.slim.not.found:
-        class: 'QL\Panthor\Slim\NotFound'
-        arguments: ['@slim']
+        class: 'Slim\Handlers\NotFound'
 
     ############################################################################
     # Panthor Cookies
@@ -310,7 +286,6 @@ services:
     #
     ############################################################################
 
-    #TODO: Update this middleware to be Slim 3 compatible
     panthor.middleware.request_body:
         class: 'QL\Panthor\Middleware\RequestBodyMiddleware'
         arguments:
@@ -341,7 +316,6 @@ services:
     #
     ############################################################################
 
-    #TODO: Incompatible with Slim 3. Determine if needed, if so should prob be re-written as midware
     panthor.url:
         class: 'QL\Panthor\Utility\Url'
         arguments:
