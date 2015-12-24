@@ -7,9 +7,8 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use Closure;
 use Slim\App;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Interop\Container\ContainerInterface;
 
 /**
  * This is how we configure Slim directly after it is instantiated. This is the Slim equivalent of Silex providers.
@@ -50,26 +49,13 @@ class SlimConfigurator
      */
     public function configure(App $slim)
     {
-        foreach ($this->hooks as $event => $hooks) {
-            foreach ($hooks as $hook) {
-                $slim->hook($event, $this->hookClosure($slim, $hook));
-            }
+        $container = $this->di;
+        foreach ($this->hooks as $hook) {
+            //Lazy load all services in case they haven't been created yet.
+            $slim->add(function($request, $response, $next) use ($slim, $container, $hook) {
+                return call_user_func($container->get($hook), $request, $response, $next);
+            });
         }
     }
 
-    /**
-     * Lazy loader for the actual hook services.
-     *
-     * @param App $slim
-     * @param string $key
-     *
-     * @return Closure
-     */
-    private function hookClosure(App $slim, $key)
-    {
-        return function() use ($slim, $key) {
-            $service = $this->di->get($key);
-            call_user_func($service, $slim);
-        };
-    }
 }
