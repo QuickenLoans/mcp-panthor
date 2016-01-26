@@ -16,27 +16,26 @@ class SlimConfiguratorTest extends PHPUnit_Framework_TestCase
 {
     public function test()
     {
-        $this->fail(self::class . 'configurator is dumb :( ');
         $slim = Mockery::mock(App::CLASS);
         $di = Mockery::mock(ContainerInterface::CLASS);
 
         $slim
-            ->shouldReceive('hook')
-            ->with('event1', Mockery::type('callable'))
-            ->twice();
-        $slim
-            ->shouldReceive('hook')
-            ->with('event2', Mockery::type('callable'))
+            ->shouldReceive('add')
+            ->with(Mockery::type('callable'))
             ->once();
         $slim
-            ->shouldReceive('hook')
-            ->with('event3', Mockery::type('callable'))
-            ->never();
+            ->shouldReceive('add')
+            ->with(Mockery::type('callable'))
+            ->once();
+        $slim
+            ->shouldReceive('add')
+            ->with(Mockery::type('callable'))
+            ->once();
 
         $configurator = new SlimConfigurator($di, [
-            'event1' => ['hook1', 'hook2'],
-            'event2' => ['hook3'],
-            'event3' => []
+            'hook1',
+            'hook2',
+            'hook3'
         ]);
 
         $configurator->configure($slim);
