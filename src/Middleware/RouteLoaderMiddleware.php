@@ -98,7 +98,7 @@ class RouteLoaderMiddleware
 
             // Create route
             if (!is_null($group)) {
-                //Groups can't have methods, just their constituents.
+                //Groups can't be named or have methods, just their constituents.
                 $access = $this;
                 $route = $slim->group($url, function () use ($slim, $group, $access) {
                     $access->loadRoutes($slim, $group);
@@ -114,6 +114,7 @@ class RouteLoaderMiddleware
             }
         }
     }
+
     /**
      * Convert an array of keys to middleware callables
      *

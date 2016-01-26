@@ -78,24 +78,26 @@ class EncryptedCookies extends Cookies
     }
 
     /**
-     * Convenience method to centralize cookie handling (also so we dont have to pass Slim\Slim around as a dependency)
+     * Convenience method to centralize cookie handling.
      *
-     * @see Slim::deleteCookie
+     * @param string $name
+     * @return null
      */
     public function deleteCookie($name)
     {
-        return call_user_func_array([$this, 'set'], [$name, null]);
+        call_user_func_array([$this, 'set'], [$name, ['value' => null, 'domain' => null]]);
     }
 
     /**
-     * Convenience method to centralize cookie handling (also so we dont have to pass Slim\Slim around as a dependency)
+     * Convenience method to centralize cookie handling.
      *
-     * @see Slim::getCookie
+     * @param string $name
+     * @return mixed|null
      */
     public function getCookie($name)
     {
         if ($value = parent::get($name)) {
-            $decrypted = $this->encryption->decrypt($value);
+            $decrypted = $this->encryption->decrypt($value['value']);
 
             // Successful decryption
             if (is_string($decrypted)) {
@@ -106,7 +108,7 @@ class EncryptedCookies extends Cookies
 
             // Allow straight value through if fails decryption and allowed to be unencrypted.
             } elseif (in_array($name, $this->unencryptedCookies)) {
-                $decoded = $this->json->decode($value);
+                $decoded = $this->json->decode($value['value']);
                 if ($decoded !== null) {
                     return $decoded;
                 }
