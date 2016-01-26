@@ -9,14 +9,15 @@ namespace QL\Panthor\Bootstrap;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Slim\Slim;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Slim\App;
+use Interop\Container\ContainerInterface;
 
 class SlimConfiguratorTest extends PHPUnit_Framework_TestCase
 {
     public function test()
     {
-        $slim = Mockery::mock(Slim::CLASS);
+        $this->fail(self::class . 'configurator is dumb :( ');
+        $slim = Mockery::mock(App::CLASS);
         $di = Mockery::mock(ContainerInterface::CLASS);
 
         $slim

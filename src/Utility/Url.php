@@ -9,7 +9,6 @@ namespace QL\Panthor\Utility;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Exception\Stop;
 use Slim\Router;
 use Slim\Route;
 
@@ -94,7 +93,10 @@ class Url
      */
     public function absoluteUrlFor($route, array $params = [], array $query = [])
     {
-        return $this->request->getUri() . $this->urlFor($route, $params, $query);
+        $uri = $this->request->getUri();
+        $port = $uri->getPort();
+        $baseUri = !is_null($port)? $uri . ":" . $port : $uri;
+        return $baseUri . $this->urlFor($route, $params, $query);
     }
 
     /**
@@ -122,6 +124,7 @@ class Url
     {
         $this->response = $this->response->withHeader('Location', $this->appendQueryString($url, $query));
 
+        call_user_func($this->halt, $code);
         $this->response = $this->response->withStatus($code);
     }
 
