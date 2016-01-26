@@ -20,6 +20,7 @@ class EncryptedCookiesTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        $this->fail(self::class . ': Encrypted Cookies');
         $this->slim = Mockery::mock('Slim\Slim');
         $this->json = new Json;
         $this->encryption = Mockery::mock('QL\Panthor\Http\CookieEncryptionInterface');

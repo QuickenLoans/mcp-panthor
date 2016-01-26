@@ -64,24 +64,26 @@ class RequestBodyMiddleware implements MiddlewareInterface
      * @param Json $json
      * @param string $serviceName
      */
-    public function __construct(ContainerInterface $di, Request $request, Json $json, $serviceName)
+    public function __construct(ContainerInterface $di, Json $json, $serviceName)
     {
         $this->di = $di;
-        $this->request = $request;
         $this->json = $json;
         $this->serviceName = $serviceName;
     }
 
     /**
-     * @throws RequestException
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param callable $next
      *
-     * @return null
+     * @return mixed
+     * @throws RequestException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
         $mediaType = $request->getHeader('contentType');// getMediaType();
         if ($mediaType === 'application/json') {
-            $decoded = $this->handleJson();
+            $decoded = $this->handleJson($request);
 
         } else if ($mediaType === 'application/x-www-form-urlencoded') {
             $decoded = $request->getParsedBody();// post();
@@ -142,13 +144,14 @@ class RequestBodyMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @throws RequestException
+     * @param ServerRequestInterface $request
      *
-     * @return array
+     * @return mixed
+     * @throws RequestException
      */
-    protected function handleJson()
+    protected function handleJson(ServerRequestInterface $request)
     {
-        $body = $this->request->getBody()->getContents();
+        $body = $request->getBody()->getContents();
         $decoded = call_user_func($this->json, $body);
 
         if (!is_array($decoded)) {

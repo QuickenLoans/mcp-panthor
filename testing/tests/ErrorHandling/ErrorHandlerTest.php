@@ -15,7 +15,7 @@ use QL\Panthor\Exception\Exception;
 use QL\Panthor\Exception\NotFoundException;
 use QL\Panthor\Exception\RequestException;
 use QL\Panthor\ErrorHandling\ExceptionHandler\GenericHandler;
-use Slim\Slim;
+use Slim\App;
 
 class ErrorHandlerTest extends PHPUnit_Framework_TestCase
 {
@@ -23,7 +23,7 @@ class ErrorHandlerTest extends PHPUnit_Framework_TestCase
     {
         $handler = new ErrorHandler;
 
-        $slim = Mockery::mock(Slim::CLASS);
+        $slim = Mockery::mock(App::CLASS);
 
         $slim
             ->shouldReceive('notFound')

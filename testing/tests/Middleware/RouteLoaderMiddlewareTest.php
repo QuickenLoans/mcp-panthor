@@ -5,24 +5,25 @@
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\Slim;
+namespace QL\Panthor\Middleware;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Slim\Route;
-use Slim\Slim;
+use Slim\App;
 use Symfony\Component\DependencyInjection\Container;
 
-class RouteLoaderHookTest extends PHPUnit_Framework_TestCase
+class RouteLoaderMiddlewareTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
         $this->di = Mockery::mock(Container::CLASS);
-        $this->slim = Mockery::mock(Slim::CLASS);
+        $this->slim = Mockery::mock(App::CLASS);
     }
 
     public function testAddingRoutesOnInstantiation()
     {
+        $this->fail(self::class . 'I re-wrote the class, now re-write the tests!');
         $routes = [
             'herp' => [
                 'method' => 'POST',
@@ -79,6 +80,7 @@ class RouteLoaderHookTest extends PHPUnit_Framework_TestCase
 
     public function testAddingIncrementalRoutes()
     {
+        $this->fail(self::class . 'I re-wrote the class, now re-write the tests!');
         $routes = [
             'herp' => [
                 'method' => 'POST',
@@ -136,6 +138,7 @@ class RouteLoaderHookTest extends PHPUnit_Framework_TestCase
 
     public function testMergingRoutes()
     {
+        $this->fail(self::class . 'I re-wrote the class, now re-write the tests!');
         $routes = [
             'herp' => [
                 'method' => 'POST',
