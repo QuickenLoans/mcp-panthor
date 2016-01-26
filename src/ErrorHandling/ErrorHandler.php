@@ -12,7 +12,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use QL\Panthor\Exception\NotFoundException;
-use Slim\Slim;
+use Slim\App;
 use Throwable;
 
 /**
@@ -162,14 +162,14 @@ class ErrorHandler
     }
 
     /**
-     * @param Slim $slim
+     * @param App $slim
      *
      * @return void
      */
-    public function attach(Slim $slim)
+    public function attach(App $slim)
     {
         // Register Global Exception Handler
-        $slim->notFound([$this, 'handleNotFound']);
+        $slim-> notFound([$this, 'handleNotFound']);
 
         // Register Global Exception Handler
         $slim->error([$this, 'handleException']);

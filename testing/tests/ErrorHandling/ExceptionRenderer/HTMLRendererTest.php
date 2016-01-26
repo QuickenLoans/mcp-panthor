@@ -15,6 +15,7 @@ class HTMLRendererTest extends PHPUnit_Framework_TestCase
 {
     public function testDefaultTemplateRendersNoBody()
     {
+        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
         $renderer = new HTMLRenderer;
 
         ob_start();
@@ -31,6 +32,7 @@ JSON;
 
     public function testRenderedTemplateSetAsBody()
     {
+        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
         $template = Mockery::mock(TemplateInterface::CLASS, [
             'render' => 'error page'
         ]);

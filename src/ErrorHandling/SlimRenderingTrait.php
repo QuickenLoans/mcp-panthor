@@ -7,8 +7,9 @@
 
 namespace QL\Panthor\ErrorHandling;
 
+use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Slim;
+use Slim\App;
 
 /**
  * Force sending of the response and end the php process.
@@ -19,7 +20,7 @@ use Slim\Slim;
 trait SlimRenderingTrait
 {
     /**
-     * @type Slim|null
+     * @type App|null
      */
     private $slim;
 
@@ -29,12 +30,12 @@ trait SlimRenderingTrait
     private $headerSetter;
 
     /**
-     * @param Slim $slim
+     * @param App $slim
      * @param callable|null $headerSetter
      *
      * @return void
      */
-    public function attachSlim(Slim $slim, callable $headerSetter = null)
+    public function attachSlim(App $slim, callable $headerSetter = null)
     {
         $this->slim = $slim;
         $this->headerSetter = $headerSetter;
@@ -47,24 +48,29 @@ trait SlimRenderingTrait
      *
      * @return void
      */
-    private function renderResponse($status = 500, $body = '', array $additionalHeaders = [])
-    {
+    private function renderResponse(
+        Request $request,
+        Response $response,
+        $status = 500,
+        $body = '',
+        array $additionalHeaders = []
+    ) {
         $httpVersion = '1.1';
-        $httpStatus = Response::getMessageForCode($status) ?: 500;
+        $httpStatus = $response->getReasonPhrase()?: 500;
 
         $setHeader = is_callable($this->headerSetter) ? $this->headerSetter : '\header';
 
         if ($this->slim) {
-            $response = $this->slim->response();
-            $response->setBody($body);
-            $response->setStatus($status);
+            $response = $response->write($body)->withStatus($status);
 
             foreach ($additionalHeaders as $key => $value) {
                 $response->headers->set($key, $value);
             }
 
-            list($httpStatus, $httpHeaders, $body) = $response->finalize();
-            $httpVersion = $this->slim->config('http.version');
+            $httpStatus = $response->getReasonPhrase();
+            $httpHeaders = $response->getHeaders();
+            $body = $response->getBody()->getContents();
+            $httpVersion = $this->slim->getContainer()->get('http.version');
 
         } else {
             $httpHeaders = $additionalHeaders;

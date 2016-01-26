@@ -13,12 +13,13 @@ use QL\Panthor\Exception\HTTPProblemException;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Helper\Set;
-use Slim\Slim;
+use Slim\App as Slim;
 
 class ProblemRendererTest extends PHPUnit_Framework_TestCase
 {
     public function testDefaultRendererWithoutContext()
     {
+        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
         $renderer = new ProblemRenderer;
 
         ob_start();
@@ -39,6 +40,7 @@ JSON;
 
     public function testRenderingWithProblem()
     {
+        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
         $renderer = new ProblemRenderer;
 
         $exception = new HTTPProblemException(403, 'This action is not allowed', [
@@ -76,6 +78,7 @@ JSON;
 
     public function testRendererWithSlimAttached()
     {
+        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
         $request = Mockery::mock(Request::CLASS, ['isHead' => true]);
         $response = Mockery::mock(Response::CLASS);
         $slim = Mockery::mock(Slim::CLASS, [
