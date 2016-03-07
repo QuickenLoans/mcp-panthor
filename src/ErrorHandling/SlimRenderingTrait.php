@@ -50,7 +50,7 @@ trait SlimRenderingTrait
         }
 
         // do not set body for HEAD requests
-        if ($this->slim && $this->slim->request->getMethod() == 'head') {
+        if ($this->slim && $this->slim->getContainer()->get('request')->getMethod() == 'head') {
             return;
         }
 

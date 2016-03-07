@@ -11,6 +11,7 @@ use ErrorException;
 use Exception as BaseException;
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ResponseInterface;
 use QL\MCP\Common\Testing\MemoryLogger;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\Exception\Exception;
@@ -22,12 +23,32 @@ class BaseHandlerTest extends PHPUnit_Framework_TestCase
 {
     use MockeryAssistantTrait;
 
+    public function testBaseHandlerHandlesEverything()
+    {
+        $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
+        $response = Mockery::mock(ResponseInterface::class);
+
+        $handler = new BaseHandler($response, $renderer);
+
+        $handled = $handler->getHandledExceptions();
+        $this->assertCount(1, $handled);
+
+        $handled = $handled[0];
+
+        $this->assertInstanceOf($handled, new Exception);
+        $this->assertInstanceOf($handled, new NotFoundException);
+        $this->assertInstanceOf($handled, new RequestException);
+        $this->assertInstanceOf($handled, new BaseException);
+    }
+
     public function testStatusAndContextPassedToRenderer()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $this->spy($renderer, 'render', [500, $this->buildSpy('renderer')]);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new BaseHandler($renderer);
+        $this->spy($renderer, 'render', [$response, 500, $this->buildSpy('renderer')]);
+
+        $handler = new BaseHandler($response, $renderer);
 
         $ex = new Exception('ex msg');
         $this->assertTrue($handler->handle($ex));
@@ -46,9 +67,11 @@ class BaseHandlerTest extends PHPUnit_Framework_TestCase
     public function testErrorExceptionPassesCorrectSeverityToRenderer()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $this->spy($renderer, 'render', [500, $this->buildSpy('renderer')]);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new BaseHandler($renderer);
+        $this->spy($renderer, 'render', [$response, 500, $this->buildSpy('renderer')]);
+
+        $handler = new BaseHandler($response, $renderer);
 
         $ex = new ErrorException('ex msg', 5, \E_ERROR);
         $this->assertTrue($handler->handle($ex));
@@ -63,8 +86,9 @@ class BaseHandlerTest extends PHPUnit_Framework_TestCase
     {
         $logger = new MemoryLogger;
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS, ['render' => null]);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new BaseHandler($renderer, $logger);
+        $handler = new BaseHandler($response, $renderer, $logger);
 
         $ex = new ErrorException('ex msg', 5, \E_ERROR);
         $this->assertTrue($handler->handle($ex));
@@ -78,15 +102,16 @@ class BaseHandlerTest extends PHPUnit_Framework_TestCase
         $this->assertSame('E_ERROR', $msg['context']['errorType']);
         $this->assertSame('ErrorException', $msg['context']['errorClass']);
 
-        $this->assertContains('/testing/tests/ErrorHandling/ExceptionHandler/BaseHandlerTest.php:69', $msg['context']['errorStacktrace']);
+        $this->assertContains('/testing/tests/ErrorHandling/ExceptionHandler/BaseHandlerTest.php:94', $msg['context']['errorStacktrace']);
     }
 
     public function testPreviousExceptionIsLoggedInStacktrace()
     {
         $logger = new MemoryLogger;
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS, ['render' => null]);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new BaseHandler($renderer, $logger);
+        $handler = new BaseHandler($response, $renderer, $logger);
 
         $prev = new ErrorException('prev exception', 5, \E_NOTICE);
         $ex = new Exception('ex msg', 5, $prev);
@@ -101,10 +126,10 @@ class BaseHandlerTest extends PHPUnit_Framework_TestCase
         $this->assertSame('QL\Panthor\Exception\Exception', $msg['context']['errorType']);
         $this->assertSame('QL\Panthor\Exception\Exception', $msg['context']['errorClass']);
 
-        $this->assertContains('/testing/tests/ErrorHandling/ExceptionHandler/BaseHandlerTest.php:91', $msg['context']['errorStacktrace']);
+        $this->assertContains('/testing/tests/ErrorHandling/ExceptionHandler/BaseHandlerTest.php:117', $msg['context']['errorStacktrace']);
         $this->assertContains('prev exception', $msg['context']['errorStacktrace']);
 
-        $this->assertContains('/testing/tests/ErrorHandling/ExceptionHandler/BaseHandlerTest.php:92', $msg['context']['errorStacktrace']);
+        $this->assertContains('/testing/tests/ErrorHandling/ExceptionHandler/BaseHandlerTest.php:118', $msg['context']['errorStacktrace']);
         $this->assertContains('ex msg', $msg['context']['errorStacktrace']);
     }
 }

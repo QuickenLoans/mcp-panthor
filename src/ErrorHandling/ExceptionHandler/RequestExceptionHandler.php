@@ -36,6 +36,7 @@ class RequestExceptionHandler implements ExceptionHandlerInterface
      */
     public function __construct(ResponseInterface $response, ExceptionRendererInterface $renderer)
     {
+        $this->response = $response;
         $this->renderer = $renderer;
 
         $this->setHandledThrowables([
