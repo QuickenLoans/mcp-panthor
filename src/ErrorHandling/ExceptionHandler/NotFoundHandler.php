@@ -34,6 +34,7 @@ class NotFoundHandler implements ExceptionHandlerInterface
      */
     public function __construct(ResponseInterface $response, ExceptionRendererInterface $renderer)
     {
+        $this->response = $response;
         $this->renderer = $renderer;
     }
 
@@ -60,7 +61,7 @@ class NotFoundHandler implements ExceptionHandlerInterface
             'exception' => $exception
         ];
 
-        $this->renderer->render($status, $context);
+        $this->renderer->render($this->response, $status, $context);
 
         return true;
     }

@@ -10,6 +10,7 @@ namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 use Exception as BaseException;
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\Exception\Exception;
 use QL\Panthor\Exception\HTTPProblemException;
@@ -23,8 +24,9 @@ class HTTPProblemHandlerTest extends PHPUnit_Framework_TestCase
     public function testCanHandleNotFoundException()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new HTTPProblemHandler($renderer);
+        $handler = new HTTPProblemHandler($response, $renderer);
 
         $handled = $handler->getHandledExceptions();
         $this->assertCount(1, $handled);
@@ -41,8 +43,9 @@ class HTTPProblemHandlerTest extends PHPUnit_Framework_TestCase
     public function testDoesNotHandleIfExceptionNotRequestException()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new HTTPProblemHandler($renderer);
+        $handler = new HTTPProblemHandler($response, $renderer);
 
         $this->assertFalse($handler->handle(new Exception));
         $this->assertFalse($handler->handle(new RequestException));
@@ -52,9 +55,10 @@ class HTTPProblemHandlerTest extends PHPUnit_Framework_TestCase
     public function testStatusAndContextPassedToRenderer()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $this->spy($renderer, 'render', [410, $this->buildSpy('renderer')]);
+        $response = Mockery::mock(ResponseInterface::class);
+        $this->spy($renderer, 'render', [$response, 410, $this->buildSpy('renderer')]);
 
-        $handler = new HTTPProblemHandler($renderer);
+        $handler = new HTTPProblemHandler($response, $renderer);
 
         $ex = new HTTPProblemException(410, 'Error occured', [
             'data' => 'abcd'
