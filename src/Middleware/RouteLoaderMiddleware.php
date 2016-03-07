@@ -152,10 +152,6 @@ class RouteLoaderMiddleware
             $methods = [$methods];
         }
 
-        if ($methods === ['GET']) {
-            array_push($methods, 'HEAD');
-        }
-
         return $methods;
     }
 
