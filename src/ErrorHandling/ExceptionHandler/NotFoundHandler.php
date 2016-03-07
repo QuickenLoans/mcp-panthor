@@ -8,6 +8,7 @@
 namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionHandlerInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\Exception\NotFoundException;
@@ -23,9 +24,15 @@ class NotFoundHandler implements ExceptionHandlerInterface
     private $renderer;
 
     /**
+     * @var ResponseInterface $response
+     */
+    private $response;
+
+    /**
+     * @param ResponseInterface $response
      * @param ExceptionRendererInterface $renderer
      */
-    public function __construct(ExceptionRendererInterface $renderer)
+    public function __construct(ResponseInterface $response, ExceptionRendererInterface $renderer)
     {
         $this->renderer = $renderer;
     }
