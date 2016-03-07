@@ -279,12 +279,7 @@ class RouteLoaderMiddlewareTest extends PHPUnit_Framework_TestCase
             ->shouldReceive('group')
             ->with('/users/{id:[\d]{6}}', Mockery::type('Closure'))
             ->andReturn($route1);
-//        $this->slim
-//            ->shouldReceive('map')
-//            ->with(['GET', 'POST'], '/resource/add', Mockery::type('Closure'))
-//            ->andReturn($route2);
 
-        // route 1
         $route1
             ->shouldReceive('add')
             ->with(Mockery::type('Closure'))
