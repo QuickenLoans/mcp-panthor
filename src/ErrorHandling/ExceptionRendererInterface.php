@@ -8,16 +8,18 @@
 namespace QL\Panthor\ErrorHandling;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 
 interface ExceptionRendererInterface
 {
     /**
      * Render a exception data to the response.
      *
+     * @param ResponseInterface $response
      * @param int $status
      * @param array $context
      *
      * @return void
      */
-    public function render($status, array $context);
+    public function render(ResponseInterface $response, $status, array $context);
 }
