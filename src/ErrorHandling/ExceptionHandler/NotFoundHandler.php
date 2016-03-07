@@ -7,6 +7,8 @@
 
 namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 
+use Exception;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionHandlerInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\Exception\NotFoundException;
@@ -24,10 +26,17 @@ class NotFoundHandler implements ExceptionHandlerInterface
     private $renderer;
 
     /**
+     * @var ResponseInterface $response
+     */
+    private $response;
+
+    /**
+     * @param ResponseInterface $response
      * @param ExceptionRendererInterface $renderer
      */
-    public function __construct(ExceptionRendererInterface $renderer)
+    public function __construct(ResponseInterface $response, ExceptionRendererInterface $renderer)
     {
+        $this->response = $response;
         $this->renderer = $renderer;
 
         $this->setHandledThrowables([
@@ -52,7 +61,7 @@ class NotFoundHandler implements ExceptionHandlerInterface
             'exception' => $throwable
         ];
 
-        $this->renderer->render($status, $context);
+        $this->renderer->render($this->response, $status, $context);
 
         return true;
     }

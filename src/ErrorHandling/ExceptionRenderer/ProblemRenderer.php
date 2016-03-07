@@ -8,6 +8,7 @@
 namespace QL\Panthor\ErrorHandling\ExceptionRenderer;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\ErrorHandling\SlimRenderingTrait;
 use QL\Panthor\Exception\HTTPProblemException;
@@ -42,7 +43,7 @@ class ProblemRenderer implements ExceptionRendererInterface
     /**
      * {@inheritdoc}
      */
-    public function render($status, array $context)
+    public function render(ResponseInterface $response, $status, array $context)
     {
         $problem = null;
         if (isset($context['exception']) && $context['exception'] instanceof HTTPProblemException) {
@@ -54,11 +55,15 @@ class ProblemRenderer implements ExceptionRendererInterface
             $problem = $this->createProblem($status, $message);
         }
 
-        $status = $this->renderer->status($problem);
-        $body = $this->renderer->body($problem);
-        $headers = $this->renderer->headers($problem);
 
-        $this->renderResponse($status, $body, $headers);
+        $response = $response->withStatus($this->renderer->status($problem), $this->renderer->body($problem));
+
+        $headers = $this->renderer->headers($problem);
+        foreach ($headers as $header => $value) {
+            $response = $response->withHeader($header, $value);
+        }
+
+        $this->renderResponse($response);
     }
 
     /**

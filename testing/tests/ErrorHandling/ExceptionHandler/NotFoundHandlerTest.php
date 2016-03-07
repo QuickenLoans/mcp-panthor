@@ -10,6 +10,7 @@ namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 use Exception as BaseException;
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\Exception\Exception;
 use QL\Panthor\Exception\NotFoundException;
@@ -23,8 +24,9 @@ class NotFoundHandlerTest extends PHPUnit_Framework_TestCase
     public function testDoesNotHandleIfExceptionNotRequestException()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new NotFoundHandler($renderer);
+        $handler = new NotFoundHandler($response, $renderer);
 
         $this->assertFalse($handler->handle(new Exception));
         $this->assertFalse($handler->handle(new RequestException));
@@ -34,9 +36,10 @@ class NotFoundHandlerTest extends PHPUnit_Framework_TestCase
     public function testStatusAndContextPassedToRenderer()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $this->spy($renderer, 'render', [404, $this->buildSpy('renderer')]);
+        $response = Mockery::mock(ResponseInterface::class);
+        $this->spy($renderer, 'render', [$response, 404, $this->buildSpy('renderer')]);
 
-        $handler = new NotFoundHandler($renderer);
+        $handler = new NotFoundHandler($response, $renderer);
 
         $ex = new NotFoundException;
         $this->assertTrue($handler->handle($ex));

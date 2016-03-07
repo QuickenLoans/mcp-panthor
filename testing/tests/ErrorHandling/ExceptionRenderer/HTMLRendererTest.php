@@ -8,6 +8,7 @@
 namespace QL\Panthor\ErrorHandling\ExceptionRenderer;
 
 use Mockery;
+use Psr\Http\Message\ResponseInterface;
 use PHPUnit_Framework_TestCase;
 use QL\Panthor\TemplateInterface;
 
@@ -15,12 +16,25 @@ class HTMLRendererTest extends PHPUnit_Framework_TestCase
 {
     public function testDefaultTemplateRendersNoBody()
     {
-        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
         $renderer = new HTMLRenderer;
+        $rendered = '';
+        $status = 500;
+        $response = Mockery::mock(ResponseInterface::class,[
+            'getBody' => $rendered
+        ]);
+
+        $response->shouldReceive('withStatus')
+            ->with($status, $rendered)
+            ->andReturn($response)
+            ->once();
+        $response->shouldReceive('withHeader')
+            ->with('Content-Type', 'text/html')
+            ->andReturn($response)
+            ->once();
 
         ob_start();
 
-        $renderer->render(500, []);
+        $renderer->render($response, $status, []);
 
         $output = ob_get_clean();
 
@@ -32,20 +46,35 @@ JSON;
 
     public function testRenderedTemplateSetAsBody()
     {
-        $this->fail(self::class . ': ExceptionRendererInterface copied from slim 2 is not compatible with slim 3');
+        $rendered = 'error page';
         $template = Mockery::mock(TemplateInterface::CLASS, [
-            'render' => 'error page'
+            'render' => $rendered
         ]);
         $renderer = new HTMLRenderer($template);
 
+        $status = 500;
+
+        $response = Mockery::mock(ResponseInterface::class,[
+            'getBody' => $rendered
+        ]);
+
+        $response->shouldReceive('withStatus')
+            ->with($status, $rendered)
+            ->andReturn($response)
+            ->once();
+        $response->shouldReceive('withHeader')
+            ->with('Content-Type', 'text/html')
+            ->andReturn($response)
+            ->once();
+
         ob_start();
 
-        $renderer->render(500, []);
+        $renderer->render($response, $status, []);
 
         $output = ob_get_clean();
 
         $expected = <<<JSON
-error page
+$rendered
 JSON;
         $this->assertSame($expected, $output);
     }

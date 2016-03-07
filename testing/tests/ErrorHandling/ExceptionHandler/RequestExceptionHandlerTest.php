@@ -10,6 +10,7 @@ namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 use Exception as BaseException;
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\Exception\Exception;
 use QL\Panthor\Exception\NotFoundException;
@@ -23,8 +24,9 @@ class RequestExceptionHandlerTest extends PHPUnit_Framework_TestCase
     public function testDoesNotHandleIfExceptionNotRequestException()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
+        $response = Mockery::mock(ResponseInterface::class);
 
-        $handler = new RequestExceptionHandler($renderer);
+        $handler = new RequestExceptionHandler($response, $renderer);
 
         $this->assertFalse($handler->handle(new Exception));
         $this->assertFalse($handler->handle(new NotFoundException));
@@ -34,9 +36,10 @@ class RequestExceptionHandlerTest extends PHPUnit_Framework_TestCase
     public function testStatusAndContextPassedToRenderer()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $this->spy($renderer, 'render', [410, $this->buildSpy('renderer')]);
+        $response = Mockery::mock(ResponseInterface::class);
+        $this->spy($renderer, 'render', [$response, 410, $this->buildSpy('renderer')]);
 
-        $handler = new RequestExceptionHandler($renderer);
+        $handler = new RequestExceptionHandler($response, $renderer);
 
         $ex = new RequestException('msg', 410);
         $this->assertTrue($handler->handle($ex));
@@ -55,9 +58,11 @@ class RequestExceptionHandlerTest extends PHPUnit_Framework_TestCase
     public function testInvalidStatusIsResetTo400()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $this->spy($renderer, 'render', [400, $this->buildSpy('renderer')]);
+        $response = Mockery::mock(ResponseInterface::class);
+        $this->spy($renderer, 'render', [$response, 400, $this->buildSpy('renderer')]);
 
-        $handler = new RequestExceptionHandler($renderer);
+
+        $handler = new RequestExceptionHandler($response, $renderer);
 
         $ex = new RequestException('msg');
         $this->assertTrue($handler->handle($ex));
