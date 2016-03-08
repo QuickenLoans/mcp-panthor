@@ -100,8 +100,8 @@ class RouteLoaderMiddleware
             if (!is_null($group)) {
                 //Groups can't be named or have methods, just their constituents.
                 $access = $this;
-                $route = $slim->group($url, function () use ($group, $access) {
-                    $access->loadRoutes($this->slim, $group);
+                $route = $slim->group($url, function () use ($slim, $group, $access) {
+                    $access->loadRoutes($slim, $group);
                 });
 
             } else {
@@ -124,9 +124,10 @@ class RouteLoaderMiddleware
      */
     private function convertStackToCallables(array $stack)
     {
+        $container = $this->container;
         foreach ($stack as &$key) {
-            $key = function ($req, $res, $var) use ($key) {
-                return call_user_func($this->container->get($key), $req, $res, $var);
+            $key = function ($req, $res, $var) use ($container, $key) {
+                return call_user_func($container->get($key), $req, $res, $var);
             };
         }
 
