@@ -7,14 +7,13 @@
 
 namespace QL\Panthor\Middleware;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\RequestException;
 use QL\Panthor\MiddlewareInterface;
 use QL\Panthor\Utility\Json;
 use Slim\Http\Request;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Interop\Container\ContainerInterface;
 
 /**
  * Sanitize the request properties and normalize for consumption by the application.
@@ -60,7 +59,6 @@ class RequestBodyMiddleware implements MiddlewareInterface
 
     /**
      * @param ContainerInterface $di
-     * @param Request $request
      * @param Json $json
      * @param string $serviceName
      */
