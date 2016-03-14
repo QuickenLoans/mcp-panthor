@@ -48,7 +48,7 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
             $mw($this->request, $this->response, function(){});
         } catch (\Exception $e)
         {
-            $e->getMessage();
+            echo $e->getMessage();
         }
     }
 
