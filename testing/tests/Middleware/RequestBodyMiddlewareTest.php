@@ -8,7 +8,11 @@
 namespace QL\Panthor\Middleware;
 
 use Mockery;
+use Interop\Container\ContainerInterface;
 use PHPUnit_Framework_TestCase;
+use QL\Panthor\Utility\Json;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
 {
@@ -23,10 +27,10 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->di = Mockery::mock('Symfony\Component\DependencyInjection\Container');
-        $this->request = Mockery::mock('Slim\Http\Request');
-        $this->response = Mockery::mock('Slim\Http\Response');
-        $this->json = Mockery::mock('QL\Panthor\Utility\Json');
+        $this->di = Mockery::mock(ContainerInterface::class);
+        $this->request = Mockery::mock(Request::class);
+        $this->response = Mockery::mock(Response::class);
+        $this->json = Mockery::mock(Json::class);
     }
 
     /**
@@ -40,7 +44,12 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
             ->andReturn('text/plain');
 
         $mw = new RequestBodyMiddleware($this->di, $this->json, 'service.name');
-        $mw($this->request, $this->response, function(){});
+        try {
+            $mw($this->request, $this->response, function(){});
+        } catch (\Exception $e)
+        {
+            $e->getMessage();
+        }
     }
 
     public function testEmptyPostMeansPartyTime()
