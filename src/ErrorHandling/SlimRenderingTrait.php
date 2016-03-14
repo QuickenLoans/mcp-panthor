@@ -7,8 +7,8 @@
 
 namespace QL\Panthor\ErrorHandling;
 
-use Slim\Http\Response;
-use Slim\Slim;
+use Psr\Http\Message\ResponseInterface;
+use Slim\App;
 
 /**
  * Force sending of the response and end the php process.
@@ -19,7 +19,7 @@ use Slim\Slim;
 trait SlimRenderingTrait
 {
     /**
-     * @type Slim|null
+     * @type App|null
      */
     private $slim;
 
@@ -29,67 +29,31 @@ trait SlimRenderingTrait
     private $headerSetter;
 
     /**
-     * @param Slim $slim
+     * @param App $slim
      * @param callable|null $headerSetter
      *
      * @return void
      */
-    public function attachSlim(Slim $slim, callable $headerSetter = null)
+    public function attachSlim(App $slim, callable $headerSetter = null)
     {
         $this->slim = $slim;
         $this->headerSetter = $headerSetter;
     }
 
     /**
-     * @param int $status
-     * @param string $body
-     * @param string[] $additionalHeaders
-     *
-     * @return void
+     * @param ResponseInterface $response
      */
-    private function renderResponse($status = 500, $body = '', array $additionalHeaders = [])
+    private function renderResponse(ResponseInterface $response)
     {
-        $httpVersion = '1.1';
-        $httpStatus = Response::getMessageForCode($status) ?: 500;
-
-        $setHeader = is_callable($this->headerSetter) ? $this->headerSetter : '\header';
-
         if ($this->slim) {
-            $response = $this->slim->response();
-            $response->setBody($body);
-            $response->setStatus($status);
-
-            foreach ($additionalHeaders as $key => $value) {
-                $response->headers->set($key, $value);
-            }
-
-            list($httpStatus, $httpHeaders, $body) = $response->finalize();
-            $httpVersion = $this->slim->config('http.version');
-
-        } else {
-            $httpHeaders = $additionalHeaders;
-            http_response_code($status);
-        }
-
-        if (headers_sent() === false) {
-
-            // Send status
-            $setHeader(sprintf('HTTP/%s %s', $httpVersion, $httpStatus));
-
-            // Send headers
-            foreach ($httpHeaders as $name => $value) {
-                $hValues = explode("\n", $value);
-                foreach ($hValues as $hVal) {
-                    $setHeader(sprintf('%s: %s', $name, $hVal), false);
-                }
-            }
+            $this->slim->respond($response);
         }
 
         // do not set body for HEAD requests
-        if ($this->slim && $this->slim->request()->isHead()) {
+        if ($this->slim && $this->slim->getContainer()->get('request')->getMethod() == 'head') {
             return;
         }
 
-        echo $body;
+        echo $response->getBody();
     }
 }

@@ -8,6 +8,7 @@
 namespace QL\Panthor\ErrorHandling\ExceptionRenderer;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
 use QL\Panthor\ErrorHandling\SlimRenderingTrait;
 use QL\Panthor\TemplateInterface;
@@ -33,13 +34,12 @@ class HTMLRenderer implements ExceptionRendererInterface
     /**
      * {@inheritdoc}
      */
-    public function render($status, array $context)
+    public function render(ResponseInterface $response, $status, array $context)
     {
-        $headers = [
-            'Content-Type' => 'text/html'
-        ];
-
         $rendered = $this->template->render($context);
-        $this->renderResponse($status, $rendered, $headers);
+
+        $response->withStatus($status, $rendered);
+        $response->withHeader('Content-Type', 'text/html');
+        $this->renderResponse($response);
     }
 }
