@@ -9,6 +9,7 @@ namespace QL\Panthor\Middleware;
 
 use Mockery;
 use Interop\Container\ContainerInterface;
+use QL\Panthor\Exception\RequestException;
 use PHPUnit_Framework_TestCase;
 use QL\Panthor\Utility\Json;
 use Slim\Http\Request;
@@ -34,7 +35,7 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \QL\Panthor\Exception\RequestException
+     * @expectedException QL\Panthor\Exception\RequestException
      */
     public function testUnsupportedType()
     {
@@ -44,12 +45,8 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
             ->andReturn('text/plain');
 
         $mw = new RequestBodyMiddleware($this->di, $this->json, 'service.name');
-        try {
-            $mw($this->request, $this->response, function(){});
-        } catch (\Exception $e)
-        {
-            var_dump($e);
-        }
+
+        $mw($this->request, $this->response, function(){});
     }
 
     public function testEmptyPostMeansPartyTime()
