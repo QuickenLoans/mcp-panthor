@@ -9,7 +9,6 @@ namespace QL\Panthor\Utility;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-//use Slim\Http\Response;
 use Slim\Router;
 use Slim\Route;
 
