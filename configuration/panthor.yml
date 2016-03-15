@@ -97,18 +97,18 @@ services:
     ############################################################################
 
     panthor.container:
-        class: Acclimate\Container\CompositeContainer
+        class: 'Acclimate\Container\CompositeContainer'
         arguments:
             - ["@panthor.slim.container", "@acclimate.symfony.container"]
 
     acclimate.container:
-        class: Acclimate\Container\ContainerAcclimator
+        class: 'Acclimate\Container\ContainerAcclimator'
 
     acclimate.symfony.container:
-        class: Acclimate\Container\ContainerAcclimator
-        factory: [@acclimate.container, acclimate]
+        class: 'Acclimate\Container\ContainerAcclimator'
+        factory: ['@acclimate.container', 'acclimate']
         arguments:
-            - @symfony.container
+            - '@symfony.container'
 
     ############################################################################
     # Slim 3
@@ -123,12 +123,12 @@ services:
     panthor.slim:
         class: 'Slim\App'
         arguments:
-            - @container
-        configurator: [@slim.configurator, 'configure']
+            - '@container'
+        configurator: ['@slim.configurator', 'configure']
     panthor.slim.container:
-        class: Slim\Container
+        class: 'Slim\Container'
         arguments:
-            - %slim.settings%
+            - '%slim.settings%'
 
     ############################################################################
     # Slim
@@ -143,52 +143,32 @@ services:
 
     panthor.slim.configurator:
         class: 'QL\Panthor\Bootstrap\SlimConfigurator'
-        arguments: [@container, %middleware%]
-
-    panthor.slim.middleware.routes:
-        class: 'QL\Panthor\Middleware\RouteLoaderMiddleware'
-        arguments: [@container, %routes%]
-
-    panthor.slim.middleware.apacheAuthorization:
-        class: 'QL\Panthor\Middleware\ApacheAuthorizationHeaderMiddleware'
+        arguments: ['@container', '%middleware%']
 
     panthor.slim.environment:
         class: 'Slim\Environment'
-        factory_service: panthor.slim.container
-        factory_method: get
+        factory: ['@panthor.slim.container', 'get']
         arguments: ['environment']
 
     panthor.slim.request:
         class: 'Slim\Http\Request'
-        factory_service: panthor.slim.container
-        factory_method: get
+        factory: ['@panthor.slim.container', 'get']
         arguments: ['request']
 
     panthor.slim.response:
         class: 'Slim\Http\Response'
-        factory_service: panthor.slim.container
-        factory_method: get
+        factory: ['@panthor.slim.container', 'get']
         arguments: ['response']
 
     panthor.slim.router:
         class: 'Slim\Router'
-        factory_service: panthor.slim.container
-        factory_method: get
+        factory: ['@panthor.slim.container', 'get']
         arguments: ['router']
 
     panthor.slim.route:
         class: 'Slim\Route'
-        factory_service: slim.request
-        factory_method: getAttribute
+        factory: ['@slim.request', 'getAttribute']
         arguments: ['route']
-
-    #TODO: This is seriously broke, still trying to fix it.
-    panthor.slim.cookies:
-        class: 'QL\Panthor\Http\EncryptedCookies'
-        arguments:
-            - @json
-            - @cookie.encryption
-            - %cookie.unencrypted%
 
     panthor.slim.route.parameters:
         class: 'na'
@@ -285,6 +265,17 @@ services:
     #
     ############################################################################
 
+    panthor.slim.middleware.routes:
+        class: 'QL\Panthor\Middleware\RouteLoaderMiddleware'
+        arguments: ['@container', '%routes%']
+
+    panthor.slim.middleware.cookies:
+        class: 'QL\Panthor\Middleware\EncryptedCookiesMiddleware'
+        arguments:
+            - '@json'
+            - '@cookie.encryption'
+            - '%cookie.unencrypted%'
+
     panthor.middleware.request_body:
         class: 'QL\Panthor\Middleware\RequestBodyMiddleware'
         arguments:
@@ -324,7 +315,7 @@ services:
 
     panthor.clock:
         class: 'QL\MCP\Common\Time\Clock'
-        arguments: ['now', %panthor.internal.timezone%]
+        arguments: ['now', '%panthor.internal.timezone%']
 
     panthor.json:
         class: 'QL\Panthor\Utility\Json'
