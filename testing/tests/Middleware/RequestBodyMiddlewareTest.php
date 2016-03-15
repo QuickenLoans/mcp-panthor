@@ -8,6 +8,7 @@
 namespace QL\Panthor\Middleware;
 
 use Mockery;
+use QL\Panthor\Exception\RequestException;
 use PHPUnit_Framework_TestCase;
 
 class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
