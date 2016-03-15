@@ -24,7 +24,7 @@ class LibsodiumCookieEncryption implements CookieEncryptionInterface
     private $crypto;
 
     /**
-     * @param string secret
+     * @param LibsodiumSymmetricCrypto $crypto
      */
     public function __construct(LibsodiumSymmetricCrypto $crypto)
     {

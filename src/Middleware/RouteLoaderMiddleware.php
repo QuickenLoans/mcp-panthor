@@ -7,9 +7,10 @@
 
 namespace QL\Panthor\Middleware;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\Exception;
+use QL\Panthor\MiddlewareInterface;
 use Slim\App;
 use Interop\Container\ContainerInterface;
 
@@ -18,7 +19,7 @@ use Interop\Container\ContainerInterface;
  *
  * This hook should be attached to the "slim.before.router" event.
  */
-class RouteLoaderMiddleware
+class RouteLoaderMiddleware implements MiddlewareInterface
 {
     /**
      * A hash of valid http methods. The keys are the methods.
@@ -67,7 +68,7 @@ class RouteLoaderMiddleware
         $this->routes = array_merge($this->routes, $routes);
     }
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response, $next)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
         $this->loadRoutes($this->slim, $this->routes);
         return $next($request, $response);

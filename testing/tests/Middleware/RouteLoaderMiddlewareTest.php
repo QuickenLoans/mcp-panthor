@@ -11,7 +11,7 @@ use Mockery;
 use PHPUnit_Framework_TestCase;
 use Slim\Route;
 use Slim\App;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Interop\Container\ContainerInterface;
 
@@ -36,7 +36,7 @@ class RouteLoaderMiddlewareTest extends PHPUnit_Framework_TestCase
             ->shouldReceive('get')
             ->with('panthor.slim')
             ->andReturn($this->slim);
-        $this->request = Mockery::mock(RequestInterface::class);
+        $this->request = Mockery::mock(ServerRequestInterface::class);
         $this->response = Mockery::mock(ResponseInterface::class);
         $this->next = function(){};
     }

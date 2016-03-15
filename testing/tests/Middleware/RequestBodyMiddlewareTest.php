@@ -6,12 +6,11 @@
  */
 namespace QL\Panthor\Middleware;
 use Mockery;
-use Interop\Container\ContainerInterface;
-use QL\Panthor\Exception\RequestException;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use QL\Panthor\Utility\Json;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
 {

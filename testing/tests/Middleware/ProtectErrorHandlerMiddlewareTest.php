@@ -9,8 +9,8 @@ namespace QL\Panthor\Middleware;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 class ProtectErrorHandlerMiddlewareTest extends PHPUnit_Framework_TestCase
 {

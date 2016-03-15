@@ -125,6 +125,7 @@ services:
         arguments:
             - '@container'
         configurator: ['@slim.configurator', 'configure']
+
     panthor.slim.container:
         class: 'Slim\Container'
         arguments:
@@ -147,23 +148,27 @@ services:
 
     panthor.slim.environment:
         class: 'Slim\Environment'
-        factory: ['@panthor.slim.container', 'get']
+        factory: ['@panthor.container', 'get']
         arguments: ['environment']
 
     panthor.slim.request:
         class: 'Slim\Http\Request'
-        factory: ['@panthor.slim.container', 'get']
+        factory: ['@panthor.container', 'get']
         arguments: ['request']
 
     panthor.slim.response:
         class: 'Slim\Http\Response'
-        factory: ['@panthor.slim.container', 'get']
+        factory: ['@panthor.container', 'get']
         arguments: ['response']
 
     panthor.slim.router:
         class: 'Slim\Router'
-        factory: ['@panthor.slim.container', 'get']
+        factory: ['@panthor.container', 'get']
         arguments: ['router']
+
+    panthor.slim.cookies:
+        class: 'na'
+        factory: ['@slim.request', 'getCookieParams']
 
     panthor.slim.route:
         class: 'Slim\Route'
@@ -279,7 +284,7 @@ services:
     panthor.middleware.request_body:
         class: 'QL\Panthor\Middleware\RequestBodyMiddleware'
         arguments:
-            - '@service_container'
+            - '@symfony.container'
             - '@slim.request'
             - '@json'
             - '%request.body.service%'
