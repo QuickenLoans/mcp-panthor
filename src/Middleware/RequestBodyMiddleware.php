@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\RequestException;
 use QL\Panthor\MiddlewareInterface;
 use QL\Panthor\Utility\Json;
-use Interop\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Sanitize the request properties and normalize for consumption by the application.

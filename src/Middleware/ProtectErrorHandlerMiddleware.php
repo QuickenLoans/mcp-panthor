@@ -7,15 +7,16 @@
 
 namespace QL\Panthor\Middleware;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use QL\Panthor\MiddlewareInterface;
 
 /**
  * This middleware restores error handling back to the handler chosen by the app.
  *
  * This is necessary because Slim 2.x resets to its own error handler on Slim:run()
  */
-class ProtectErrorHandlerMiddleware
+class ProtectErrorHandlerMiddleware implements MiddlewareInterface
 {
     /**
      * @var callable
@@ -40,7 +41,7 @@ class ProtectErrorHandlerMiddleware
     /**
      * {@inheritdoc}
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
         set_error_handler($this->handler, $this->level);
         return $next($request, $response);
