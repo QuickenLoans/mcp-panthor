@@ -4,11 +4,14 @@
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
-
 namespace QL\Panthor\Middleware;
-
 use Mockery;
+use Interop\Container\ContainerInterface;
+use QL\Panthor\Exception\RequestException;
 use PHPUnit_Framework_TestCase;
+use QL\Panthor\Utility\Json;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
 {
@@ -23,14 +26,13 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->di = Mockery::mock('Symfony\Component\DependencyInjection\Container');
-        $this->request = Mockery::mock('Slim\Http\Request');
-        $this->response = Mockery::mock('Slim\Http\Response');
-        $this->json = Mockery::mock('QL\Panthor\Utility\Json');
+        $this->di = Mockery::mock(ContainerInterface::class);
+        $this->request = Mockery::mock(Request::class);
+        $this->response = Mockery::mock(Response::class);
+        $this->json = Mockery::mock(Json::class);
     }
-
     /**
-     * @expectedException \QL\Panthor\Exception\RequestException
+     * @expectedException QL\Panthor\Exception\RequestException
      */
     public function testUnsupportedType()
     {

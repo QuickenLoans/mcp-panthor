@@ -12,7 +12,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\RequestException;
 use QL\Panthor\MiddlewareInterface;
 use QL\Panthor\Utility\Json;
-use Slim\Http\Request;
 use Interop\Container\ContainerInterface;
 
 /**
@@ -36,11 +35,6 @@ class RequestBodyMiddleware implements MiddlewareInterface
      * @type ContainerInterface
      */
     private $di;
-
-    /**
-     * @type Request
-     */
-    private $request;
 
     /**
      * @type Json
@@ -80,7 +74,7 @@ class RequestBodyMiddleware implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
-        $mediaType = $request->getHeader('contentType');// getMediaType();
+        $mediaType = $request->getHeader('contentType');
         if ($mediaType === 'application/json') {
             $decoded = $this->handleJson($request);
 
