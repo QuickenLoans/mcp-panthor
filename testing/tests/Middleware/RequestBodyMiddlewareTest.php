@@ -30,7 +30,7 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \QL\Panthor\Exception\RequestException
+     * @expectedException QL\Panthor\Exception\RequestException
      */
     public function testUnsupportedType()
     {
