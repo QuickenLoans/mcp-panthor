@@ -48,7 +48,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      * @param ResponseInterface $response
      * @param callable $next
      *
-     * @return \Psr\Http\Message\MessageInterface|ResponseInterface
+     * @return ResponseInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
@@ -103,7 +103,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      *
      * @return mixed
      */
-    protected function encrypt($cookie)
+    public function encrypt($cookie)
     {
         $value = array_key_exists('value', $cookie) ? $cookie['value']:null;
         if ($value) {
@@ -121,7 +121,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      *
      * @return mixed
      */
-    protected function decrypt($cookie)
+    public function decrypt($cookie)
     {
         $value = array_key_exists('value', $cookie) ? $cookie['value']:null;
         if ($value) {
@@ -148,7 +148,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
             $cookie['value'] = $decoded;
 
             return $cookie;
-        } elseif (!is_null($decrypted)) {
+        } elseif (!empty($decrypted)) {
             $cookie['value'] = $decrypted;
 
             return $cookie;

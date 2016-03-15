@@ -12,7 +12,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\RequestException;
 use QL\Panthor\MiddlewareInterface;
 use QL\Panthor\Utility\Json;
-use Slim\Http\Request;
 use Interop\Container\ContainerInterface;
 
 /**
@@ -36,11 +35,6 @@ class RequestBodyMiddleware implements MiddlewareInterface
      * @type ContainerInterface
      */
     private $di;
-
-    /**
-     * @type Request
-     */
-    private $request;
 
     /**
      * @type Json
@@ -79,16 +73,13 @@ class RequestBodyMiddleware implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
-        $mediaType = $request->getHeader('contentType');// getMediaType();
+        $mediaType = $request->getHeader('contentType');
         if ($mediaType === 'application/json') {
             $decoded = $this->handleJson($request);
-
         } else if ($mediaType === 'application/x-www-form-urlencoded') {
-            $decoded = $request->getParsedBody();// post();
-
+            $decoded = $request->getParsedBody();
         } else if ($mediaType === 'multipart/form-data') {
-            $decoded = $request->getParsedBody();//post();
-
+            $decoded = $request->getParsedBody();
         } else {
             throw new RequestException(static::ERR_UNSUPPORTED, static::ERR_UNSUPPORTED_CODE);
         }
