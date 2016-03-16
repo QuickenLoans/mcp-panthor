@@ -179,8 +179,10 @@ class ErrorHandler
      *
      * @return void
      */
-    public function handleException(Exception $exception)
+    public function handleException($exception)
     {
+        $this->convertPHP7ErrorObjectToException($exception);
+
         foreach ($this->handlers as $handler) {
             $canHandle = false;
             foreach ($handler->getHandledExceptions() as $exceptionType) {
@@ -422,5 +424,20 @@ class ErrorHandler
         ]);
 
         return true;
+    }
+
+    /**
+     * This is here to give a compatibility layer for php 7 error objects since mcp-panthor is not quite
+     * ready for them yet
+     */
+    private function convertPHP7ErrorObjectToException($exception)
+    {
+        if ($exception instanceof \Error) {
+            throw new Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+        }
+
+        if (!$exception instanceof Exception) {
+            throw new Exception('Exception was not an exception!');
+        }
     }
 }
