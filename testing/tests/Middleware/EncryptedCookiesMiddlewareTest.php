@@ -11,7 +11,7 @@ use QL\Panthor\Utility\Json;
 use QL\Panthor\Http\CookieEncryptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Slim\Http\Cookies;
+use QL\Panthor\Utility\CookieTool;
 use Mockery;
 
 class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
@@ -22,6 +22,8 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
     /** @var \Mockery\MockInterface */
     private $encryption;
     /** @var \Mockery\MockInterface */
+    private $cookieTool;
+    /** @var \Mockery\MockInterface */
     private $request;
     /** @var \Mockery\MockInterface */
     private $response;
@@ -30,6 +32,7 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
     {
         $this->json = Mockery::mock(Json::class);
         $this->encryption = Mockery::mock(CookieEncryptionInterface::class);
+        $this->cookieTool = Mockery::mock(CookieTool::class);
         $this->request = Mockery::mock(ServerRequestInterface::class);
         $this->response = Mockery::mock(ResponseInterface::class);
     }
@@ -38,23 +41,37 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
     {
         $unencryptedCookies = ['unencrypted'];
         $cookies = [
-            'unencrypted' => [
-                'value' => 'stuff',
-                'domain' => 'place.com'
-            ]
+            'unencrypted' => 'stuff'
         ];
-        $next = function ($request, $response) {return $response;};
+        $cookieHeaders = ['cookieHeaders'];
+        $next = function ($request, $response) {return $this->response;};
+        $decryptedResponse = Mockery::mock(ResponseInterface::class);
 
         $this->request->shouldReceive('getCookieParams')
             ->andReturn($cookies)
             ->byDefault();
-        $this->request->shouldReceive('withCookieParams')
-            ->andReturn($this->request);
+
+        $this->encryption->shouldReceive('decrypt')
+            ->with('stuff')
+            ->andReturn(null);
+
+        $this->cookieTool->shouldReceive('setCookies')
+            ->andReturn($decryptedResponse);
+        $this->cookieTool->shouldReceive('getRawCookies')
+            ->with($this->response)
+            ->andReturn($cookies);
+        $this->cookieTool->shouldReceive('setCookies')
+            ->andReturn($decryptedResponse);
+
+        $decryptedResponse->shouldReceive('getHeader')
+            ->with('Set-Cookie')
+            ->andReturn($cookieHeaders);
 
         $this->response->shouldReceive('withHeader')
+            ->withArgs(['Set-Cookie', $cookieHeaders])
             ->andReturn($this->response);
 
-        $mw = new EncryptedCookiesMiddleware($this->json, $this->encryption, $unencryptedCookies);
+        $mw = new EncryptedCookiesMiddleware($this->json, $this->encryption, $this->cookieTool, $unencryptedCookies);
         $this->assertEquals($this->response, $mw($this->request, $this->response, $next));
     }
 
@@ -65,30 +82,18 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
         $unEncodedValue = 'blah';
         $unencryptedCookies = ['unencrypted'];
         $encryptedCookies = [
-            'encrypted' => [
-                'value' => $encryptedValue,
-                'domain' => 'place.com'
-            ]
+            'encrypted' => $encryptedValue
         ];
         $unencryptedCookie = [
-            'encrypted' => [
-                'value' => $unEncodedValue,
-                'domain' => 'place.com'
-            ]
+            'encrypted' => $unEncodedValue
         ];
-        $next = function ($request, $response) {return $response;};
+        $cookieHeaders = ['cookieHeaders'];
+        $next = function ($request, $response) {return $this->response;};
+        $decryptedResponse = Mockery::mock(ResponseInterface::class);
 
         $this->request->shouldReceive('getCookieParams')
             ->andReturn($encryptedCookies)
-            ->once();
-        $this->request->shouldReceive('getCookieParams')
-            ->andReturn($unencryptedCookie)
-            ->once();
-        $this->request->shouldReceive('withCookieParams')
-            ->andReturn($this->request);
-
-        $this->response->shouldReceive('withHeader')
-            ->andReturn($this->response);
+            ->byDefault();
 
         $this->encryption->shouldReceive('decrypt')
             ->with($encryptedValue)
@@ -97,6 +102,18 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
             ->with($unencryptedValue)
             ->andReturn($encryptedValue);
 
+        $this->cookieTool->shouldReceive('setCookies')
+            ->andReturn($decryptedResponse);
+        $this->cookieTool->shouldReceive('getRawCookies')
+            ->with($this->response)
+            ->andReturn($unencryptedCookie);
+        $this->cookieTool->shouldReceive('setCookies')
+            ->andReturn($decryptedResponse);
+
+        $decryptedResponse->shouldReceive('getHeader')
+            ->with('Set-Cookie')
+            ->andReturn($cookieHeaders);
+
         $this->json->shouldReceive('decode')
             ->with($unencryptedValue)
             ->andReturn($unEncodedValue);
@@ -104,16 +121,19 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
             ->with($unEncodedValue)
             ->andReturn($unencryptedValue);
 
-        $mw = new EncryptedCookiesMiddleware($this->json, $this->encryption, $unencryptedCookies);
+        $this->response->shouldReceive('withHeader')
+            ->andReturn($this->response);
+
+        $mw = new EncryptedCookiesMiddleware($this->json, $this->encryption, $this->cookieTool, $unencryptedCookies);
         $this->assertEquals($this->response, $mw($this->request, $this->response, $next));
     }
 
     public function decryptionProvider()
     {
         return [
-            ['decrypted' => 'decrypted', 'decoded' => 'decoded', 'expected' => ['value' => 'decoded', 'domain' => 'blah']],
-            ['decrypted' => 'decrypted', 'decoded' => null, 'expected' => ['value' => 'decrypted', 'domain' => 'blah']],
-            ['decrypted' => '', 'decoded' => null, 'expected' => ['value' => null, 'domain' => null]],
+            ['decrypted' => 'decrypted', 'decoded' => 'decoded', 'expected' => 'decoded'],
+            ['decrypted' => 'decrypted', 'decoded' => null, 'expected' => 'decrypted'],
+            ['decrypted' => '', 'decoded' => null, 'expected' => null],
         ];
     }
 
@@ -127,10 +147,7 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
     public function testDecryptionScenarios($decrypted, $decoded, $expected)
     {
         $encrypted = 'encrypted';
-        $cookie = [
-            'value' => $encrypted,
-            'domain' => 'blah'
-        ];
+        $expected = is_null($expected)? $encrypted:$expected;
 
         $this->encryption->shouldReceive('decrypt')
             ->with($encrypted)
@@ -140,7 +157,7 @@ class EncryptedCookiesMiddlewareTest extends \PHPUnit_Framework_TestCase
             ->with($decrypted)
             ->andReturn($decoded);
 
-        $mw = new EncryptedCookiesMiddleware($this->json, $this->encryption);
-        $this->assertEquals($expected, $mw->decrypt($cookie));
+        $mw = new EncryptedCookiesMiddleware($this->json, $this->encryption, $this->cookieTool);
+        $this->assertEquals($expected, $mw->decrypt('blah', $encrypted));
     }
 }
