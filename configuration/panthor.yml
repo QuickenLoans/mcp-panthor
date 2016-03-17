@@ -60,6 +60,7 @@ services:
     slim.route.parameters:          {parent: panthor.slim.route.parameters}
 
     slim.middleware.routes:         {parent: panthor.slim.middleware.routes}
+    slim.middleware.cookies:        {parent: panthor.slim.middleware.cookies}
 
     url:                            {parent: panthor.url}
     json:                           {parent: panthor.json}
@@ -279,6 +280,7 @@ services:
         arguments:
             - '@json'
             - '@cookie.encryption'
+            - '@panthor.cookie.tool'
             - '%cookie.unencrypted%'
 
     panthor.middleware.request_body:
@@ -324,6 +326,9 @@ services:
 
     panthor.json:
         class: 'QL\Panthor\Utility\Json'
+
+    panthor.cookie.tool:
+        class: 'QL\Panthor\Utility\CookieTool'
 
     ############################################################################
     # Twig

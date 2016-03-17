@@ -12,17 +12,21 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Http\CookieEncryptionInterface;
 use QL\Panthor\MiddlewareInterface;
+use QL\Panthor\Utility\CookieTool;
 use QL\Panthor\Utility\Json;
 use Slim\Http\Cookies;
 
 class EncryptedCookiesMiddleware implements MiddlewareInterface
 {
 
+    /** @var Json $json */
+    private $json;
+
     /** @var CookieEncryptionInterface $encryption */
     private $encryption;
 
-    /** @var Json $json */
-    private $json;
+    /** @var CookieTool $cookieTool */
+    private $cookieTool;
 
     /** @var array $unencryptedCookies */
     private $unencryptedCookies;
@@ -30,17 +34,20 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     /**
      * EncryptedCookiesMiddleware constructor.
      *
-     * @param CookieEncryptionInterface $encryptionAlgorithms
      * @param Json $json
+     * @param CookieEncryptionInterface $encryptionAlgorithms
+     * @param CookieTool $cookieTool
      * @param array $unencryptedCookies
      */
     public function __construct(
         JSON $json,
         CookieEncryptionInterface $encryptionAlgorithms,
+        CookieTool $cookieTool,
         array $unencryptedCookies = []
     ) {
-        $this->encryption = $encryptionAlgorithms;
         $this->json = $json;
+        $this->encryption = $encryptionAlgorithms;
+        $this->cookieTool = $cookieTool;
         $this->unencryptedCookies = $unencryptedCookies;
     }
 
@@ -53,31 +60,32 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
-        $decryptedContainer = $this->getConvertedContainer($request, 'decrypt');
+        $rawCookies = $request->getCookieParams();
+        $decryptedCookies = $this->getConvertedContainer($rawCookies, 'decrypt');
 
-        $cookieHeader = $decryptedContainer->toHeaders();
-        $decryptedCookies = Cookies::parseHeader($cookieHeader);
-        $request = $request->withCookieParams($decryptedCookies);
+        $decryptedResponse = $this->cookieTool->setCookies($response, $decryptedCookies);
 
-        $next($request, $response);
+        $response = $next($request, $decryptedResponse);
 
-        $encryptedContainer = $this->getConvertedContainer($request, 'encrypt');
-        $response = $response->withHeader('Set-Cookie', $encryptedContainer->toHeaders());
+        $rawCookies = $this->cookieTool->getRawCookies($response);
+        $encryptedCookies = $this->getConvertedContainer($rawCookies, 'encrypt');
+
+        $decryptedResponse = $this->cookieTool->setCookies($decryptedResponse, $encryptedCookies);
+        $response = $response->withHeader('Set-Cookie', $decryptedResponse->getHeader('Set-Cookie'));
         return $response;
     }
 
     /**
-     * @param ServerRequestInterface $request
+     * @param array $rawCookies
      * @param $operation
      *
      * @return Cookies
      */
-    private function getConvertedContainer(ServerRequestInterface $request, $operation)
+    private function getConvertedContainer($rawCookies, $operation)
     {
-        $cookies = $request->getCookieParams();
-        $keys = array_keys($cookies);
-        $cookieContainer = new Cookies($cookies);
-        return $this->convertCookies($keys, $cookieContainer, $operation);
+        $keys = array_keys($rawCookies);
+        $cookies = new Cookies($rawCookies);
+        return $this->convertCookies($keys, $cookies, $operation);
     }
 
     /**
@@ -90,74 +98,63 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     private function convertCookies($cookieKeys, Cookies $cookies, $operation)
     {
         foreach ($cookieKeys as $key) {
-            $cookie = $cookies->get($key);
-            if (!in_array($key, $this->unencryptedCookies)) {
-                $cookie = call_user_func([$this, $operation], $cookie);
-            }
-            $cookies->set($key, $cookie);
+            $value = $cookies->get($key);
+            $value = call_user_func([$this, $operation], $key, $value);
+
+            $cookies->set($key, $value);
         }
         return $cookies;
     }
 
     /**
-     * @param $cookie
+     * @param $value
      *
      * @return mixed
      */
-    public function encrypt($cookie)
+    public function encrypt($key, $value = null)
     {
-        $value = array_key_exists('value', $cookie) ? $cookie['value']:null;
-        if ($value) {
-            $value = $this->json->encode($value);
-
-            $value = $this->encryption->encrypt($value);
+        if (!in_array($key, $this->unencryptedCookies)) {
+            if ($value) {
+                $value = $this->encryption->encrypt($this->json->encode($value));
+            }
         }
-        $cookie['value'] = $value;
 
-        return $cookie;
+        return $value;
     }
 
     /**
-     * @param $cookie
+     * @param $value
      *
      * @return mixed
      */
-    public function decrypt($cookie)
+    public function decrypt($key, $value = null)
     {
-        $value = array_key_exists('value', $cookie) ? $cookie['value']:null;
         if ($value) {
             $decrypted = $this->encryption->decrypt($value);
 
             if (is_string($decrypted)) {
-                $cookie = $this->handleDecrypted($cookie, $decrypted);
+                $value = $this->handleDecrypted($value, $decrypted);
             }
         }
 
-        return $cookie;
+        return $value;
     }
 
     /**
-     * @param $cookie
+     * @param $value
      * @param $decrypted
      *
      * @return mixed
      */
-    private function handleDecrypted($cookie, $decrypted)
+    private function handleDecrypted($value, $decrypted)
     {
         $decoded = $this->json->decode($decrypted);
         if (!is_null($decoded)) {
-            $cookie['value'] = $decoded;
-
-            return $cookie;
+            $value = $decoded;
         } elseif (!empty($decrypted)) {
-            $cookie['value'] = $decrypted;
-
-            return $cookie;
-        } else {
-            $cookie['value'] = null;
-            $cookie['domain'] = null;
-
-            return $cookie;
+            $value = $decrypted;
         }
+
+        return $value;
     }
 }
