@@ -1,6 +1,8 @@
 parameters:
     # Parameters overridden by application configuration
     routes: []
+    routes.cache: true
+    routes.cache.file: 'src/CachedRoutes.php'
 
     slim.settings:
         determineRouteBeforeAppMiddleware: true
@@ -54,6 +56,9 @@ services:
     slim.request:                   {parent: panthor.slim.request}
     slim.response:                  {parent: panthor.slim.response}
     slim.cookies:                   {parent: panthor.slim.cookies}
+
+#    fast.route.dispatcher.factory:  {parent: panthor.fast.route.dispatcher.factory}
+    fast.route.dispatcher:          {synthetic: true}
 
     slim.router:                    {parent: panthor.slim.router}
     slim.route:                     {parent: panthor.slim.route}
@@ -147,6 +152,14 @@ services:
         class: 'QL\Panthor\Bootstrap\SlimConfigurator'
         arguments: ['@container', '%middleware%']
 
+    panthor.fast.route.dispatcher.factory:
+        class: 'QL\Panthor\Bootstrap\FastRouteDispatcherFactory'
+        arguments: ['@slim.router', '@root', '%routes.cache.file%', '%routes.cache%']
+
+    panthor.fast.route.dispatcher:
+        class: 'FastRoute\Dispatcher'
+        factory: ['@panthor.fast.route.dispatcher.factory', 'getDispatcher']
+
     panthor.slim.environment:
         class: 'Slim\Environment'
         factory: ['@panthor.container', 'get']
@@ -166,6 +179,8 @@ services:
         class: 'Slim\Router'
         factory: ['@panthor.container', 'get']
         arguments: ['router']
+        calls:
+            - ['setDispatcher', ['@fast.route.dispatcher']]
 
     panthor.slim.cookies:
         class: 'na'

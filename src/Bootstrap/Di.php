@@ -62,6 +62,9 @@ class Di
 
         $container->compile();
 
+        $routes = new Routes($root, $container);
+        $routes->cacheRoutes($root, $container);
+
         return $container;
     }
 

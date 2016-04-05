@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\Middleware;
 
-
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Http\CookieEncryptionInterface;
@@ -40,7 +39,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      * @param array $unencryptedCookies
      */
     public function __construct(
-        JSON $json,
+        Json $json,
         CookieEncryptionInterface $encryptionAlgorithms,
         CookieTool $cookieTool,
         array $unencryptedCookies = []
@@ -107,7 +106,8 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param $value
+     * @param string $key
+     * @param mixed $value
      *
      * @return mixed
      */
@@ -123,7 +123,8 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param $value
+     * @param string $key
+     * @param string $value
      *
      * @return mixed
      */
@@ -141,8 +142,8 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param $value
-     * @param $decrypted
+     * @param string $value
+     * @param mixed $decrypted
      *
      * @return mixed
      */

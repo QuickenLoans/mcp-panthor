@@ -7,12 +7,12 @@
 
 namespace QL\Panthor\Middleware;
 
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\Exception\Exception;
 use QL\Panthor\MiddlewareInterface;
 use Slim\App;
-use Interop\Container\ContainerInterface;
 
 /**
  * Convert a flat array into slim routes and attaches them to the slim application.

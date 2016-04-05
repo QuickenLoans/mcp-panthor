@@ -55,8 +55,8 @@ class CookieTool
     /**
      * Makes sure previously set and newly set cookies make their way to the final response.
      *
-     * @param $rawCookies
-     * @param $parsedCookies
+     * @param array $rawCookies
+     * @param array $parsedCookies
      *
      * @return array
      */
@@ -91,7 +91,7 @@ class CookieTool
     }
 
     /**
-     * @param $headers
+     * @param array $headers
      * @param array $parsedHeaders
      *
      * @return array
