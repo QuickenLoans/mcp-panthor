@@ -21,25 +21,6 @@ class HTTPProblemHandlerTest extends PHPUnit_Framework_TestCase
 {
     use MockeryAssistantTrait;
 
-    public function testCanHandleNotFoundException()
-    {
-        $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $response = Mockery::mock(ResponseInterface::class);
-
-        $handler = new HTTPProblemHandler($response, $renderer);
-
-        $handled = $handler->getHandledExceptions();
-        $this->assertCount(1, $handled);
-
-        $handled = $handled[0];
-
-        $this->assertNotInstanceOf($handled, new BaseException);
-        $this->assertNotInstanceOf($handled, new Exception);
-        $this->assertNotInstanceOf($handled, new RequestException);
-
-        $this->assertInstanceOf($handled, new HTTPProblemException(500, ''));
-    }
-
     public function testDoesNotHandleIfExceptionNotRequestException()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);

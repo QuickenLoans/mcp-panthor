@@ -21,25 +21,6 @@ class RequestExceptionHandlerTest extends PHPUnit_Framework_TestCase
 {
     use MockeryAssistantTrait;
 
-    public function testCanHandleRequestException()
-    {
-        $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
-        $response = Mockery::mock(ResponseInterface::class);
-
-        $handler = new RequestExceptionHandler($response, $renderer);
-
-        $handled = $handler->getHandledExceptions();
-        $this->assertCount(1, $handled);
-
-        $handled = $handled[0];
-
-        $this->assertNotInstanceOf($handled, new BaseException);
-        $this->assertNotInstanceOf($handled, new Exception);
-        $this->assertNotInstanceOf($handled, new NotFoundException);
-
-        $this->assertInstanceOf($handled, new RequestException);
-    }
-
     public function testDoesNotHandleIfExceptionNotRequestException()
     {
         $renderer = Mockery::mock(ExceptionRendererInterface::CLASS);
