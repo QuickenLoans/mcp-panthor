@@ -13,7 +13,7 @@ use Slim\App as Slim;
 class Routes
 {
     /**
-     * @param $root
+     * @param string $root
      * @param ContainerInterface $container
      *
      * @return ContainerInterface

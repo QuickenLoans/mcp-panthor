@@ -7,8 +7,8 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use Slim\App;
 use Interop\Container\ContainerInterface;
+use Slim\App;
 
 /**
  * This is how we configure Slim directly after it is instantiated. This is the Slim equivalent of Silex providers.

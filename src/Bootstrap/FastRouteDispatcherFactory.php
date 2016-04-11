@@ -7,7 +7,7 @@
 
 namespace QL\Panthor\Bootstrap;
 
-
+use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser;
 use Slim\Router;
@@ -51,7 +51,7 @@ class FastRouteDispatcherFactory
     /**
      * Get the configured dispatcher
      *
-     * @return mixed
+     * @return Dispatcher
      */
     public function getDispatcher()
     {
@@ -66,7 +66,7 @@ class FastRouteDispatcherFactory
      *
      * @param array $options
      *
-     * @return mixed
+     * @return Dispatcher
      */
     public function loadCachedDispatcher($options = [])
     {
@@ -79,7 +79,7 @@ class FastRouteDispatcherFactory
      *
      * @param array $options
      *
-     * @return mixed
+     * @return Dispatcher
      */
     public function getDefaultDispatcher($options = [])
     {
@@ -89,7 +89,7 @@ class FastRouteDispatcherFactory
     /**
      * Gets the absolute location of the cachefile if it exists.
      *
-     * @return string
+     * @return string|null
      */
     public function getAbsolutePath()
     {

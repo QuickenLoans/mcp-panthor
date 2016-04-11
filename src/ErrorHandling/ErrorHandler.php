@@ -169,7 +169,7 @@ class ErrorHandler
     public function attach(App $slim)
     {
         // Register Global Exception Handler
-        $slim-> notFound([$this, 'handleNotFound']);
+        $slim->notFound([$this, 'handleNotFound']);
 
         // Register Global Exception Handler
         $slim->error([$this, 'handleException']);
