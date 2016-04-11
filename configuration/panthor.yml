@@ -1,9 +1,14 @@
 parameters:
     # Parameters overridden by application configuration
     routes: []
-    slim.hooks:
-        slim.before.router:
-            - 'slim.hook.routes'
+    routes.cache: true
+    routes.cache.file: 'src/CachedRoutes.php'
+
+    slim.settings:
+        determineRouteBeforeAppMiddleware: true
+
+    middleware:
+        - 'slim.middleware.routes'
 
     debug: false
     request.body.service: 'request.body'
@@ -41,10 +46,10 @@ services:
     # application configuration
     ############################################################################
 
+    container:                      {parent: panthor.container}
     slim:                           {parent: panthor.slim}
     slim.configurator:              {parent: panthor.slim.configurator}
 
-    slim.halt:                      {parent: panthor.slim.halt}
     slim.not.found:                 {parent: panthor.slim.not.found}
 
     slim.environment:               {parent: panthor.slim.environment}
@@ -52,11 +57,15 @@ services:
     slim.response:                  {parent: panthor.slim.response}
     slim.cookies:                   {parent: panthor.slim.cookies}
 
+#    fast.route.dispatcher.factory:  {parent: panthor.fast.route.dispatcher.factory}
+    fast.route.dispatcher:          {synthetic: true}
+
     slim.router:                    {parent: panthor.slim.router}
     slim.route:                     {parent: panthor.slim.route}
     slim.route.parameters:          {parent: panthor.slim.route.parameters}
 
-    slim.hook.routes:               {parent: panthor.slim.hook.routes}
+    slim.middleware.routes:         {parent: panthor.slim.middleware.routes}
+    slim.middleware.cookies:        {parent: panthor.slim.middleware.cookies}
 
     url:                            {parent: panthor.url}
     json:                           {parent: panthor.json}
@@ -78,6 +87,56 @@ services:
 
     middleware.request_body:        {parent: panthor.middleware.request_body}
 
+    symfony.container:              {synthetic: true}
+
+    ############################################################################
+    # Acclimate
+    #
+    # Required parameters:
+    #
+    # %debug%
+    # %routes%
+    # %slim.middleware%
+    # %cookie.unencrypted%
+    # @symfony.container
+    #
+    ############################################################################
+
+    panthor.container:
+        class: 'Acclimate\Container\CompositeContainer'
+        arguments:
+            - ["@panthor.slim.container", "@acclimate.symfony.container"]
+
+    acclimate.container:
+        class: 'Acclimate\Container\ContainerAcclimator'
+
+    acclimate.symfony.container:
+        class: 'Acclimate\Container\ContainerAcclimator'
+        factory: ['@acclimate.container', 'acclimate']
+        arguments:
+            - '@symfony.container'
+
+    ############################################################################
+    # Slim 3
+    #
+    # Required parameters:
+    #
+    # @container
+    # %slim.settings%
+    #
+    ############################################################################
+
+    panthor.slim:
+        class: 'Slim\App'
+        arguments:
+            - '@container'
+        configurator: ['@slim.configurator', 'configure']
+
+    panthor.slim.container:
+        class: 'Slim\Container'
+        arguments:
+            - '%slim.settings%'
+
     ############################################################################
     # Slim
     #
@@ -85,69 +144,59 @@ services:
     #
     # %debug%
     # %routes%
-    # %slim.hooks%
-    # %cookie.unencrypted%
+    # %slim.middleware%
     #
     ############################################################################
 
-    panthor.slim:
-        class: 'Slim\Slim'
-        arguments:
-            - debug: '%debug%'
-        configurator: ['@slim.configurator', 'configure']
-        properties:
-            response: @slim.response
-
     panthor.slim.configurator:
         class: 'QL\Panthor\Bootstrap\SlimConfigurator'
-        arguments: ['@service_container', '%slim.hooks%']
+        arguments: ['@container', '%middleware%']
 
-    panthor.slim.hook.routes:
-        class: 'QL\Panthor\Slim\RouteLoaderHook'
-        arguments: ['@service_container', '%routes%']
+    panthor.fast.route.dispatcher.factory:
+        class: 'QL\Panthor\Bootstrap\FastRouteDispatcherFactory'
+        arguments: ['@slim.router', '@root', '%routes.cache.file%', '%routes.cache%']
 
-    # slim accessors
+    panthor.fast.route.dispatcher:
+        class: 'FastRoute\Dispatcher'
+        factory: ['@panthor.fast.route.dispatcher.factory', 'getDispatcher']
 
     panthor.slim.environment:
         class: 'Slim\Environment'
-        factory: ['@slim', 'environment']
+        factory: ['@panthor.container', 'get']
+        arguments: ['environment']
 
     panthor.slim.request:
         class: 'Slim\Http\Request'
-        factory: ['@slim', 'request']
+        factory: ['@panthor.container', 'get']
+        arguments: ['request']
 
     panthor.slim.response:
         class: 'Slim\Http\Response'
-        properties:
-            cookies: '@slim.cookies'
-
-    panthor.slim.cookies:
-        class: 'QL\Panthor\Http\EncryptedCookies'
-        arguments:
-            - '@slim'
-            - '@json'
-            - '@cookie.encryption'
-            - '%cookie.unencrypted%'
+        factory: ['@panthor.container', 'get']
+        arguments: ['response']
 
     panthor.slim.router:
         class: 'Slim\Router'
-        factory: ['@slim', 'router']
+        factory: ['@panthor.container', 'get']
+        arguments: ['router']
+        calls:
+            - ['setDispatcher', ['@fast.route.dispatcher']]
+
+    panthor.slim.cookies:
+        class: 'na'
+        factory: ['@slim.request', 'getCookieParams']
 
     panthor.slim.route:
         class: 'Slim\Route'
-        factory: ['@slim.router', 'getCurrentRoute']
+        factory: ['@slim.request', 'getAttribute']
+        arguments: ['route']
 
     panthor.slim.route.parameters:
         class: 'na'
         factory: ['@slim.route', 'getParams']
 
-    panthor.slim.halt:
-        class: 'QL\Panthor\Slim\Halt'
-        arguments: ['@slim']
-
     panthor.slim.not.found:
-        class: 'QL\Panthor\Slim\NotFound'
-        arguments: ['@slim']
+        class: 'Slim\Handlers\NotFound'
 
     ############################################################################
     # Panthor Cookies
@@ -192,16 +241,16 @@ services:
 
     panthor.error_handling.handler.not_found:
         class: 'QL\Panthor\ErrorHandling\ExceptionHandler\NotFoundHandler'
-        arguments: ['@panthor.error_handling.html_renderer']
+        arguments: ['@panthor.slim.response', '@panthor.error_handling.html_renderer']
     panthor.error_handling.handler.http_problem:
         class: 'QL\Panthor\ErrorHandling\ExceptionHandler\HTTPProblemHandler'
-        arguments: ['@panthor.error_handling.problem_renderer']
+        arguments: ['@panthor.slim.response', '@panthor.error_handling.problem_renderer']
     panthor.error_handling.handler.request:
         class: 'QL\Panthor\ErrorHandling\ExceptionHandler\RequestExceptionHandler'
-        arguments: ['@panthor.error_handling.problem_renderer']
+        arguments: ['@panthor.slim.response', '@panthor.error_handling.problem_renderer']
     panthor.error_handling.handler.base:
         class: 'QL\Panthor\ErrorHandling\ExceptionHandler\BaseHandler'
-        arguments: ['@panthor.error_handling.html_renderer', '@logger']
+        arguments: ['@panthor.slim.response', '@panthor.error_handling.html_renderer', '@logger']
         calls:
             - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
 
@@ -237,10 +286,22 @@ services:
     #
     ############################################################################
 
+    panthor.slim.middleware.routes:
+        class: 'QL\Panthor\Middleware\RouteLoaderMiddleware'
+        arguments: ['@container', '%routes%']
+
+    panthor.slim.middleware.cookies:
+        class: 'QL\Panthor\Middleware\EncryptedCookiesMiddleware'
+        arguments:
+            - '@json'
+            - '@cookie.encryption'
+            - '@panthor.cookie.tool'
+            - '%cookie.unencrypted%'
+
     panthor.middleware.request_body:
         class: 'QL\Panthor\Middleware\RequestBodyMiddleware'
         arguments:
-            - '@service_container'
+            - '@symfony.container'
             - '@slim.request'
             - '@json'
             - '%request.body.service%'
@@ -273,14 +334,16 @@ services:
             - '@slim.router'
             - '@slim.request'
             - '@slim.response'
-            - '@slim.halt'
 
     panthor.clock:
         class: 'QL\MCP\Common\Time\Clock'
-        arguments: ['now', %panthor.internal.timezone%]
+        arguments: ['now', '%panthor.internal.timezone%']
 
     panthor.json:
         class: 'QL\Panthor\Utility\Json'
+
+    panthor.cookie.tool:
+        class: 'QL\Panthor\Utility\CookieTool'
 
     ############################################################################
     # Twig

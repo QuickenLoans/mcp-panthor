@@ -1,21 +1,22 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2015 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\Slim;
+namespace QL\Panthor\Middleware;
 
-use Slim\Slim;
-use Slim\Middleware;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use QL\Panthor\MiddlewareInterface;
 
 /**
  * This middleware restores error handling back to the handler chosen by the app.
  *
  * This is necessary because Slim 2.x resets to its own error handler on Slim:run()
  */
-class ProtectErrorHandlerMiddleware extends Middleware
+class ProtectErrorHandlerMiddleware implements MiddlewareInterface
 {
     /**
      * @var callable
@@ -40,9 +41,9 @@ class ProtectErrorHandlerMiddleware extends Middleware
     /**
      * {@inheritdoc}
      */
-    public function call()
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
         set_error_handler($this->handler, $this->level);
-        $this->next->call();
+        return $next($request, $response);
     }
 }

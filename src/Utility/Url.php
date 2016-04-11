@@ -7,10 +7,10 @@
 
 namespace QL\Panthor\Utility;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Slim\Exception\Stop;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Router;
+use Slim\Route;
 
 class Url
 {
@@ -55,7 +55,8 @@ class Url
      */
     public function currentRoute()
     {
-        if (!$route = $this->router->getCurrentRoute()) {
+        /** @var Route $route */
+        if (!$route = $this->request->getAttribute('route')) {
             return null;
         }
 
@@ -92,7 +93,10 @@ class Url
      */
     public function absoluteUrlFor($route, array $params = [], array $query = [])
     {
-        return $this->request->getUrl() . $this->urlFor($route, $params, $query);
+        $uri = $this->request->getUri();
+        $port = $uri->getPort();
+        $baseUri = !is_null($port)? $uri . ":" . $port : $uri;
+        return $baseUri . $this->urlFor($route, $params, $query);
     }
 
     /**
@@ -102,8 +106,6 @@ class Url
      * @param array $params
      * @param array $query
      * @param int $code
-     *
-     * @throws Stop
      */
     public function redirectFor($route, array $params = [], array $query = [], $code = 302)
     {
@@ -117,14 +119,13 @@ class Url
      * @param string $url
      * @param array $query
      * @param int $code
-     *
-     * @throws Stop
      */
     public function redirectForURL($url, array $query = [], $code = 302)
     {
-        $this->response->headers->set('Location', $this->appendQueryString($url, $query));
+        $this->response = $this->response->withHeader('Location', $this->appendQueryString($url, $query));
 
         call_user_func($this->halt, $code);
+        $this->response = $this->response->withStatus($code);
     }
 
     /**

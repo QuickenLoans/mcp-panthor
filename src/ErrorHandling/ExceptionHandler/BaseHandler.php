@@ -9,6 +9,7 @@ namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 
 use ErrorException;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use QL\Panthor\ErrorHandling\ExceptionHandlerInterface;
@@ -38,11 +39,21 @@ class BaseHandler implements ExceptionHandlerInterface
     private $logger;
 
     /**
+     * @var ResponseInterface $response
+     */
+    private $response;
+
+    /**
+     * @param ResponseInterface $response
      * @param ExceptionRendererInterface $renderer
      * @param LoggerInterface|null $logger
      */
-    public function __construct(ExceptionRendererInterface $renderer, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        ResponseInterface $response,
+        ExceptionRendererInterface $renderer,
+        LoggerInterface $logger = null
+    ) {
+        $this->response = $response;
         $this->renderer = $renderer;
         $this->logger = $logger ?: new NullLogger;
 
@@ -74,7 +85,7 @@ class BaseHandler implements ExceptionHandlerInterface
         }
 
         $this->log($throwable);
-        $this->renderer->render($status, $context);
+        $this->renderer->render($this->response, $status, $context);
 
         return true;
     }

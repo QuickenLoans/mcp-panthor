@@ -53,11 +53,17 @@ class Di
         $builder = new YamlFileLoader($container, new FileLocator($root));
         $builder->load(static::PRIMARY_CONFIGURATION_FILE);
 
+        $container->set('symfony.container', $container);
+        $container->set('root', $root);
+
         if (is_callable($containerModifier)) {
             $containerModifier($container);
         }
 
         $container->compile();
+
+        $routes = new Routes($root, $container);
+        $routes->cacheRoutes($root, $container);
 
         return $container;
     }

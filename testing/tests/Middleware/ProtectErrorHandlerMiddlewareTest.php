@@ -5,29 +5,27 @@
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\Slim;
+namespace QL\Panthor\Middleware;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Slim\Slim;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 class ProtectErrorHandlerMiddlewareTest extends PHPUnit_Framework_TestCase
 {
     public function testErrorHandlerIsReset()
     {
-        $slim = Mockery::mock(Slim::CLASS);
-        $slim
-            ->shouldReceive('call')
-            ->once();
+        $request = Mockery::mock(Request::class);
+        $response = Mockery::mock(Response::class);
 
         $handler = function() {};
 
         $middleware = new ProtectErrorHandlerMiddleware($handler);
-        $middleware->setNextMiddleware($slim);
 
         $existingHandler = set_error_handler(null);
 
-        $middleware->call();
+        $middleware($request, $response, $handler);
 
         $appHandler = set_error_handler($existingHandler);
 

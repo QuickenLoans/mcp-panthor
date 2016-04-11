@@ -12,14 +12,19 @@ use PHPUnit_Framework_TestCase;
 use Slim\Http\Headers;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Http\Uri;
 use Slim\Router;
 use Slim\Route;
 
 class UrlTest extends PHPUnit_Framework_TestCase
 {
+    /** @var \Mockery\MockInterface */
     private $router;
+    /** @var \Mockery\MockInterface */
     private $request;
+    /** @var \Mockery\MockInterface */
     private $response;
+    /** @var \Mockery\MockInterface */
     private $halt;
 
     public function setUp()
@@ -33,8 +38,9 @@ class UrlTest extends PHPUnit_Framework_TestCase
 
     public function testCurrentRouteReturnsNullIfNoRouteMatches()
     {
-        $this->router
-            ->shouldReceive('getCurrentRoute')
+        $this->request
+            ->shouldReceive('getAttribute')
+            ->with('route')
             ->andReturnNull();
 
         $url = new Url($this->router, $this->request, $this->response, $this->halt);
@@ -44,8 +50,9 @@ class UrlTest extends PHPUnit_Framework_TestCase
 
     public function testCurrentRouteReturnsRouteName()
     {
-        $this->router
-            ->shouldReceive('getCurrentRoute')
+        $this->request
+            ->shouldReceive('getAttribute')
+            ->with('route')
             ->andReturn(Mockery::mock(Route::CLASS, [
                 'getName' => 'route.name'
             ]));
@@ -77,9 +84,14 @@ class UrlTest extends PHPUnit_Framework_TestCase
 
     public function testAbsoluteUrlGetsRouteAndAppendsQueryString()
     {
-        $this->request
-            ->shouldReceive('getUrl')
+        $uri = Mockery::mock(Uri::class);
+        $uri->shouldReceive('__toString')
             ->andReturn('http://example.com');
+        $uri->shouldReceive('getPort')
+            ->andReturnNull();
+        $this->request
+            ->shouldReceive('getUri')
+            ->andReturn($uri);
         $this->router
             ->shouldReceive('urlFor')
             ->with('route.name', ['param1' => '1'])
@@ -91,22 +103,55 @@ class UrlTest extends PHPUnit_Framework_TestCase
         $this->assertSame('http://example.com/path?query1=2', $actual);
     }
 
+    public function testAbsoluteUrlGetsRouteAndAppendsPortWhenNotStandard()
+    {
+        $uri = Mockery::mock(Uri::class);
+        $uri->shouldReceive('__toString')
+            ->andReturn('http://example.com');
+        $uri->shouldReceive('getPort')
+            ->andReturn('2345');
+        $this->request
+            ->shouldReceive('getUri')
+            ->andReturn($uri);
+        $this->router
+            ->shouldReceive('urlFor')
+            ->with('route.name', ['param1' => '1'])
+            ->andReturn('/path');
+
+        $url = new Url($this->router, $this->request, $this->response, $this->halt);
+
+        $actual = $url->absoluteUrlFor('route.name', ['param1' => '1'], ['query1' => '2']);
+        $this->assertSame('http://example.com:2345/path?query1=2', $actual);
+    }
+
     public function testRedirectForRetrievesRoute()
     {
-        $this->request
-            ->shouldReceive('getUrl')
+        $uri = Mockery::mock(Uri::class);
+        $uri->shouldReceive('__toString')
             ->andReturn('http://example.com');
+        $uri->shouldReceive('getPort')
+            ->andReturnNull();
+        $this->request
+            ->shouldReceive('getUri')
+            ->andReturn($uri);
         $this->router
             ->shouldReceive('urlFor')
             ->with('route.name', [])
             ->andReturn('/path');
 
-        $headers = Mockery::mock(Headers::CLASS);
-        $headers
-            ->shouldReceive('set')
+//        $headers = Mockery::mock(Headers::CLASS);
+//        $headers
+//            ->shouldReceive('set')
+//            ->with('Location', 'http://example.com/path')
+//            ->once();
+        $this->response
+            ->shouldReceive('withHeader')
             ->with('Location', 'http://example.com/path')
-            ->once();
-        $this->response->headers = $headers;
+            ->andReturn($this->response);
+        $this->response
+            ->shouldReceive('withStatus')
+            ->with(302)
+            ->andReturn($this->response);
 
         $code = null;
         $this->halt = function($v) use (&$code) {

@@ -4,40 +4,55 @@
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
-
 namespace QL\Panthor\Middleware;
-
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use QL\Panthor\Utility\Json;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
 {
+    /** @var \Mockery\MockInterface */
+    private $di;
+    /** @var \Mockery\MockInterface */
+    private $request;
+    /** @var \Mockery\MockInterface */
+    private $response;
+    /** @var \Mockery\MockInterface */
+    private $json;
+
     public function setUp()
     {
-        $this->di = Mockery::mock('Symfony\Component\DependencyInjection\Container');
-        $this->request = Mockery::mock('Slim\Http\Request');
-        $this->json = Mockery::mock('QL\Panthor\Utility\Json');
+        $this->di = Mockery::mock(ContainerInterface::class);
+        $this->request = Mockery::mock(Request::class);
+        $this->response = Mockery::mock(Response::class);
+        $this->json = Mockery::mock(Json::class);
     }
-
     /**
      * @expectedException QL\Panthor\Exception\RequestException
      */
     public function testUnsupportedType()
     {
         $this->request
-            ->shouldReceive(['getMediaType' => 'text/plain']);
+            ->shouldReceive('getHeader')
+            ->with('contentType')
+            ->andReturn('text/plain');
 
-        $mw = new RequestBodyMiddleware($this->di, $this->request, $this->json, 'service.name');
-        $mw();
+        $mw = new RequestBodyMiddleware($this->di, $this->json, 'service.name');
+        $mw($this->request, $this->response, function(){});
     }
 
     public function testEmptyPostMeansPartyTime()
     {
         $this->request
-            ->shouldReceive([
-                'getMediaType' => 'application/json',
-                'getBody' => '{}',
-            ]);
+            ->shouldReceive('getHeader')
+            ->with('contentType')
+            ->andReturn('application/json');
+        $this->request
+            ->shouldReceive('getBody->getContents')
+            ->andReturn('{}');
 
         $this->json
             ->shouldReceive('__invoke')
@@ -49,17 +64,19 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
             ->with('service.name', [RequestBodyMiddleware::NOFUNZONE])
             ->andReturn([]);
 
-        $mw = new RequestBodyMiddleware($this->di, $this->request, $this->json, 'service.name');
-        $mw();
+        $mw = new RequestBodyMiddleware($this->di, $this->json, 'service.name');
+        $mw($this->request, $this->response, function(){});
     }
 
     public function testEmptyJsonWithDefaultKeys()
     {
         $this->request
-            ->shouldReceive([
-                'getMediaType' => 'application/json',
-                'getBody' => '{}',
-            ]);
+            ->shouldReceive('getHeader')
+            ->with('contentType')
+            ->andReturn('application/json');
+        $this->request
+            ->shouldReceive('getBody->getContents')
+            ->andReturn('{}');
 
         $this->json
             ->shouldReceive('__invoke')
@@ -71,8 +88,8 @@ class RequestBodyMiddlewareTest extends PHPUnit_Framework_TestCase
             ->with('service.name', ['key1' => null, 'key2' => null])
             ->andReturn([]);
 
-        $mw = new RequestBodyMiddleware($this->di, $this->request, $this->json, 'service.name');
+        $mw = new RequestBodyMiddleware($this->di, $this->json, 'service.name');
         $mw->setDefaultKeys(['key1', 'key2']);
-        $mw();
+        $mw($this->request, $this->response, function(){});
     }
 }

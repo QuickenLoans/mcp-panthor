@@ -7,6 +7,8 @@
 
 namespace QL\Panthor\ErrorHandling\ExceptionHandler;
 
+use Exception;
+use Psr\Http\Message\ResponseInterface;
 use QL\Panthor\Exception\HTTPProblemException;
 use QL\Panthor\ErrorHandling\ExceptionHandlerInterface;
 use QL\Panthor\ErrorHandling\ExceptionRendererInterface;
@@ -21,10 +23,17 @@ class HTTPProblemHandler implements ExceptionHandlerInterface
     private $renderer;
 
     /**
+     * @var ResponseInterface $response
+     */
+    private $response;
+
+    /**
+     * @param ResponseInterface $response
      * @param ExceptionRendererInterface $renderer
      */
-    public function __construct(ExceptionRendererInterface $renderer)
+    public function __construct(ResponseInterface $response, ExceptionRendererInterface $renderer)
     {
+        $this->response = $response;
         $this->renderer = $renderer;
 
         $this->setHandledThrowables([
@@ -50,7 +59,7 @@ class HTTPProblemHandler implements ExceptionHandlerInterface
             'exception' => $throwable
         ];
 
-        $this->renderer->render($status, $context);
+        $this->renderer->render($this->response, $status, $context);
 
         return true;
     }
