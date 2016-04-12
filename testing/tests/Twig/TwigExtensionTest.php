@@ -23,8 +23,8 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->url = Mockery::mock(Url::CLASS);
-        $this->clock = Mockery::mock(Clock::CLASS);
+        $this->url = Mockery::mock(Url::class);
+        $this->clock = Mockery::mock(Clock::class);
     }
 
     public function testName()
@@ -53,7 +53,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
 
     public function testGetTimepointReadsFromClock()
     {
-        $time = Mockery::mock(TimePoint::CLASS);
+        $time = Mockery::mock(TimePoint::class);
         $this->clock
             ->shouldReceive('read')
             ->andReturn($time);
@@ -64,7 +64,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
 
     public function testGetTimepointReadsFromClockAndModifies()
     {
-        $time = Mockery::mock(TimePoint::CLASS);
+        $time = Mockery::mock(TimePoint::class);
         $time
             ->shouldReceive('modify')
             ->with('+2 days')

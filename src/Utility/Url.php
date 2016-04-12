@@ -7,10 +7,8 @@
 
 namespace QL\Panthor\Utility;
 
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\UriInterface;
 use Slim\Router;
-use Slim\Route;
 
 class Url
 {
@@ -20,47 +18,33 @@ class Url
     private $router;
 
     /**
-     * @type Request
-     */
-    private $request;
-
-    /**
-     * @type Response
-     */
-    private $response;
-
-    /**
-     * @type callable
-     */
-    private $halt;
-
-    /**
      * @param Router $router
-     * @param Request $request
-     * @param Response $response
-     * @param callable $halt
      */
-    public function __construct(Router $router, Request $request, Response $response, callable $halt)
+    public function __construct(Router $router)
     {
         $this->router = $router;
-        $this->request = $request;
-        $this->response = $response;
-        $this->halt = $halt;
     }
 
     /**
-     * Get the name of the current route.
+     * Get a query parameter from a PSR-7 UriInterface
      *
-     * @return string|null
+     * @param UriInterface $uri
+     * @param string $param
+     *
+     * @return string|array|null
      */
-    public function currentRoute()
+    public function getQueryParam(UriInterface $uri, $param)
     {
-        /** @var Route $route */
-        if (!$route = $this->request->getAttribute('route')) {
+        if (!$query = $uri->getQuery()) {
             return null;
         }
 
-        return $route->getName();
+        parse_str($query, $params);
+        if (!array_key_exists($param, $params)) {
+            return null;
+        }
+
+        return $params[$param];
     }
 
     /**
@@ -78,68 +62,28 @@ class Url
             return '';
         }
 
-        $urlPath = $this->router->urlFor($route, $params);
-        return $this->appendQueryString($urlPath, $query);
+        return $this->router->relativePathFor($route, $params, $query);
     }
 
     /**
      * Get the absolute URL for a given route name.
+     * You must provide the current request Uri to retrieve the scheme and host.
      *
+     * @param UriInterface $uri
      * @param string $route
      * @param array $params
      * @param array $query
      *
      * @return string
      */
-    public function absoluteUrlFor($route, array $params = [], array $query = [])
+    public function absoluteUrlFor(UriInterface $uri, $route, array $params = [], array $query = [])
     {
-        $uri = $this->request->getUri();
-        $port = $uri->getPort();
-        $baseUri = !is_null($port)? $uri . ":" . $port : $uri;
-        return $baseUri . $this->urlFor($route, $params, $query);
-    }
+        $path = $this->urlFor($route, $params);
 
-    /**
-     * Generate a redirect response for a given route name and halt the application.
-     *
-     * @param string $route
-     * @param array $params
-     * @param array $query
-     * @param int $code
-     */
-    public function redirectFor($route, array $params = [], array $query = [], $code = 302)
-    {
-        $url = $this->absoluteUrlFor($route, $params);
-        $this->redirectForURL($url, $query, $code);
-    }
-
-    /**
-     * Generate a redirect response for a given URL and halt the application.
-     *
-     * @param string $url
-     * @param array $query
-     * @param int $code
-     */
-    public function redirectForURL($url, array $query = [], $code = 302)
-    {
-        $this->response = $this->response->withHeader('Location', $this->appendQueryString($url, $query));
-
-        call_user_func($this->halt, $code);
-        $this->response = $this->response->withStatus($code);
-    }
-
-    /**
-     * @param string $url
-     * @param array $query
-     *
-     * @return string
-     */
-    private function appendQueryString($url, array $query)
-    {
-        if (count($query)) {
-            $url = sprintf('%s?%s', $url, http_build_query($query));
-        }
-
-        return $url;
+        return (string) $uri
+            ->withUserInfo('')
+            ->withPath($path)
+            ->withQuery(http_build_query($query))
+            ->withFragment('');
     }
 }

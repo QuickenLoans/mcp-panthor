@@ -78,7 +78,6 @@ class TwigExtension extends Twig_Extension
     {
         return [
             new Twig_SimpleFunction('urlFor', [$this->url, 'urlFor']),
-            new Twig_SimpleFunction('route', [$this->url, 'currentRoute']),
 
             new Twig_SimpleFunction('isDebugMode', [$this, 'isDebugMode']),
 
