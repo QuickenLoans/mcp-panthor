@@ -26,7 +26,7 @@ class AutoRenderingTemplate extends LazyTwig
     /**
      * @param Response $response
      *
-     * @return null
+     * @return void
      */
     public function setResponse(Response $response)
     {

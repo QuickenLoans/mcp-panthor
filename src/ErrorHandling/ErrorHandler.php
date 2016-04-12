@@ -178,6 +178,8 @@ class ErrorHandler
     /**
      * @param Exception $exception
      *
+     * @throws Exception
+     *
      * @return void
      */
     public function handleException($exception)
@@ -209,13 +211,15 @@ class ErrorHandler
     }
 
     /**
+     * @see http://php.net/manual/en/function.set-error-handler.php
+     *
      * @param int $errno
      * @param string $errstr
      * @param string $errfile
      * @param int $errline
      * @param array $errcontext
      *
-     * @see http://php.net/manual/en/function.set-error-handler.php
+     * @throws ErrorException
      *
      * @return bool
      */
@@ -237,7 +241,9 @@ class ErrorHandler
     /**
      * Shutdown registered function for handling PHP fatal errors.
      *
-     * @throws Exception
+     * @throws ErrorException
+     *
+     * @return void
      */
     public static function handleFatalError()
     {
@@ -349,7 +355,7 @@ class ErrorHandler
     /**
      * Errors that will be logged only.
      *
-     * @param int $thrownTypes
+     * @param int $loggedTypes
      *
      * @return void
      */

@@ -108,7 +108,7 @@ class Json
      *
      * @param int $encodingOptions
      *
-     * @return null
+     * @return void
      */
     public function setEncodingOptions($encodingOptions)
     {

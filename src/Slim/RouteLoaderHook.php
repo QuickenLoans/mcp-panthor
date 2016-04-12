@@ -64,7 +64,7 @@ class RouteLoaderHook
      *
      * @param Slim $slim
      *
-     * @return null
+     * @return void
      */
     public function __invoke(Slim $slim)
     {
@@ -113,6 +113,7 @@ class RouteLoaderHook
 
     /**
      * @param array $routeDetails
+     * 
      * @throws Exception
      *
      * @return string[]
@@ -146,7 +147,7 @@ class RouteLoaderHook
      * @param string $key
      * @param array $data
      *
-     * @return mixed
+     * @return mixed|null
      */
     private function nullable($key, array $data)
     {

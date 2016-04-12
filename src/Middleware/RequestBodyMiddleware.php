@@ -72,7 +72,7 @@ class RequestBodyMiddleware implements MiddlewareInterface
     /**
      * @throws RequestException
      *
-     * @return null
+     * @return void
      */
     public function __invoke()
     {
@@ -80,10 +80,10 @@ class RequestBodyMiddleware implements MiddlewareInterface
         if ($mediaType === 'application/json') {
             $decoded = $this->handleJson();
 
-        } else if ($mediaType === 'application/x-www-form-urlencoded') {
+        } elseif ($mediaType === 'application/x-www-form-urlencoded') {
             $decoded = $this->request->post();
 
-        } else if ($mediaType === 'multipart/form-data') {
+        } elseif ($mediaType === 'multipart/form-data') {
             $decoded = $this->request->post();
 
         } else {
@@ -125,12 +125,12 @@ class RequestBodyMiddleware implements MiddlewareInterface
      *     'key2' => 'test2',
      *     'key3' => null,
      *     'key4' => 'test4',
-     *     'key5' => 'null
+     *     'key5' => null
      * ]
      *
      * @param array $keys
      *
-     * @return null
+     * @return void
      */
     public function setDefaultKeys(array $keys)
     {

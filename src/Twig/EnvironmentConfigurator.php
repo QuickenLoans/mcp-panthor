@@ -40,14 +40,13 @@ class EnvironmentConfigurator
     /**
      * @param Twig_Environment $environment
      *
-     * @return null
+     * @return void
      */
     public function configure(Twig_Environment $environment)
     {
         if ($this->debugMode) {
             $environment->enableDebug();
             $environment->enableAutoReload();
-
         } else {
             $environment->disableDebug();
             $environment->disableAutoReload();
@@ -62,7 +61,7 @@ class EnvironmentConfigurator
      *
      * @param Twig_Environment $environment
      *
-     * @return null
+     * @return void
      */
     protected function applicationConfigure(Twig_Environment $environment)
     {

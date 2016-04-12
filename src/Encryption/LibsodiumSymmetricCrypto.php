@@ -69,6 +69,8 @@ class LibsodiumSymmetricCrypto
      * While in memory these are stored as OpaqueProperty, to obscure from debug code or stacktraces.
      *
      * @param string $secret
+     *
+     * @throws CryptoException
      */
     public function __construct($secret)
     {
@@ -93,7 +95,11 @@ class LibsodiumSymmetricCrypto
     }
 
     /**
-     * {@inheritdoc}
+     * @param mixed $unencrypted
+     *
+     * @throws CryptoException
+     *
+     * @return string
      */
     public function encrypt($unencrypted)
     {
@@ -123,7 +129,11 @@ class LibsodiumSymmetricCrypto
     }
 
     /**
-     * {@inheritdoc}
+     * @param string $encrypted
+     *
+     * @throws CryptoException
+     * 
+     * @return string
      */
     public function decrypt($encrypted)
     {

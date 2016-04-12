@@ -79,9 +79,8 @@ class BaseHandler implements ExceptionHandlerInterface
         return true;
     }
 
-
     /**
-     * @param Exception|Throwable $exception
+     * @param Exception|Throwable $throwable
      *
      * @return void
      */

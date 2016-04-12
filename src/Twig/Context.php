@@ -33,8 +33,9 @@ class Context implements Countable, IteratorAggregate
     /**
      * Merge additional context into the existing data.
      *
-     * @var array $context
-     * @return null
+     * @param array $context
+     *
+     * @return void
      */
     public function addContext(array $context)
     {
@@ -46,7 +47,7 @@ class Context implements Countable, IteratorAggregate
      *
      * @param string|null $key
      *
-     * @return array
+     * @return array|null
      */
     public function get($key = null)
     {

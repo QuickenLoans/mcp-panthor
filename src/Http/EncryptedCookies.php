@@ -63,6 +63,10 @@ class EncryptedCookies extends Cookies
 
     /**
      * Used by slim to render out cookies. Never retrieve response cookies within the application!
+     *
+     * @param string $key
+     *
+     * @return array|null
      */
     public function getResponseCookie($key)
     {
@@ -103,6 +107,10 @@ class EncryptedCookies extends Cookies
      * Convenience method to centralize cookie handling (also so we dont have to pass Slim\Slim around as a dependency)
      *
      * @see Slim::deleteCookie
+     *
+     * @param string $name
+     *
+     * @return mixed|false
      */
     public function deleteCookie($name)
     {
@@ -113,6 +121,10 @@ class EncryptedCookies extends Cookies
      * Convenience method to centralize cookie handling (also so we dont have to pass Slim\Slim around as a dependency)
      *
      * @see Slim::getCookie
+     *
+     * @param string $name
+     *
+     * @return string|null
      */
     public function getCookie($name)
     {

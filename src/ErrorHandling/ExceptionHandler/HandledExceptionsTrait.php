@@ -12,6 +12,9 @@ use Throwable;
 
 trait HandledExceptionsTrait
 {
+    /**
+     * @type array
+     */
     private $handledThrowables = [];
 
     /**

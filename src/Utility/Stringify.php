@@ -21,6 +21,7 @@ class Stringify
     /**
      * @param string $template Valid printf template
      * @param array $parameters
+     *
      * @return string
      */
     public static function template($template, array $parameters)
@@ -31,6 +32,7 @@ class Stringify
 
     /**
      * @param array $parameters
+     *
      * @return string
      */
     public static function combine(array $parameters)

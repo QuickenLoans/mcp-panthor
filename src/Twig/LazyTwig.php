@@ -96,7 +96,7 @@ class LazyTwig implements TemplateInterface
      *
      * @param string $template
      *
-     * @return null
+     * @return void
      */
     public function setTemplate($template)
     {

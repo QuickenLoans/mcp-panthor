@@ -18,7 +18,7 @@ trait StacktraceFormatterTrait
     private $root;
 
     /**
-     * @type string
+     * @type bool
      */
     private $logStacktraces = false;
 

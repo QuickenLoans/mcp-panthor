@@ -34,6 +34,7 @@ class SlimConfigurator
     private $hooks;
 
     /**
+     * @param ContainerInterface $di
      * @param array $hooks
      */
     public function __construct(ContainerInterface $di, array $hooks)
@@ -45,7 +46,7 @@ class SlimConfigurator
     /**
      * @param Slim $slim
      *
-     * @return null
+     * @return void
      */
     public function configure(Slim $slim)
     {
