@@ -34,7 +34,7 @@ services:
 
     environment:
         class: 'Slim\Http\Environment'
-        factory: ['QL\Panthor\Slim\EnvironmentFactory', 'fromGlobal']
+        factory: ['QL\Panthor\Bootstrap\SlimEnvironmentFactory', 'fromGlobal']
 
     request:
         class: 'Slim\Http\Request'
