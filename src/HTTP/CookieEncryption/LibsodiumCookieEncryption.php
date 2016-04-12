@@ -5,11 +5,11 @@
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\Http\CookieEncryption;
+namespace QL\Panthor\HTTP\CookieEncryption;
 
 use QL\Panthor\Encryption\LibsodiumSymmetricCrypto;
 use QL\Panthor\Exception\CryptoException;
-use QL\Panthor\Http\CookieEncryptionInterface;
+use QL\Panthor\HTTP\CookieEncryptionInterface;
 
 /**
  * Encrypts payload using libsodium authenticated symmetric encryption.

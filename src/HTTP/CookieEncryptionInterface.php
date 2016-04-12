@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\Http;
+namespace QL\Panthor\HTTP;
 
 interface CookieEncryptionInterface
 {

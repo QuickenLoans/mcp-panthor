@@ -132,7 +132,7 @@ class LibsodiumSymmetricCrypto
      * @param string $encrypted
      *
      * @throws CryptoException
-     * 
+     *
      * @return string
      */
     public function decrypt($encrypted)
