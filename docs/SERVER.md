@@ -4,6 +4,7 @@
 - [Application Structure](APPLICATION_STRUCTURE.md)
 - [How To Use](USAGE.md)
 - [Error Handling](ERRORS.md)
+- [Cookies](COOKIES.md)
 - Web Server Configuration
 
 Example web server configuration. Note that these configurations listen on port `80` only. To add HTTPS, Add a listener

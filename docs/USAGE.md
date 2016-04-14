@@ -4,6 +4,7 @@
 - [Application Structure](APPLICATION_STRUCTURE.md)
 - How To Use
 - [Error Handling](ERRORS.md)
+- [Cookies](COOKIES.md)
 - [Web Server Configuration](SERVER.md)
 
 ### Controllers and middleware

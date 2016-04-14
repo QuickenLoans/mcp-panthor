@@ -4,6 +4,7 @@
 - [Application Structure](APPLICATION_STRUCTURE.md)
 - [How To Use](USAGE.md)
 - Error Handling
+- [Cookies](COOKIES.md)
 - [Web Server Configuration](SERVER.md)
 
 ### Table of Contents
