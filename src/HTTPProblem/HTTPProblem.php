@@ -51,6 +51,7 @@ class HTTPProblem
         //Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
+        102 => 'Processing',
         //Successful 2xx
         200 => 'OK',
         201 => 'Created',
@@ -59,6 +60,8 @@ class HTTPProblem
         204 => 'No Content',
         205 => 'Reset Content',
         206 => 'Partial Content',
+        207 => 'Multi-Status',
+        208 => 'Already Reported',
         226 => 'IM Used',
         //Redirection 3xx
         300 => 'Multiple Choices',
@@ -69,6 +72,7 @@ class HTTPProblem
         305 => 'Use Proxy',
         306 => '(Unused)',
         307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
         //Client Error 4xx
         400 => 'Bad Request',
         401 => 'Unauthorized',
@@ -91,10 +95,12 @@ class HTTPProblem
         418 => 'I\'m a teapot',
         422 => 'Unprocessable Entity',
         423 => 'Locked',
+        424 => 'Failed Dependency',
         426 => 'Upgrade Required',
         428 => 'Precondition Required',
         429 => 'Too Many Requests',
         431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
         //Server Error 5xx
         500 => 'Internal Server Error',
         501 => 'Not Implemented',
@@ -103,8 +109,10 @@ class HTTPProblem
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
         506 => 'Variant Also Negotiates',
+        507 => 'Insufficient Storage',
+        508 => 'Loop Detected',
         510 => 'Not Extended',
-        511 => 'Network Authentication Required'
+        511 => 'Network Authentication Required',
     ];
 
     /**

@@ -12,71 +12,31 @@ use Mockery;
 use PHPUnit_Framework_TestCase;
 use QL\MCP\Common\Testing\MemoryLogger;
 use QL\Panthor\Exception\Exception;
-use QL\Panthor\Exception\NotFoundException;
-use QL\Panthor\Exception\RequestException;
-use QL\Panthor\ErrorHandling\ExceptionHandler\GenericHandler;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 use Slim\App;
 
 class ErrorHandlerTest extends PHPUnit_Framework_TestCase
 {
-    public function testHandlerIsAttached()
+    use MockeryAssistantTrait;
+
+    public $exHandler;
+
+    public function setUp()
     {
-        $handler = new ErrorHandler;
-
-        $slim = Mockery::mock(App::CLASS);
-
-        $slim
-            ->shouldReceive('notFound')
-            ->with([$handler, 'handleNotFound'])
-            ->once();
-
-        $slim
-            ->shouldReceive('error')
-            ->with([$handler, 'handleException'])
-            ->once();
-
-        $handler->attach($slim);
-    }
-
-    /**
-     * @expectedException QL\Panthor\Exception\NotFoundException
-     */
-    public function testNotFoundExceptionIsThrownWhenNotFoundEventTriggered()
-    {
-        $handler = new ErrorHandler;
-
-        $handler->handleNotFound();
-    }
-
-    /**
-     * @expectedException QL\Panthor\Exception\RequestException
-     */
-    public function testUnhandledExceptionIsRethrown()
-    {
-        $handler = new ErrorHandler;
-
-        $handler->handleException(new RequestException);
+        $this->exHandler = Mockery::mock(ExceptionHandler::class);
     }
 
     public function testHandlerThrowsExceptionWillAbortStackAndRethrow()
     {
-        $exHandler1 = new GenericHandler([Exception::CLASS], function($ex) {
-            throw $ex;
-        });
-
-        $called = false;
-        $exHandler2 = new GenericHandler([Exception::CLASS], function($ex) use (&$called) {
-            $called = true;
-            return false;
-        });
-
-        $handler = new ErrorHandler;
-        $handler->addHandlers([
-            $exHandler1,
-            $exHandler2,
-        ]);
-
         $exception = new Exception;
+
+        $this->exHandler
+            ->shouldReceive('handle')
+            ->with($exception)
+            ->andThrow(Exception::class);
+
+        $handler = new ErrorHandler($this->exHandler);
+
         try {
             $handler->handleException($exception);
         } catch (Exception $ex) {
@@ -84,12 +44,31 @@ class ErrorHandlerTest extends PHPUnit_Framework_TestCase
         }
 
         $this->assertSame($ex, $rethrown);
-        $this->assertSame(false, $called);
+    }
+
+    public function testHandlerReturnsFalseWillAbortStackAndRethrow()
+    {
+        $exception = new Exception;
+
+        $this->exHandler
+            ->shouldReceive('handle')
+            ->with($exception)
+            ->andReturn(false);
+
+        $handler = new ErrorHandler($this->exHandler);
+
+        try {
+            $handler->handleException($exception);
+        } catch (Exception $ex) {
+            $rethrown = $ex;
+        }
+
+        $this->assertSame($ex, $rethrown);
     }
 
     public function testThrowableErrorIsThrownAsErrorException()
     {
-        $handler = new ErrorHandler;
+        $handler = new ErrorHandler($this->exHandler);
         $handler->setThrownErrors(\E_DEPRECATED);
         $handler->setLoggedErrors(\E_DEPRECATED);
 
@@ -103,7 +82,7 @@ class ErrorHandlerTest extends PHPUnit_Framework_TestCase
 
     public function testErrorIsNotThrownAndNotHandled()
     {
-        $handler = new ErrorHandler;
+        $handler = new ErrorHandler($this->exHandler);
         $handler->setThrownErrors(\E_NOTICE);
         $handler->setLoggedErrors(\E_NOTICE);
 
@@ -114,7 +93,7 @@ class ErrorHandlerTest extends PHPUnit_Framework_TestCase
     public function testLoggableErrorIsLoggedIfNotThrown()
     {
         $logger = new MemoryLogger;
-        $handler = new ErrorHandler($logger);
+        $handler = new ErrorHandler($this->exHandler, $logger);
         $handler->setThrownErrors(\E_NOTICE);
         $handler->setLoggedErrors(\E_DEPRECATED);
 

@@ -9,24 +9,21 @@ namespace QL\Panthor\HTTPProblem\Renderer;
 
 use QL\Panthor\HTTPProblem\HTTPProblem;
 use QL\Panthor\HTTPProblem\ProblemRendererInterface;
+use QL\Panthor\Utility\JSON;
 
 class JSONRenderer implements ProblemRendererInterface
 {
     /**
-     * @type int
+     * @type JSON
      */
-    private $encodingOptions;
+    private $json;
 
     /**
-     * @param int $encodingOptions
+     * @param JSON $json
      */
-    public function __construct($encodingOptions = null)
+    public function __construct(JSON $json = null)
     {
-        if (!is_int($encodingOptions)) {
-            $encodingOptions = JSON_PRETTY_PRINT | JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES;
-        }
-
-        $this->encodingOptions = $encodingOptions;
+        $this->json = $json ?: new JSON;
     }
 
     /**
@@ -74,6 +71,6 @@ class JSONRenderer implements ProblemRendererInterface
 
         $data += $problem->extensions();
 
-        return json_encode($data, $this->encodingOptions);
+        return $this->json->encode($data);
     }
 }

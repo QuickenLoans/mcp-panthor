@@ -11,10 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 
 /**
- * Force sending of the response and end the php process.
- *
- * This is copypasta from Slim\Slim::run, as once an error occurs and the application has broken out of Slim's
- * handling context, Slim cannot be made to re-render the response.
+ * Render a PSR-7 response through slim.
  */
 trait SlimRenderingTrait
 {
@@ -24,20 +21,13 @@ trait SlimRenderingTrait
     private $slim;
 
     /**
-     * @type callable|null
-     */
-    private $headerSetter;
-
-    /**
      * @param App $slim
-     * @param callable|null $headerSetter
      *
      * @return void
      */
-    public function attachSlim(App $slim, callable $headerSetter = null)
+    public function attachSlim(App $slim)
     {
         $this->slim = $slim;
-        $this->headerSetter = $headerSetter;
     }
 
     /**
@@ -47,13 +37,8 @@ trait SlimRenderingTrait
     {
         if ($this->slim) {
             $this->slim->respond($response);
+        } else {
+            // do something
         }
-
-        // do not set body for HEAD requests
-        if ($this->slim && $this->slim->getContainer()->get('request')->getMethod() == 'head') {
-            return;
-        }
-
-        echo $response->getBody();
     }
 }

@@ -33,6 +33,27 @@ trait StacktraceFormatterTrait
     }
 
     /**
+     * Unpack nested throwables into a flat array
+     *
+     * @param Throwable|Exception $parent
+     *
+     * @return Throwable[]|Exception[]
+     */
+    private function unpackThrowables($throwable)
+    {
+        if (!$throwable instanceof Throwable && !$throwable instanceof Exception) {
+            return [];
+        }
+
+        $throwables = [$throwable];
+        while ($throwable = $throwable->getPrevious()) {
+            $throwables[] = $throwable;
+        }
+
+        return $throwables;
+    }
+
+    /**
      * @param array $stacktrace
      *
      * @return string
