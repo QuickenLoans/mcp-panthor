@@ -9,7 +9,7 @@ namespace QL\Panthor\Utility;
 
 use JsonSerializable;
 
-class Json
+class JSON
 {
     /**
      * @type callable|string
@@ -113,5 +113,16 @@ class Json
     public function setEncodingOptions($encodingOptions)
     {
         $this->encodingOptions = (int) $encodingOptions;
+    }
+    /**
+     * @see http://php.net/manual/en/json.constants.php
+     *
+     * @param int $encodingOptions
+     *
+     * @return void
+     */
+    public function addEncodingOptions($encodingOptions)
+    {
+        $this->encodingOptions = $this->encodingOptions | (int) $encodingOptions;
     }
 }

@@ -10,7 +10,7 @@ namespace QL\Panthor\Utility;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
-class JsonTest extends PHPUnit_Framework_TestCase
+class JSONTest extends PHPUnit_Framework_TestCase
 {
     public function testEncoding()
     {
@@ -22,7 +22,7 @@ class JsonTest extends PHPUnit_Framework_TestCase
 {"test1":"abcd1","test2":"abcd2"}
 FORMATTED;
 
-        $json = new Json;
+        $json = new JSON;
         $output = $json->encode($input);
 
         $this->assertSame($expected, $output);
@@ -41,7 +41,7 @@ FORMATTED;
 }
 FORMATTED;
 
-        $json = new Json;
+        $json = new JSON;
         $json->setEncodingOptions(JSON_PRETTY_PRINT);
         $output = $json->encode($input);
 
@@ -62,7 +62,7 @@ FORMATTED;
             'test2' => 'abcd2'
         ];
 
-        $json = new Json;
+        $json = new JSON;
         $json->setEncodingOptions(JSON_PRETTY_PRINT);
         $output = $json->decode($input);
 
@@ -80,7 +80,7 @@ FORMATTED;
 
         $expected = 'Invalid json (Syntax error)';
 
-        $json = new Json;
+        $json = new JSON;
 
         $output = $json->decode($input);
         $this->assertSame(null, $output);
