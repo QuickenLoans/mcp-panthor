@@ -50,6 +50,8 @@ services:
     logger:                         { alias: panthor.logger }
 
     error.handler:                  { alias: panthor.error_handling.handler }
+    exception.handler:              { alias: panthor.error_handling.exception_handler }
+    problem.renderer:               { alias: panthor.problem.renderer }
 
     cookie.encryption:              { alias: panthor.cookie.encryption }
     cookie.handler:                 { alias: panthor.cookie.handler }
@@ -66,12 +68,9 @@ services:
     ############################################################################
     # Slim
     #
-    # Required parameters:
+    # Configuration parameters:
     #
-    # %debug%
     # %routes%
-    # %slim.hooks%
-    # %cookie.unencrypted%
     #
     ############################################################################
 
@@ -82,9 +81,10 @@ services:
     ############################################################################
     # Panthor Cookies
     #
-    # Required Parameters:
+    # Configuration parameters:
     #
     # %cookie.encryption.secret%
+    # %cookie.settings%
     #
     ############################################################################
 
@@ -103,12 +103,15 @@ services:
     ############################################################################
     # Error Handling
     #
-    # Required Parameters:
+    # Configuration parameters:
     #
+    # %slim.settings.display_errors%
     # %error_handling.log_stacktrace%
     # %error_handling.levels%
     # %error_handling.thrown_errors%
     # %error_handling.logged_errors%
+    #
+    # %error_handling.html_template%
     #
     ############################################################################
 
@@ -165,33 +168,17 @@ services:
         factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
         arguments: ['@panthor.content_handler', 'handleException']
 
+    panthor.error_handling.exception_handler:
+        class: 'QL\Panthor\ErrorHandling\ExceptionHandler'
+        arguments: ['@panthor.content_handler', '@request', '@response']
 
     panthor.error_handling.handler:
         class: 'QL\Panthor\ErrorHandling\ErrorHandler'
-        arguments: ['@logger']
+        arguments: ['@exception.handler', '@logger']
         calls:
             - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
             - ['setThrownErrors', ['%error_handling.thrown_errors%']]
             - ['setLoggedErrors', ['%error_handling.logged_errors%']]
-            # - ['addHandler', ['@panthor.error_handling.handler.not_found']]
-            # - ['addHandler', ['@panthor.error_handling.handler.http_problem']]
-            # - ['addHandler', ['@panthor.error_handling.handler.request']]
-            # - ['addHandler', ['@panthor.error_handling.handler.base']]
-
-    # panthor.error_handling.handler.not_found:
-    #     class: 'QL\Panthor\ErrorHandling\ExceptionHandler\NotFoundHandler'
-    #     arguments: ['@panthor.error_handling.html_renderer']
-    # panthor.error_handling.handler.http_problem:
-    #     class: 'QL\Panthor\ErrorHandling\ExceptionHandler\HTTPProblemHandler'
-    #     arguments: ['@panthor.error_handling.problem_renderer']
-    # panthor.error_handling.handler.request:
-    #     class: 'QL\Panthor\ErrorHandling\ExceptionHandler\RequestExceptionHandler'
-    #     arguments: ['@panthor.error_handling.problem_renderer']
-    # panthor.error_handling.handler.base:
-    #     class: 'QL\Panthor\ErrorHandling\ExceptionHandler\BaseHandler'
-    #     arguments: ['@panthor.error_handling.html_renderer', '@logger']
-    #     calls:
-    #         - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
 
     # exception rendering
     panthor.problem.json_renderer:
@@ -207,15 +194,23 @@ services:
         factory: ['@twig.environment', 'loadTemplate']
         arguments: ['%error_handling.html_template%']
 
-    # panthor.error_handling.problem_renderer:
-    #     class: 'QL\Panthor\ErrorHandling\ExceptionRenderer\ProblemRenderer'
-    #     arguments: ['@panthor.error_handling.problem.json_renderer']
-    #     calls: [['attachSlim', ['@slim']]]
-    # panthor.error_handling.problem.json_renderer:
-    #     class: 'QL\Panthor\HTTPProblem\Renderer\JSONRenderer'
+    panthor.problem.renderer:
+        class: 'QL\Panthor\HTTPProblem\Renderer\JSONRenderer'
+        arguments: ['@panthor.problem.renderer.json']
+    panthor.problem.renderer.json:
+        class: 'QL\Panthor\Utility\JSON'
+        calls:
+            - ['setEncodingOptions', [0]]
+            - ['addEncodingOptions', [64]] # JSON_UNESCAPED_SLASHES
 
     ############################################################################
     # Panthor Middleware
+    #
+    # Configuration parameters:
+    #
+    # %cookie.unencrypted%
+    # %cookie.delete_invalid%
+    #
     ############################################################################
 
     panthor.middleware.encrypted_cookies:
@@ -235,7 +230,7 @@ services:
     ############################################################################
     # Panthor Utilities
     #
-    # Required parameters:
+    # Configuration parameters:
     #
     # %panthor.internal.timezone%
     #
@@ -250,12 +245,12 @@ services:
         arguments: ['now', '%panthor.internal.timezone%']
 
     panthor.json:
-        class: 'QL\Panthor\Utility\Json'
+        class: 'QL\Panthor\Utility\JSON'
 
     ############################################################################
     # Twig
     #
-    # Required parameters:
+    # Configuration parameters:
     #
     # %debug%
     # %date.timezone%
