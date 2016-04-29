@@ -10,7 +10,7 @@ namespace QL\Panthor\Testing\Stub;
 class StringableStub
 {
     /**
-     * @type mixed
+     * @var mixed
      */
     public $output;
 

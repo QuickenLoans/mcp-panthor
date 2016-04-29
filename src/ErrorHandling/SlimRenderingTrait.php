@@ -16,7 +16,7 @@ use Slim\App;
 trait SlimRenderingTrait
 {
     /**
-     * @type App|null
+     * @var App|null
      */
     private $slim;
 

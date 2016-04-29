@@ -13,7 +13,7 @@ use Slim\Router;
 class Url
 {
     /**
-     * @type Router
+     * @var Router
      */
     private $router;
 

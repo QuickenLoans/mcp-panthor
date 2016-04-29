@@ -15,28 +15,28 @@ namespace QL\Panthor\HTTPProblem;
 class HTTPProblem
 {
     /**
-     * @type int
+     * @var int
      */
     private $status;
 
     /**
-     * @type string|null
+     * @var string|null
      */
     private $detail;
 
     /**
-     * @type string|null
+     * @var string|null
      */
     private $title;
 
     /**
-     * @type string|null
+     * @var string|null
      */
     private $type;
     private $instance;
 
     /**
-     * @type array
+     * @var array
      */
     private $extensions;
 
@@ -45,7 +45,7 @@ class HTTPProblem
      *
      * This list is copied from Slim\Http\Response
      *
-     * @type array
+     * @var array
      */
     protected static $statusPhrases = [
         //Informational 1xx

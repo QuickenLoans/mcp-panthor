@@ -32,24 +32,24 @@ use Twig_Template;
 class LazyTwig implements TemplateInterface
 {
     /**
-     * @type Twig_Environment
+     * @var Twig_Environment
      */
     private $environment;
 
     /**
-     * @type Context
+     * @var Context
      */
     private $context;
 
     /**
-     * @type Twig_Template|null
+     * @var Twig_Template|null
      */
     private $twig;
 
     /**
      * Relative path to the template
      *
-     * @type string|null
+     * @var string|null
      */
     private $template;
 

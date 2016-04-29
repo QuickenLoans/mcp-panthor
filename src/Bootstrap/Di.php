@@ -21,7 +21,7 @@ class Di
     /**
      * The primary configuration file. The entry point of all configuration.
      *
-     * @type string
+     * @var string
      */
     const PRIMARY_CONFIGURATION_FILE = 'configuration/config.yml';
 
@@ -30,14 +30,14 @@ class Di
      *
      * Using a prefix of "@" will check a service instead of parameter.
      *
-     * @type string
+     * @var string
      */
     const KEY_PREVENT_CACHING = 'symfony.debug';
 
     /**
      * Service key for root path
      *
-     * @type string
+     * @var string
      */
     const KEY_ROOT_PATH = 'root';
 

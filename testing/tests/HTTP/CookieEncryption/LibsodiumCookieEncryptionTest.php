@@ -19,7 +19,7 @@ class LibsodiumCookieEncryptionTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->crypto = Mockery::mock(LibsodiumSymmetricCrypto::CLASS);
+        $this->crypto = Mockery::mock(LibsodiumSymmetricCrypto::class);
         $this->binaryData = hex2bin('f09f8f80f09f9384f09f9aa7f09f9a80e28fb0f09f9aa8');
     }
 

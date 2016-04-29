@@ -19,22 +19,22 @@ use Twig_SimpleFunction;
 class TwigExtension extends Twig_Extension
 {
     /**
-     * @type Url
+     * @var Url
      */
     private $url;
 
     /**
-     * @type Clock
+     * @var Clock
      */
     private $clock;
 
     /**
-     * @type string
+     * @var string
      */
     private $displayTimezone;
 
     /**
-     * @type bool
+     * @var bool
      */
     private $isDebugMode;
 
@@ -54,7 +54,7 @@ class TwigExtension extends Twig_Extension
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getName()
     {
@@ -62,7 +62,7 @@ class TwigExtension extends Twig_Extension
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getFilters()
     {
@@ -72,7 +72,7 @@ class TwigExtension extends Twig_Extension
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getFunctions()
     {

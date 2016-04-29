@@ -12,7 +12,7 @@ use Mockery;
 class Spy
 {
     /**
-     * @type mixed
+     * @var mixed
      */
     private $captured;
 

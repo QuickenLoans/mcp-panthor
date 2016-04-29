@@ -13,12 +13,12 @@ use Throwable;
 trait StacktraceFormatterTrait
 {
     /**
-     * @type string
+     * @var string
      */
     private $root;
 
     /**
-     * @type bool
+     * @var bool
      */
     private $logStacktraces = false;
 

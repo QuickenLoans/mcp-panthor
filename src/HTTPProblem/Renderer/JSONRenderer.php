@@ -14,7 +14,7 @@ use QL\Panthor\Utility\JSON;
 class JSONRenderer implements ProblemRendererInterface
 {
     /**
-     * @type JSON
+     * @var JSON
      */
     private $json;
 
@@ -27,7 +27,7 @@ class JSONRenderer implements ProblemRendererInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function status(HTTPProblem $problem)
     {
@@ -35,7 +35,7 @@ class JSONRenderer implements ProblemRendererInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function headers(HTTPProblem $problem)
     {
@@ -45,7 +45,7 @@ class JSONRenderer implements ProblemRendererInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function body(HTTPProblem $problem)
     {

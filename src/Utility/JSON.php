@@ -12,12 +12,12 @@ use JsonSerializable;
 class JSON
 {
     /**
-     * @type callable|string
+     * @var callable|string
      */
     private $jsonMessageFunction;
 
     /**
-     * @type int
+     * @var int
      */
     private $encodingOptions;
 
@@ -32,7 +32,7 @@ class JSON
     }
 
     /**
-     * @type array
+     * @var array
      */
     private static $jsonErrors = [
         JSON_ERROR_NONE => 'No error',

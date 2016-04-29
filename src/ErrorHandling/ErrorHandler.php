@@ -61,40 +61,40 @@ class ErrorHandler
     use StacktraceFormatterTrait;
 
     /**
-     * @type LoggerInterface|null
+     * @var LoggerInterface|null
      */
     private $logger;
 
     /**
-     * @type ExceptionHandlerInterface
+     * @var ExceptionHandlerInterface
      */
     private $handler;
 
     /**
-     * @type int
+     * @var int
      */
     private $thrownErrors;
     private $loggedErrors;
 
     /**
-     * @type array
+     * @var array
      */
     private $logLevels;
 
     /**
      * Exception handler for errors only caught by the shutdown handler.
      *
-     * @type callable
+     * @var callable
      */
     private static $exceptionHandler;
 
     /**
-     * @type string
+     * @var string
      */
     private static $reservedMemory;
 
     /**
-     * @type array
+     * @var array
      */
     private static $levels = array(
         \E_DEPRECATED => 'E_DEPRECATED',
@@ -116,7 +116,7 @@ class ErrorHandler
     );
 
     /**
-     * @type array
+     * @var array
      */
     private static $humanLevels = array(
         \E_DEPRECATED => 'Deprecated',

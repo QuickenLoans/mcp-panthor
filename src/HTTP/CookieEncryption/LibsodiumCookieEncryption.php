@@ -19,7 +19,7 @@ use QL\Panthor\HTTP\CookieEncryptionInterface;
 class LibsodiumCookieEncryption implements CookieEncryptionInterface
 {
     /**
-     * @type LibsodiumSymmetricCrypto
+     * @var LibsodiumSymmetricCrypto
      */
     private $crypto;
 
@@ -32,7 +32,7 @@ class LibsodiumCookieEncryption implements CookieEncryptionInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function encrypt($unencrypted)
     {
@@ -46,7 +46,7 @@ class LibsodiumCookieEncryption implements CookieEncryptionInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function decrypt($encrypted)
     {
