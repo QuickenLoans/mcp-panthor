@@ -32,7 +32,7 @@ class Di
      *
      * @type string
      */
-    const KEY_PREVENT_CACHING = 'debug';
+    const KEY_PREVENT_CACHING = 'symfony.debug';
 
     /**
      * Service key for root path
