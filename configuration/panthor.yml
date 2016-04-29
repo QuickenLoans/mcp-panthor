@@ -1,8 +1,11 @@
 parameters:
     # Parameters overridden by application configuration
     routes: []
+    routes.cached: 'configuration/routes.cached.php'
+    routes.cache_disabled: true
 
     debug: false
+    symfony.debug: true
     request.body.service: 'request.body'
 
     date.timezone: 'America/Detroit'
@@ -71,12 +74,23 @@ services:
     # Configuration parameters:
     #
     # %routes%
+    # %routes.cached%
+    # %routes.cache_disabled%
     #
     ############################################################################
 
     panthor.routes:
         class: 'QL\Panthor\Bootstrap\RouteLoader'
         arguments: ['%routes%']
+
+    router:
+        class: 'QL\Panthor\Bootstrap\CacheableRouter'
+        calls:
+            - ['setCaching', ['@router.cache_file', '%routes.cache_disabled%']]
+    router.cache_file:
+        class: 'string'
+        factory: ['QL\Panthor\Utility\Stringify', 'template']
+        arguments: ['%%s/%%s', ['@root', '%routes.cached%']]
 
     ############################################################################
     # Panthor Cookies
