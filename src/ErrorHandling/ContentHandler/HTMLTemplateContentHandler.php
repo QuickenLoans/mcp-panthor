@@ -14,6 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\ErrorHandling\ContentHandlerInterface;
 use QL\Panthor\ErrorHandling\ErrorHandler;
 use QL\Panthor\ErrorHandling\StacktraceFormatterTrait;
+use QL\Panthor\HTTP\NewBodyTrait;
 use QL\Panthor\TemplateInterface;
 use QL\Panthor\Templating\NullTemplate;
 use Throwable;

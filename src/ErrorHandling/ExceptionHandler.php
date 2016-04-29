@@ -54,10 +54,10 @@ class ExceptionHandler implements ExceptionHandlerInterface
      */
     public function handle($throwable)
     {
-        if ($exception instanceof Exception) {
-            $response = $this->handler->handleException($this->defaultRequest, $this->defaultResponse, $exception);
-        } elseif ($exception instanceof Throwable) {
-            $response = $this->handler->handleThrowable($this->defaultRequest, $this->defaultResponse, $exception);
+        if ($throwable instanceof Exception) {
+            $response = $this->handler->handleException($this->defaultRequest, $this->defaultResponse, $throwable);
+        } elseif ($throwable instanceof Throwable) {
+            $response = $this->handler->handleThrowable($this->defaultRequest, $this->defaultResponse, $throwable);
         } else {
             return false;
         }

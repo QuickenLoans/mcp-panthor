@@ -12,6 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\ErrorHandling\ContentHandlerInterface;
 use QL\Panthor\ErrorHandling\StacktraceFormatterTrait;
+use QL\Panthor\HTTP\NewBodyTrait;
 use QL\Panthor\Utility\JSON;
 use Throwable;
 

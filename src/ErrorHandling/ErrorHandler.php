@@ -82,7 +82,9 @@ class ErrorHandler
     private $logLevels;
 
     /**
-     * @type self
+     * Exception handler for errors only caught by the shutdown handler.
+     *
+     * @type callable
      */
     private static $exceptionHandler;
 
@@ -171,13 +173,14 @@ class ErrorHandler
     {
         $isHandled = false;
         try {
-            $isHandled = $handler->handle($exception);
-
-        } catch (Exception $ex) {
-        } catch (Throwable $ex) {}
+            $isHandled = $this->handler->handle($exception);
+        }
+        catch (Exception $ex) {}
+        catch (Throwable $ex) {}
 
         // Bomb out if handler returns true, since was able to render something to the client
         if ($isHandled) exit;
+
 
         // Rethrow to be handled by default php exception handling.
         throw $exception;
@@ -245,7 +248,7 @@ class ErrorHandler
         }
 
         try {
-            $handler->handleException($exception);
+            $handler($exception);
         } catch (Exception $ex) {
             // Silence any further exceptions
         }
@@ -283,7 +286,7 @@ class ErrorHandler
             register_shutdown_function(__CLASS__ . '::handleFatalError');
         }
 
-        self::$exceptionHandler = $this;
+        self::$exceptionHandler = [$this, 'handleException'];
 
         return $this;
     }

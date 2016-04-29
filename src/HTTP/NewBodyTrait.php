@@ -5,7 +5,7 @@
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
-namespace QL\Panthor\ErrorHandling\ContentHandler;
+namespace QL\Panthor\HTTP;
 
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Body;

@@ -14,12 +14,13 @@ use QL\Panthor\ErrorHandling\ContentHandlerInterface;
 use QL\Panthor\ErrorHandling\StacktraceFormatterTrait;
 use QL\Panthor\HTTPProblem\HTTPProblem;
 use QL\Panthor\HTTPProblem\ProblemRendererInterface;
+use QL\Panthor\HTTPProblem\ProblemRenderingTrait;
 use QL\Panthor\HTTPProblem\Renderer\JSONRenderer;
 use Throwable;
 
 class HTTPProblemContentHandler implements ContentHandlerInterface
 {
-    use NewBodyTrait;
+    use ProblemRenderingTrait;
     use StacktraceFormatterTrait;
 
     /**
@@ -72,7 +73,7 @@ class HTTPProblemContentHandler implements ContentHandlerInterface
         ];
 
         $problem = new HTTPProblem($status, $detail, $extensions);
-        return $this->withProblem($response, $problem);
+        return $this->renderProblem($response, $this->renderer, $problem);
     }
 
     /**
@@ -118,28 +119,6 @@ class HTTPProblemContentHandler implements ContentHandlerInterface
         }
 
         $problem = new HTTPProblem(500, $detail, $extensions);
-        return $this->withProblem($response, $problem);
-    }
-
-    /**
-     * @param ResponseInterface $response
-     * @param HTTPProblem $problem
-     *
-     * @return ResponseInterface
-     */
-    private function withProblem(ResponseInterface $response, HTTPProblem $problem)
-    {
-        $rendered = $this->renderer->body($problem);
-        $status = $this->renderer->status($problem);
-
-        return $this
-            ->withNewBody($response, $rendered)
-            ->withStatus($status);
-
-        foreach ($this->renderer->headers($problem) as $header => $val) {
-            $response = $response->withHeader($header, $val);
-        }
-
-        return $response;
+        return $this->renderProblem($response, $this->renderer, $problem);
     }
 }
