@@ -13,41 +13,41 @@ use Mockery;
 use PHPUnit_Framework_TestCase;
 use QL\MCP\Common\Time\Clock;
 use QL\MCP\Common\Time\TimePoint;
-use QL\Panthor\Utility\Url;
+use QL\Panthor\Utility\URI;
 use stdClass;
 
 class TwigExtensionTest extends PHPUnit_Framework_TestCase
 {
-    public $url;
+    public $uri;
     public $clock;
 
     public function setUp()
     {
-        $this->url = Mockery::mock(Url::class);
+        $this->uri = Mockery::mock(URI::class);
         $this->clock = Mockery::mock(Clock::class);
     }
 
     public function testName()
     {
-        $ext = new TwigExtension($this->url, $this->clock, 'America\Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
         $this->assertSame('panthor', $ext->getName());
     }
 
     public function testIsDebugMode()
     {
-        $ext = new TwigExtension($this->url, $this->clock, 'America\Detroit', true);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', true);
         $this->assertSame(true, $ext->isDebugMode());
     }
 
     public function testGetFunctionsDoesNotBlowUp()
     {
-        $ext = new TwigExtension($this->url, $this->clock, 'America\Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
         $this->assertInternalType('array', $ext->getFunctions());
     }
 
     public function testGetFiltersDoesNotBlowUp()
     {
-        $ext = new TwigExtension($this->url, $this->clock, 'America\Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
         $this->assertInternalType('array', $ext->getFilters());
     }
 
@@ -58,7 +58,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
             ->shouldReceive('read')
             ->andReturn($time);
 
-        $ext = new TwigExtension($this->url, $this->clock, 'America\Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
         $this->assertSame($time, $ext->getTimepoint());
     }
 
@@ -74,7 +74,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
             ->shouldReceive('read')
             ->andReturn($time);
 
-        $ext = new TwigExtension($this->url, $this->clock, 'America\Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
         $this->assertSame($time, $ext->getTimepoint('+2 days'));
     }
 
@@ -82,7 +82,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
     {
         $expected = '2014-08-05 11:00:32';
         $datetime = new DateTime('2014-08-05 15:00:32', new DateTimeZone('UTC'));
-        $ext = new TwigExtension($this->url, $this->clock, 'America/Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America/Detroit', false);
 
         $this->assertSame($expected, $ext->formatTimepoint($datetime, 'Y-m-d H:i:s'));
     }
@@ -91,7 +91,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
     {
         $expected = '2014-08-05 15:00:32';
         $timepoint = new TimePoint(2014, 8, 5, 15, 0, 32, 'America/Detroit');
-        $ext = new TwigExtension($this->url, $this->clock, 'America/Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America/Detroit', false);
 
         $this->assertSame($expected, $ext->formatTimepoint($timepoint, 'Y-m-d H:i:s'));
     }
@@ -99,7 +99,7 @@ class TwigExtensionTest extends PHPUnit_Framework_TestCase
     public function testFormattingDateFailsGracefullyWithUnknownType()
     {
         $invalid = new stdClass;
-        $ext = new TwigExtension($this->url, $this->clock, 'America/Detroit', false);
+        $ext = new TwigExtension($this->uri, $this->clock, 'America/Detroit', false);
 
         $this->assertSame('', $ext->formatTimepoint($invalid, 'Y-m-d H:i:s'));
     }

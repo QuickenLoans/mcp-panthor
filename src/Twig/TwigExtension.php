@@ -11,7 +11,7 @@ use DateTime;
 use DateTimeZone;
 use QL\MCP\Common\Time\Clock;
 use QL\MCP\Common\Time\TimePoint;
-use QL\Panthor\Utility\Url;
+use QL\Panthor\Utility\URI;
 use Twig_Extension;
 use Twig_SimpleFilter;
 use Twig_SimpleFunction;
@@ -19,9 +19,9 @@ use Twig_SimpleFunction;
 class TwigExtension extends Twig_Extension
 {
     /**
-     * @var Url
+     * @var URI
      */
-    private $url;
+    private $uri;
 
     /**
      * @var Clock
@@ -39,14 +39,14 @@ class TwigExtension extends Twig_Extension
     private $isDebugMode;
 
     /**
-     * @param Url $url
+     * @param URI $uri
      * @param Clock $clock
      * @param string $timezone
      * @param bool $isDebugMode
      */
-    public function __construct(Url $url, Clock $clock, $timezone, $isDebugMode)
+    public function __construct(URI $uri, Clock $clock, $timezone, $isDebugMode)
     {
-        $this->url = $url;
+        $this->uri = $uri;
         $this->clock = $clock;
 
         $this->displayTimezone = $timezone;
@@ -77,7 +77,7 @@ class TwigExtension extends Twig_Extension
     public function getFunctions()
     {
         return [
-            new Twig_SimpleFunction('urlFor', [$this->url, 'urlFor']),
+            new Twig_SimpleFunction('uriFor', [$this->uri, 'uriFor']),
 
             new Twig_SimpleFunction('isDebugMode', [$this, 'isDebugMode']),
 

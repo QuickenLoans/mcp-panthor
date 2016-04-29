@@ -47,7 +47,7 @@ services:
     # application configuration
     ############################################################################
 
-    url:                            { alias: panthor.url }
+    uri:                            { alias: panthor.uri }
     json:                           { alias: panthor.json }
     clock:                          { alias: panthor.clock }
     logger:                         { alias: panthor.logger }
@@ -250,8 +250,8 @@ services:
     #
     ############################################################################
 
-    panthor.url:
-        class: 'QL\Panthor\Utility\Url'
+    panthor.uri:
+        class: 'QL\Panthor\Utility\URI'
         arguments: ['@router']
 
     panthor.clock:
@@ -278,7 +278,7 @@ services:
     panthor.twig.extension:
         class: 'QL\Panthor\Twig\TwigExtension'
         arguments:
-            - '@panthor.url'
+            - '@panthor.uri'
             - '@panthor.clock'
             - '%date.timezone%'
             - '%debug%'

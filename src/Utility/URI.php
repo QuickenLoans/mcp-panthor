@@ -10,7 +10,7 @@ namespace QL\Panthor\Utility;
 use Psr\Http\Message\UriInterface;
 use Slim\Router;
 
-class Url
+class URI
 {
     /**
      * @var Router
@@ -56,7 +56,7 @@ class Url
      *
      * @return string
      */
-    public function urlFor($route, array $params = [], array $query = [])
+    public function uriFor($route, array $params = [], array $query = [])
     {
         if (!$route) {
             return '';
@@ -76,7 +76,7 @@ class Url
      *
      * @return string
      */
-    public function absoluteUrlFor(UriInterface $uri, $route, array $params = [], array $query = [])
+    public function absoluteURIFor(UriInterface $uri, $route, array $params = [], array $query = [])
     {
         $path = $this->urlFor($route, $params);
 
