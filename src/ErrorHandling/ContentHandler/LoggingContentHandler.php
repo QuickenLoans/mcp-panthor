@@ -15,6 +15,7 @@ use Psr\Log\NullLogger;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\ErrorHandling\ContentHandlerInterface;
+use QL\Panthor\ErrorHandling\ErrorHandler;
 use QL\Panthor\ErrorHandling\StacktraceFormatterTrait;
 use Throwable;
 
@@ -71,6 +72,7 @@ class LoggingContentHandler implements ContentHandlerInterface
     public function __construct(ContentHandlerInterface $handler, LoggerInterface $logger = null, array $configuration = [])
     {
         $this->handler = $handler;
+        $this->configuration = $configuration;
 
         $this->logger = $logger ?: new NullLogger;
     }
@@ -85,7 +87,7 @@ class LoggingContentHandler implements ContentHandlerInterface
     {
         if ($level = $this->shouldLog('not-found')) {
             $message = $request->getRequestTarget();
-            $this->logEvent('not-found', '', $level);
+            $this->logEvent('not-found', $message, $level);
         }
 
         return $this->handler->handleNotFound($request, $response);
@@ -105,7 +107,7 @@ class LoggingContentHandler implements ContentHandlerInterface
             $this->logEvent('not-allowed', $message, $level);
         }
 
-        return $this->handler->handleNotAllowed($request, $response);
+        return $this->handler->handleNotAllowed($request, $response, $methods);
     }
 
     /**
@@ -118,7 +120,7 @@ class LoggingContentHandler implements ContentHandlerInterface
     public function handleException(ServerRequestInterface $request, ResponseInterface $response, Exception $exception)
     {
         if ($level = $this->shouldLog('error')) {
-            $this->logError($throwable, $level);
+            $this->logError($exception, $level);
         }
 
         return $this->handler->handleException($request, $response, $exception);
@@ -159,7 +161,7 @@ class LoggingContentHandler implements ContentHandlerInterface
             return;
         }
 
-        if (!isset($this->levels[$level])) {
+        if (!isset(self::$levels[$level])) {
             return;
         }
 

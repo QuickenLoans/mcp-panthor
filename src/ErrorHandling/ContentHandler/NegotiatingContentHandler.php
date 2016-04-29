@@ -22,8 +22,10 @@ class NegotiatingContentHandler implements ContentHandlerInterface
     private $handlers;
 
     /**
+     * If there is no match between the provided content handlers and the client's desired media type,
+     * the first handler will be used.
+     *
      * @param ContentHandlerInterface[] $handlers
-     * @param ContentHandlerInterface $defaultHandler
      */
     public function __construct(array $handlers = [])
     {

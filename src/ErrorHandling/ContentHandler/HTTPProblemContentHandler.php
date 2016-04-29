@@ -53,7 +53,7 @@ class HTTPProblemContentHandler implements ContentHandlerInterface
     public function handleNotFound(ServerRequestInterface $request, ResponseInterface $response)
     {
         $problem = new HTTPProblem(404, null);
-        return $this->withProblem($response, $problem);
+        return $this->renderProblem($response, $this->renderer, $problem);
     }
 
     /**

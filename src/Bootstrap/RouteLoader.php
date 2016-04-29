@@ -36,7 +36,6 @@ class RouteLoader
     private $routes;
 
     /**
-     * @param ContainerInterface $container
      * @param array $routes
      */
     public function __construct(array $routes = [])
