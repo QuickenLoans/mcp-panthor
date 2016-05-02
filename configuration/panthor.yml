@@ -6,7 +6,6 @@ parameters:
 
     debug: false
     symfony.debug: true
-    request.body.service: 'request.body'
 
     date.timezone: 'America/Detroit'
     panthor.internal.timezone: 'UTC'
@@ -47,14 +46,18 @@ services:
     # application configuration
     ############################################################################
 
+    router:                         { alias: panthor.router }
+    router.loader:                  { alias: panthor.router.loader }
+
     uri:                            { alias: panthor.uri }
     json:                           { alias: panthor.json }
     clock:                          { alias: panthor.clock }
     logger:                         { alias: panthor.logger }
 
     error.handler:                  { alias: panthor.error_handling.handler }
-    exception.handler:              { alias: panthor.error_handling.exception_handler }
+    exception.handler:              { alias: panthor.error_handling.exception.handler }
     problem.renderer:               { alias: panthor.problem.renderer }
+    content_handler:                { alias: panthor.content_handler }
 
     cookie.encryption:              { alias: panthor.cookie.encryption }
     cookie.handler:                 { alias: panthor.cookie.handler }
@@ -79,15 +82,15 @@ services:
     #
     ############################################################################
 
-    panthor.routes:
+    panthor.router.loader:
         class: 'QL\Panthor\Bootstrap\RouteLoader'
         arguments: ['%routes%']
 
-    router:
+    panthor.router:
         class: 'QL\Panthor\Bootstrap\CacheableRouter'
         calls:
-            - ['setCaching', ['@router.cache_file', '%routes.cache_disabled%']]
-    router.cache_file:
+            - ['setCaching', ['@panthor.router.cache_file', '%routes.cache_disabled%']]
+    panthor.router.cache_file:
         class: 'string'
         factory: ['QL\Panthor\Utility\Stringify', 'template']
         arguments: ['%%s/%%s', ['@root', '%routes.cached%']]
@@ -165,26 +168,26 @@ services:
     panthor.handler.notFoundHandler:
         class: 'Closure'
         factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
-        arguments: ['@panthor.content_handler', 'handleNotFound']
+        arguments: ['@content_handler', 'handleNotFound']
 
     panthor.handler.notAllowedHandler:
         class: 'Closure'
         factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
-        arguments: ['@panthor.content_handler', 'handleNotAllowed']
+        arguments: ['@content_handler', 'handleNotAllowed']
 
     panthor.handler.phpErrorHandler:
         class: 'Closure'
         factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
-        arguments: ['@panthor.content_handler', 'handleThrowable']
+        arguments: ['@content_handler', 'handleThrowable']
 
     panthor.handler.errorHandler:
         class: 'Closure'
         factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
-        arguments: ['@panthor.content_handler', 'handleException']
+        arguments: ['@content_handler', 'handleException']
 
-    panthor.error_handling.exception_handler:
+    panthor.error_handling.exception.handler:
         class: 'QL\Panthor\ErrorHandling\ExceptionHandler'
-        arguments: ['@panthor.content_handler', '@request', '@response']
+        arguments: ['@content_handler', '@request', '@response']
 
     panthor.error_handling.handler:
         class: 'QL\Panthor\ErrorHandling\ErrorHandler'

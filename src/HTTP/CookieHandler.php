@@ -32,7 +32,7 @@ use QL\Panthor\Exception\Exception;
  *
  *     public function __invoke($request, $response, $args)
  *     {
- *         $testcookie = $this->cookie->getCookie('alphacookie');
+ *         $testcookie = $this->cookie->getCookie($request, 'alphacookie');
  *
  *         if ($testcookie === null) {
  *             // Cookie does not exist.
