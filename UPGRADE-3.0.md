@@ -36,8 +36,13 @@ and compare the [diff between skeleton v2.4.0 and v3.0.0](https://github.com/qui
 Panthor now requires Slim `~3.3`, Symfony `~3.0` and PHP `~5.6 || ~7.0`.
 
 To update your composer dependencies, run the following command:
-```
-composer update slim/slim ~3.3 ql/mcp-panthor ~3.0 symfony/* ~3.0
+```bash
+composer require \
+    slim/slim ~3.3 \
+    ql/mcp-panthor ~3.0 \
+    symfony/config ~3.0 \
+    symfony/dependency-injection ~3.0 \
+    symfony/yaml ~3.0
 ```
 
 ### Configuration
@@ -167,7 +172,7 @@ $router = $container->get('router');
 $router->setCaching($container->get('router.cache_file'), false);
 
 $app = $container->get('slim');
-$routes = $container->get('panthor.routes');
+$routes = $container->get('router.loader');
 $routes($app);
 
 $router->initializeDispatcher();
