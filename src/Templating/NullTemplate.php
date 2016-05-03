@@ -15,7 +15,7 @@ use QL\Panthor\TemplateInterface;
 class NullTemplate implements TemplateInterface
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function render(array $context = [])
     {

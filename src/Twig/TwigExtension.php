@@ -11,7 +11,7 @@ use DateTime;
 use DateTimeZone;
 use QL\MCP\Common\Time\Clock;
 use QL\MCP\Common\Time\TimePoint;
-use QL\Panthor\Utility\Url;
+use QL\Panthor\Utility\URI;
 use Twig_Extension;
 use Twig_SimpleFilter;
 use Twig_SimpleFunction;
@@ -19,34 +19,34 @@ use Twig_SimpleFunction;
 class TwigExtension extends Twig_Extension
 {
     /**
-     * @type Url
+     * @var URI
      */
-    private $url;
+    private $uri;
 
     /**
-     * @type Clock
+     * @var Clock
      */
     private $clock;
 
     /**
-     * @type string
+     * @var string
      */
     private $displayTimezone;
 
     /**
-     * @type bool
+     * @var bool
      */
     private $isDebugMode;
 
     /**
-     * @param Url $url
+     * @param URI $uri
      * @param Clock $clock
      * @param string $timezone
      * @param bool $isDebugMode
      */
-    public function __construct(Url $url, Clock $clock, $timezone, $isDebugMode)
+    public function __construct(URI $uri, Clock $clock, $timezone, $isDebugMode)
     {
-        $this->url = $url;
+        $this->uri = $uri;
         $this->clock = $clock;
 
         $this->displayTimezone = $timezone;
@@ -54,7 +54,7 @@ class TwigExtension extends Twig_Extension
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getName()
     {
@@ -62,7 +62,7 @@ class TwigExtension extends Twig_Extension
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getFilters()
     {
@@ -72,13 +72,12 @@ class TwigExtension extends Twig_Extension
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getFunctions()
     {
         return [
-            new Twig_SimpleFunction('urlFor', [$this->url, 'urlFor']),
-            new Twig_SimpleFunction('route', [$this->url, 'currentRoute']),
+            new Twig_SimpleFunction('uriFor', [$this->uri, 'uriFor']),
 
             new Twig_SimpleFunction('isDebugMode', [$this, 'isDebugMode']),
 

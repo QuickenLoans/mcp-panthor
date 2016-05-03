@@ -52,12 +52,12 @@ class LibsodiumSymmetricCrypto
     const ERR_DECRYPT = 'An error occured while decrypting data: %s';
 
     /**
-     * @type OpaqueProperty
+     * @var OpaqueProperty
      */
     private $cryptoSecret;
 
     /**
-     * @type OpaqueProperty
+     * @var OpaqueProperty
      */
     private $authSecret;
 
@@ -132,7 +132,7 @@ class LibsodiumSymmetricCrypto
      * @param string $encrypted
      *
      * @throws CryptoException
-     * 
+     *
      * @return string
      */
     public function decrypt($encrypted)

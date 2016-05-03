@@ -21,12 +21,12 @@ use Twig_Template;
 class TwigTemplate implements TemplateInterface
 {
     /**
-     * @type Twig_Template
+     * @var Twig_Template
      */
     private $twig;
 
     /**
-     * @type Context
+     * @var Context
      */
     private $context;
 

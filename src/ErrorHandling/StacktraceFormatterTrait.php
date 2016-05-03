@@ -13,12 +13,12 @@ use Throwable;
 trait StacktraceFormatterTrait
 {
     /**
-     * @type string
+     * @var string
      */
     private $root;
 
     /**
-     * @type bool
+     * @var bool
      */
     private $logStacktraces = false;
 
@@ -30,6 +30,27 @@ trait StacktraceFormatterTrait
     public function setStacktraceLogging($enableLogging)
     {
         $this->logStacktraces = (bool) $enableLogging;
+    }
+
+    /**
+     * Unpack nested throwables into a flat array
+     *
+     * @param Throwable|Exception $parent
+     *
+     * @return Throwable[]|Exception[]
+     */
+    private function unpackThrowables($throwable)
+    {
+        if (!$throwable instanceof Throwable && !$throwable instanceof Exception) {
+            return [];
+        }
+
+        $throwables = [$throwable];
+        while ($throwable = $throwable->getPrevious()) {
+            $throwables[] = $throwable;
+        }
+
+        return $throwables;
     }
 
     /**

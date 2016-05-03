@@ -1,12 +1,11 @@
 parameters:
     # Parameters overridden by application configuration
     routes: []
-    slim.hooks:
-        slim.before.router:
-            - 'slim.hook.routes'
+    routes.cached: 'configuration/routes.cached.php'
+    routes.cache_disabled: true
 
     debug: false
-    request.body.service: 'request.body'
+    symfony.debug: true
 
     date.timezone: 'America/Detroit'
     panthor.internal.timezone: 'UTC'
@@ -19,6 +18,15 @@ parameters:
     # cookie
     cookie.encryption.secret: ''
     cookie.unencrypted: []
+    cookie.delete_invalid: true
+
+    cookie.settings:
+        expires: 0
+        maxAge: 0
+        path: ''
+        domain: ''
+        secure: false
+        httpOnly: false
 
     error_handling.levels: 32767            # E_ALL
     error_handling.thrown_errors: 8191      # E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
@@ -29,10 +37,7 @@ parameters:
 services:
     # Injected at runtime by the Bootstrap
     # Note: This path has NO TRAILING SLASH
-    root:               {synthetic: true}
-
-    # Application specific synthetic services
-    request.body:       {synthetic: true}
+    root:               { synthetic: true }
 
     ############################################################################
     # Public exported services
@@ -41,215 +46,196 @@ services:
     # application configuration
     ############################################################################
 
-    slim:                           {parent: panthor.slim}
-    slim.configurator:              {parent: panthor.slim.configurator}
+    router:                         { alias: panthor.router }
+    router.loader:                  { alias: panthor.router.loader }
 
-    slim.halt:                      {parent: panthor.slim.halt}
-    slim.not.found:                 {parent: panthor.slim.not.found}
+    uri:                            { alias: panthor.uri }
+    json:                           { alias: panthor.json }
+    clock:                          { alias: panthor.clock }
+    logger:                         { alias: panthor.logger }
 
-    slim.environment:               {parent: panthor.slim.environment}
-    slim.request:                   {parent: panthor.slim.request}
-    slim.response:                  {parent: panthor.slim.response}
-    slim.cookies:                   {parent: panthor.slim.cookies}
+    error.handler:                  { alias: panthor.error_handling.handler }
+    exception.handler:              { alias: panthor.error_handling.exception.handler }
+    problem.renderer:               { alias: panthor.problem.renderer }
+    content_handler:                { alias: panthor.content_handler }
 
-    slim.router:                    {parent: panthor.slim.router}
-    slim.route:                     {parent: panthor.slim.route}
-    slim.route.parameters:          {parent: panthor.slim.route.parameters}
+    cookie.encryption:              { alias: panthor.cookie.encryption }
+    cookie.handler:                 { alias: panthor.cookie.handler }
 
-    slim.hook.routes:               {parent: panthor.slim.hook.routes}
+    twig.cache.dir:                 { alias: panthor.twig.cache.dir }
+    twig.template.dir:              { alias: panthor.twig.template.dir }
 
-    url:                            {parent: panthor.url}
-    json:                           {parent: panthor.json}
-    clock:                          {parent: panthor.clock}
-    logger:                         {parent: panthor.logger}
+    twig.template:                  { parent: panthor.twig.template }
+    twig.context:                   { alias: panthor.twig.context }
 
-    error.handler:                  {parent: panthor.error_handling.handler}
-
-    cookie.encryption:              {parent: panthor.cookie.encryption}
-
-    twig.cache.dir:                 {parent: panthor.twig.cache.dir}
-    twig.template.dir:              {parent: panthor.twig.template.dir}
-
-    twig.template:                  {parent: panthor.twig.template}
-    twig.context:                   {parent: panthor.twig.context}
-
-    twig.loader:                    {parent: panthor.twig.loader}
-    twig.environment:               {parent: panthor.twig.environment}
-
-    middleware.request_body:        {parent: panthor.middleware.request_body}
+    twig.loader:                    { alias: panthor.twig.loader }
+    twig.environment:               { alias: panthor.twig.environment }
 
     ############################################################################
     # Slim
     #
-    # Required parameters:
+    # Configuration parameters:
     #
-    # %debug%
     # %routes%
-    # %slim.hooks%
-    # %cookie.unencrypted%
+    # %routes.cached%
+    # %routes.cache_disabled%
     #
     ############################################################################
 
-    panthor.slim:
-        class: 'Slim\Slim'
-        arguments:
-            - debug: '%debug%'
-        configurator: ['@slim.configurator', 'configure']
-        properties:
-            response: @slim.response
+    panthor.router.loader:
+        class: 'QL\Panthor\Bootstrap\RouteLoader'
+        arguments: ['%routes%']
 
-    panthor.slim.configurator:
-        class: 'QL\Panthor\Bootstrap\SlimConfigurator'
-        arguments: ['@service_container', '%slim.hooks%']
-
-    panthor.slim.hook.routes:
-        class: 'QL\Panthor\Slim\RouteLoaderHook'
-        arguments: ['@service_container', '%routes%']
-
-    # slim accessors
-
-    panthor.slim.environment:
-        class: 'Slim\Environment'
-        factory: ['@slim', 'environment']
-
-    panthor.slim.request:
-        class: 'Slim\Http\Request'
-        factory: ['@slim', 'request']
-
-    panthor.slim.response:
-        class: 'Slim\Http\Response'
-        properties:
-            cookies: '@slim.cookies'
-
-    panthor.slim.cookies:
-        class: 'QL\Panthor\Http\EncryptedCookies'
-        arguments:
-            - '@slim'
-            - '@json'
-            - '@cookie.encryption'
-            - '%cookie.unencrypted%'
-
-    panthor.slim.router:
-        class: 'Slim\Router'
-        factory: ['@slim', 'router']
-
-    panthor.slim.route:
-        class: 'Slim\Route'
-        factory: ['@slim.router', 'getCurrentRoute']
-
-    panthor.slim.route.parameters:
-        class: 'na'
-        factory: ['@slim.route', 'getParams']
-
-    panthor.slim.halt:
-        class: 'QL\Panthor\Slim\Halt'
-        arguments: ['@slim']
-
-    panthor.slim.not.found:
-        class: 'QL\Panthor\Slim\NotFound'
-        arguments: ['@slim']
+    panthor.router:
+        class: 'QL\Panthor\Bootstrap\CacheableRouter'
+        calls:
+            - ['setCaching', ['@panthor.router.cache_file', '%routes.cache_disabled%']]
+    panthor.router.cache_file:
+        class: 'string'
+        factory: ['QL\Panthor\Utility\Stringify', 'template']
+        arguments: ['%%s/%%s', ['@root', '%routes.cached%']]
 
     ############################################################################
     # Panthor Cookies
     #
-    # Required Parameters:
+    # Configuration parameters:
     #
     # %cookie.encryption.secret%
+    # %cookie.settings%
     #
     ############################################################################
 
     panthor.cookie.encryption:
-        class: 'QL\Panthor\Http\CookieEncryption\LibsodiumCookieEncryption'
+        class: 'QL\Panthor\HTTP\CookieEncryption\LibsodiumCookieEncryption'
         arguments: ['@panthor.libsodium.encryption']
 
     panthor.libsodium.encryption:
         class: 'QL\Panthor\Encryption\LibsodiumSymmetricCrypto'
         arguments: ['%cookie.encryption.secret%']
 
+    panthor.cookie.handler:
+        class: 'QL\Panthor\HTTP\CookieHandler'
+        arguments: ['%cookie.settings%']
+
     ############################################################################
     # Error Handling
     #
-    # Required Parameters:
+    # Configuration parameters:
     #
+    # %slim.settings.display_errors%
     # %error_handling.log_stacktrace%
     # %error_handling.levels%
     # %error_handling.thrown_errors%
     # %error_handling.logged_errors%
     #
+    # %error_handling.html_template%
+    #
     ############################################################################
+
+    panthor.content_handler:
+        class: 'QL\Panthor\ErrorHandling\ContentHandler\NegotiatingContentHandler'
+        arguments:
+            -
+                '*/*': '@panthor.content_handler.html'
+                'text/html': '@panthor.content_handler.html'
+                'application/problem': '@panthor.content_handler.problem'
+                'application/json': '@panthor.content_handler.json'
+                'text/plain': '@panthor.content_handler.text'
+
+    # Content Handlers
+    panthor.content_handler.json:
+        class: 'QL\Panthor\ErrorHandling\ContentHandler\JSONContentHandler'
+        arguments: ['@json', '%slim.settings.display_errors%']
+        calls:
+            - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
+    panthor.content_handler.problem:
+        class: 'QL\Panthor\ErrorHandling\ContentHandler\HTTPProblemContentHandler'
+        arguments: ['@panthor.problem.json_renderer', '%slim.settings.display_errors%']
+        calls:
+            - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
+    panthor.content_handler.text:
+        class: 'QL\Panthor\ErrorHandling\ContentHandler\PlainTextContentHandler'
+        arguments: ['%slim.settings.display_errors%']
+        calls:
+            - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
+    panthor.content_handler.html:
+        class: 'QL\Panthor\ErrorHandling\ContentHandler\HTMLTemplateContentHandler'
+        arguments: ['@panthor.handler.twig', '%slim.settings.display_errors%']
+        calls:
+            - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
+
+    # Mapped closures for slim to our content handler
+    panthor.handler.notFoundHandler:
+        class: 'Closure'
+        factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
+        arguments: ['@content_handler', 'handleNotFound']
+
+    panthor.handler.notAllowedHandler:
+        class: 'Closure'
+        factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
+        arguments: ['@content_handler', 'handleNotAllowed']
+
+    panthor.handler.phpErrorHandler:
+        class: 'Closure'
+        factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
+        arguments: ['@content_handler', 'handleThrowable']
+
+    panthor.handler.errorHandler:
+        class: 'Closure'
+        factory: ['QL\Panthor\Utility\ClosureFactory', 'buildClosure']
+        arguments: ['@content_handler', 'handleException']
+
+    panthor.error_handling.exception.handler:
+        class: 'QL\Panthor\ErrorHandling\ExceptionHandler'
+        arguments: ['@content_handler', '@request', '@response']
 
     panthor.error_handling.handler:
         class: 'QL\Panthor\ErrorHandling\ErrorHandler'
-        arguments: ['@logger']
+        arguments: ['@exception.handler', '@logger']
         calls:
             - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
             - ['setThrownErrors', ['%error_handling.thrown_errors%']]
             - ['setLoggedErrors', ['%error_handling.logged_errors%']]
-            - ['addHandler', ['@panthor.error_handling.handler.not_found']]
-            - ['addHandler', ['@panthor.error_handling.handler.http_problem']]
-            - ['addHandler', ['@panthor.error_handling.handler.request']]
-            - ['addHandler', ['@panthor.error_handling.handler.base']]
-
-    panthor.error_handling.handler.not_found:
-        class: 'QL\Panthor\ErrorHandling\ExceptionHandler\NotFoundHandler'
-        arguments: ['@panthor.error_handling.html_renderer']
-    panthor.error_handling.handler.http_problem:
-        class: 'QL\Panthor\ErrorHandling\ExceptionHandler\HTTPProblemHandler'
-        arguments: ['@panthor.error_handling.problem_renderer']
-    panthor.error_handling.handler.request:
-        class: 'QL\Panthor\ErrorHandling\ExceptionHandler\RequestExceptionHandler'
-        arguments: ['@panthor.error_handling.problem_renderer']
-    panthor.error_handling.handler.base:
-        class: 'QL\Panthor\ErrorHandling\ExceptionHandler\BaseHandler'
-        arguments: ['@panthor.error_handling.html_renderer', '@logger']
-        calls:
-            - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
 
     # exception rendering
-    panthor.error_handling.html_renderer:
-        class: 'QL\Panthor\ErrorHandling\ExceptionRenderer\HTMLRenderer'
-        arguments: ['@panthor.error_handling.html_renderer.twig']
-        calls: [['attachSlim', ['@slim']]]
+    panthor.problem.json_renderer:
+        class: 'QL\Panthor\HTTPProblem\Renderer\JSONRenderer'
+        arguments: ['@json']
 
-    panthor.error_handling.html_renderer.twig:
+    panthor.handler.twig:
         class: 'QL\Panthor\Templating\TwigTemplate'
-        arguments: ['@panthor.error_handling.html_renderer.twig_base', '@twig.context']
+        arguments: ['@panthor.handler.twig_base', '@twig.context']
 
-    panthor.error_handling.html_renderer.twig_base:
+    panthor.handler.twig_base:
         class: 'Twig_Template'
         factory: ['@twig.environment', 'loadTemplate']
         arguments: ['%error_handling.html_template%']
 
-    panthor.error_handling.problem_renderer:
-        class: 'QL\Panthor\ErrorHandling\ExceptionRenderer\ProblemRenderer'
-        arguments: ['@panthor.error_handling.problem.json_renderer']
-        calls: [['attachSlim', ['@slim']]]
-    panthor.error_handling.problem.json_renderer:
+    panthor.problem.renderer:
         class: 'QL\Panthor\HTTPProblem\Renderer\JSONRenderer'
+        arguments: ['@panthor.problem.renderer.json']
+    panthor.problem.renderer.json:
+        class: 'QL\Panthor\Utility\JSON'
+        calls:
+            - ['setEncodingOptions', [0]]
+            - ['addEncodingOptions', [64]] # JSON_UNESCAPED_SLASHES
 
     ############################################################################
     # Panthor Middleware
     #
-    # Required Parameters:
+    # Configuration parameters:
     #
-    # %request.body.service%
-    # %error_handling.levels%
+    # %cookie.unencrypted%
+    # %cookie.delete_invalid%
     #
     ############################################################################
 
-    panthor.middleware.request_body:
-        class: 'QL\Panthor\Middleware\RequestBodyMiddleware'
+    panthor.middleware.encrypted_cookies:
+        class: 'QL\Panthor\Middleware\EncryptedCookiesMiddleware'
         arguments:
-            - '@service_container'
-            - '@slim.request'
-            - '@json'
-            - '%request.body.service%'
-
-    panthor.middleware.error_handling:
-        class: 'QL\Panthor\Slim\ProtectErrorHandlerMiddleware'
-        arguments:
-            - ['@error.handler', 'handleError']
-            - '%error_handling.levels%'
+            - '@panthor.cookie.encryption'
+            - '%cookie.unencrypted%'
+            - '%cookie.delete_invalid%'
 
     ############################################################################
     # Logging
@@ -261,31 +247,27 @@ services:
     ############################################################################
     # Panthor Utilities
     #
-    # Required parameters:
+    # Configuration parameters:
     #
     # %panthor.internal.timezone%
     #
     ############################################################################
 
-    panthor.url:
-        class: 'QL\Panthor\Utility\Url'
-        arguments:
-            - '@slim.router'
-            - '@slim.request'
-            - '@slim.response'
-            - '@slim.halt'
+    panthor.uri:
+        class: 'QL\Panthor\Utility\URI'
+        arguments: ['@router']
 
     panthor.clock:
         class: 'QL\MCP\Common\Time\Clock'
-        arguments: ['now', %panthor.internal.timezone%]
+        arguments: ['now', '%panthor.internal.timezone%']
 
     panthor.json:
-        class: 'QL\Panthor\Utility\Json'
+        class: 'QL\Panthor\Utility\JSON'
 
     ############################################################################
     # Twig
     #
-    # Required parameters:
+    # Configuration parameters:
     #
     # %debug%
     # %date.timezone%
@@ -299,7 +281,7 @@ services:
     panthor.twig.extension:
         class: 'QL\Panthor\Twig\TwigExtension'
         arguments:
-            - '@panthor.url'
+            - '@panthor.uri'
             - '@panthor.clock'
             - '%date.timezone%'
             - '%debug%'

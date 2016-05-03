@@ -1,6 +1,111 @@
 # Change Log
-All notable changes to this project will be documented in this file. See [keepachangelog.com](http://keepachangelog.com)
-for reference.
+All notable changes to this project will be documented in this file.
+See [keepachangelog.com](http://keepachangelog.com) for reference.
+
+## [3.0.0] - 2016-05-02
+
+### Changed
+- Require Slim 3.3 (from 2.x).
+- Require Symfony 3.0 (from 2.x).
+- **Routing**
+    - Add `QL\Bootstrap\RouteLoader`.
+    - Remove `QL\Panthor\Slim\RouteLoaderHook`.
+- **Twig**
+    - `urlFor` function changed to `uriFor`.
+    - Remove `currentRoute` function.
+- **PSR-7**
+    - `QL\Panthor\ControllerInterface` signature has changed has changed to be PSR-7 compatible.
+    - `QL\Panthor\Middleware` signature has changed to be PSR-7 compatible.
+- **Cookies**
+    - Remove `QL\Panthor\Http\EncryptedCookies`
+    - Add `QL\Panthor\Middleware\EncryptedCookiesMiddleware` for handling PSR-7 encrypted cookies.
+        - Must be the first global middleware set on `Slim\App`.
+    - Add `QL\Panthor\HTTP\CookieHandler` convenience getter/setter.
+        - Only use if using Encrypted Cookies!
+        - Provides simple interface for `getCookie`, `withCookie`, and `expireCookie`.
+        - Use to set or get cookies from controllers or other middleware.
+- **Error Handling**
+    - Error handling has changed significantly as we no longer recommend using exceptions for **controlling flow**.
+      Instead of throwing exceptions, render a specific response directly to the PSR-7 response in your controllers
+      or middleware.
+    - Removed exception handling from **ErrorHandler** and moved to separate **ExceptionHandler**.
+    - **ErrorHandler** now requires **ExceptionHandler** in its constructor.
+    - Attaching the error handler to the **shutdown handler** is no longer done by default and must be done by calling
+     `registerShutdown` in addition to `register`.
+    - The new exception handler can now handle **content negotiation** to render a specific content type
+      depending on the media type accepted by the http client. See error handling docs for more information.
+- Rename `QL\Panthor\Utility\Json` to `QL\Panthor\Utility\JSON`.
+- Rename `QL\Panthor\Utility\Url` to `QL\Panthor\Utility\URI`.
+    - Change `urlFor` to `uriFor`.
+    - Change `absoluteUrlFor` to `absoluteURIFor` (method signature has also changed).
+    - Remove `currentRoute` method.
+    - Remove `redirectFor`.
+    - Remove `redirectForURL`.
+- DI configuration has been split into 2 files:
+    - Make sure your `config.yml` imports both.
+    - `/panthor-slim.yml` for core slim DI definitions.
+    - `/panthor.yml`
+- **Configuration**
+    - Added `panthor-slim.yml` for slim DI configuration.
+    - `slim.hooks` removed.
+    - Added `slim.settings.http_version` (1.1)
+    - Added `slim.settings.chunk_size` (4096)
+    - Added `slim.settings.buffering` (append)
+    - Added `slim.settings.determine_route_before_mw` (false)
+    - Added `slim.settings.display_errors` (true)
+    - Added `slim.default_request_headers` (`text/html`)
+    - Added `slim.default_status_code` (200)
+    - Added `routes.cached` (`configuration/routes.cached.php`)
+        - Relative file path to cached routes
+    - Added `routes.cache_disabled` (true)
+    - Added `symfony.debug` (true)
+        - The DI utility now uses its own config parameter to determine whether to use cached container
+    - Added `cookie.delete_invalid` (true)
+        - Should invalid cookies be deleted when they cannot be decrypted?
+    - Added `cookie.settings` (default cookie settings)
+    - `@slim.configurator` removed
+    - `@slim.halt` removed
+    - `@slim.not.found` removed
+    - `@slim.cookies` removed
+    - `@slim.route` removed
+    - `@slim.environment` changed to `@environment`
+    - `@slim.request` changed to `@request` (Default request, do not inject into service constructors!)
+    - `@slim.response` changed to `@response` (Default response, do not inject into service constructors!)
+    - `@slim.router` changed to `@router`
+    - `@url` changed to `@uri`
+    - `@slim.hook.routes` changed to `@router.loader`
+    - Added `@cookie.handler`
+    - Added `@exception.handler`
+    - Added `@problem.renderer`
+    - Added `@content_handler` (for exception handler)
+
+### Added
+- Add `QL\Panthor\Bootstrap\CacheableRouter`
+    - This router allows route caching for FastRoute routes used by Slim.
+- Add `QL\Panthor\HTTPProblem\ProblemRendererTrait` for easily rendering Problems.
+    - Use this trait to render problems on the response instead of throwing exceptions.
+
+### Removed
+- **Middleware**
+    - Remove **RequestBodyMiddleware**.
+        - Slim responses support this functionality directly from `getParsedBody`.
+- **Testing**
+    - Remove **TestLogger**
+        - Use `QL\MCP\Common\Testing\MemoryLogger` instead.
+    - Remove **TestResponse**
+        - Use `Slim\Http\Response` instead, it supports `__toString` for easy assertions.
+- **Templating**
+    - Remove **AutoRenderingTemplate**.
+- **Slim Add-ons**
+    - Remove `QL\Panthor\Bootstrap\SlimConfigurator` for automatically loading Slim hooks.
+    - Remove `QL\Panthor\Slim\Halt`.
+    - Remove `QL\Panthor\Slim\NotFound`.
+    - Remove `QL\Panthor\Slim\ProtectErrorHandlerMiddleware`.
+        - Slim now handles errors better, and this is no longer necessary.
+- **Exceptions**
+    - Remove **HTTPProblemException**.
+    - Remove **NotFoundException**.
+    - Remove **RequestException**.
 
 ## [2.4.0] - 2016-03-24
 

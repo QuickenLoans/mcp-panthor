@@ -11,8 +11,6 @@ use ErrorException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use QL\Panthor\Exception\NotFoundException;
-use Slim\Slim;
 use Throwable;
 
 /**
@@ -63,38 +61,40 @@ class ErrorHandler
     use StacktraceFormatterTrait;
 
     /**
-     * @type LoggerInterface|null
+     * @var LoggerInterface|null
      */
     private $logger;
 
     /**
-     * @type ExceptionHandlerInterface[]
+     * @var ExceptionHandlerInterface
      */
-    private $handlers;
+    private $handler;
 
     /**
-     * @type int
+     * @var int
      */
     private $thrownErrors;
     private $loggedErrors;
 
     /**
-     * @type array
+     * @var array
      */
     private $logLevels;
 
     /**
-     * @type self
+     * Exception handler for errors only caught by the shutdown handler.
+     *
+     * @var callable
      */
     private static $exceptionHandler;
 
     /**
-     * @type string
+     * @var string
      */
     private static $reservedMemory;
 
     /**
-     * @type array
+     * @var array
      */
     private static $levels = array(
         \E_DEPRECATED => 'E_DEPRECATED',
@@ -116,7 +116,7 @@ class ErrorHandler
     );
 
     /**
-     * @type array
+     * @var array
      */
     private static $humanLevels = array(
         \E_DEPRECATED => 'Deprecated',
@@ -138,12 +138,13 @@ class ErrorHandler
     );
 
     /**
+     * @param ExceptionHandlerInterface $handler
      * @param LoggerInterface|null $logger
      */
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct(ExceptionHandlerInterface $handler, LoggerInterface $logger = null)
     {
         $this->logger = $logger ?: new NullLogger;
-        $this->handlers = [];
+        $this->handler = $handler;
 
         $this->thrownErrors = \E_ALL & ~\E_DEPRECATED & ~\E_USER_DEPRECATED;
         $this->loggedErrors = \E_ALL;
@@ -162,49 +163,24 @@ class ErrorHandler
     }
 
     /**
-     * @param Slim $slim
+     * @param Exception|Throwable $exception
      *
-     * @return void
-     */
-    public function attach(Slim $slim)
-    {
-        // Register Global Exception Handler
-        $slim->notFound([$this, 'handleNotFound']);
-
-        // Register Global Exception Handler
-        $slim->error([$this, 'handleException']);
-    }
-
-    /**
-     * @param Exception $exception
-     *
-     * @throws Exception
+     * @throws Exception|Throwable if not handled correctly
      *
      * @return void
      */
     public function handleException($exception)
     {
-        if (!$exception instanceof Exception && !$exception instanceof Throwable) {
-            return;
+        $isHandled = false;
+        try {
+            $isHandled = $this->handler->handle($exception);
         }
+        catch (Exception $ex) {}
+        catch (Throwable $ex) {}
 
-        foreach ($this->handlers as $handler) {
-            $isHandled = false;
+        // Bomb out if handler returns true, since was able to render something to the client
+        if ($isHandled) exit;
 
-            try {
-                $isHandled = $handler->handle($exception);
-
-            } catch (Exception $ex) {
-                break;
-
-            } catch (Throwable $ex) {
-                // If exception handler throws exception, break out of stack and rethrow.
-                break;
-            }
-
-            // Abort handler stack if handler returns true
-            if ($isHandled) exit;
-        }
 
         // Rethrow to be handled by default php exception handling.
         throw $exception;
@@ -272,28 +248,18 @@ class ErrorHandler
         }
 
         try {
-            $handler->handleException($exception);
+            $handler($exception);
         } catch (Exception $ex) {
             // Silence any further exceptions
         }
     }
 
     /**
-     * @throws NotFoundException
-     *
-     * @return void
-     */
-    public function handleNotFound()
-    {
-        throw new NotFoundException('Not Found', 404);
-    }
-
-    /**
-     * Register this handler as the exception, error, and shutdown handler.
+     * Register this handler as the exception and error handler.
      *
      * @param int $handledErrors
      *
-     * @return void
+     * @return self
      */
     public function register($handledErrors = \E_ALL)
     {
@@ -305,37 +271,24 @@ class ErrorHandler
         set_error_handler($errHandler, $handledErrors);
         set_exception_handler($exHandler);
 
+        return $this;
+    }
+
+    /**
+     * Register this handler as the shutdown handler.
+     *
+     * @return self
+     */
+    public function registerShutdown()
+    {
         if (null === self::$reservedMemory) {
             self::$reservedMemory = str_repeat('x', 10240);
             register_shutdown_function(__CLASS__ . '::handleFatalError');
         }
 
-        self::$exceptionHandler = $this;
-    }
+        self::$exceptionHandler = [$this, 'handleException'];
 
-    /**
-     * Add an exception handler. These handlers can be used to handle different scenarios by introspecting the
-     * exception (API vs HTML exceptions for example).
-     *
-     * @param ExceptionHandlerInterface $handler
-     *
-     * @return void
-     */
-    public function addHandler(ExceptionHandlerInterface $handler)
-    {
-        $this->handlers[] = $handler;
-    }
-
-    /**
-     * @param array $handlers
-     *
-     * @return void
-     */
-    public function addHandlers(array $handlers)
-    {
-        foreach ($handlers as $handler) {
-            $this->addHandler($handler);
-        }
+        return $this;
     }
 
     /**

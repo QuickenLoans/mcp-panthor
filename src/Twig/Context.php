@@ -18,7 +18,7 @@ use IteratorAggregate;
 class Context implements Countable, IteratorAggregate
 {
     /**
-     * @type array
+     * @var array
      */
     private $context;
 

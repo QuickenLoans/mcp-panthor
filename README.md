@@ -9,6 +9,8 @@ A thin PHP microframework built on Slim and Symfony.
 
 Slim + Symfony = :revolving_hearts:
 
+:warning: Panthor was recently updated to 3.0. Check out the [Upgrade Guide for 3.0](UPGRADE-3.0.md).
+
 Panthor uses the simplicity of Slim and provides a bit more structure for applications with additional Symfony
 components. Utilities and helpers are provided to simplify template caching and dependency injection using Symfony
 Dependency Injection and Slim. It can be used for html applications, APIs, or both.
@@ -20,7 +22,7 @@ Dependency Injection and Slim. It can be used for html applications, APIs, or bo
 Here's a few of the features Panthor provides:
 
 - Standard interfaces for Controllers, Middleware, and Templates
-- Error Handling
+- Error Handling (with Content Negotiation)
 - Cookie Encryption with PECL Libsodium
 - All configuration through YAML (including Slim routes)
 - Support for [HTTP Problem](https://tools.ietf.org/html/draft-ietf-appsawg-http-problem)
@@ -45,16 +47,17 @@ Here's a few of the features Panthor provides:
 - **Panthor 2**
     - Slim ~2.0
     - Symfony ~2.0
-- Panthor 3 (roadmap)
-    - Slim ~3.0
+- **Panthor 3**
+    - Slim ~3.3
     - Symfony ~3.0
+    - PHP ~5.6 || ~7.0
 
 ## Starting a new application?
 
 #### Installation
 
 ```
-composer require ql/mcp-panthor ~2.3
+composer require ql/mcp-panthor ~3.0
 ```
 
 See [Panthor Skeleton](https://github.com/quickenloans-mcp/panthor-skeleton) for an example skeleton.
@@ -62,7 +65,7 @@ See [Panthor Skeleton](https://github.com/quickenloans-mcp/panthor-skeleton) for
 Never used Composer, Slim or Symfony before? Here are some resources:
 - [Composer - Getting Started](https://getcomposer.org/doc/00-intro.md)
 - [Symfony Book - Service Container](http://symfony.com/doc/current/book/service_container.html)
-- [Slim Framework v2 documentation](http://docs.slimframework.com/)
+- [Slim Framework v3 documentation](http://www.slimframework.com/docs)
 
 #### Quick Start
 
@@ -84,7 +87,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
 
    > ```
    > composer init
-   > composer require ql/mcp-panthor ~2.3 paragonie/random_compat ~1.1
+   > composer require ql/mcp-panthor ~3.0 paragonie/random_compat ~1.1
    >
    > # Also require twig/twig if using html templating
    > composer require twig/twig ~1.20
@@ -102,6 +105,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
 
     > ```yaml
     > imports:
+    >     - resource: ../vendor/ql/mcp-panthor/configuration/panthor-slim.yml
     >     - resource: ../vendor/ql/mcp-panthor/configuration/panthor.yml
     >     - resource: di.yml
     >     - resource: routes.yml
@@ -111,14 +115,8 @@ Never used Composer, Slim or Symfony before? Here are some resources:
 
     > ```yaml
     > services:
-    >     # Reset slim response to not use encryption for cookies
-    >     slim.response:
-    >         class: 'Slim\Http\Response'
-    >
     >     page.hello_world:
     >         class: 'TestApplication\TestController'
-    >         arguments:
-    >             - '@slim.response'
     > ```
 
 5. `configuration/routes.yml` contains routes.
@@ -149,7 +147,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     > return Di::getDi($root, CachedContainer::class);
     > ```
 
-7. `public/index.php` loads the bootstrap and starts **Slim**.
+7. `public/index.php` loads the bootstrap, attaches routes and starts **Slim**.
 
     > ```php
     > <?php
@@ -162,31 +160,29 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >     exit;
     > };
     >
-    > $container->get('slim')->run();
+    > $slim = $container->get('slim');
+    > $routes = $container->get('router.loader');
+    >
+    > $routes($app);
+    > $slim->run();
     > ```
 
-8. `src/TestController.php` is a simple class that can be **invoked** as a callable.
+8. `src/TestController.php` is a simple controller that can be **invoked** as a callable.
 
     > ```php
     > <?php
     >
     > namespace TestApplication;
     >
+    > use Psr\Http\Message\ResponseInterface;
+    > use Psr\Http\Message\ServerRequestInterface;
     > use QL\Panthor\ControllerInterface;
-    > use Slim\Http\Response;
     >
     > class TestController implements ControllerInterface
     > {
-    >     private $response;
-    >
-    >     public function __construct(Response $response)
+    >     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     >     {
-    >         $this->response = $response;
-    >     }
-    >
-    >     public function __invoke()
-    >     {
-    >         $this->response->setBody('Hello World!');
+    >         return $response->getBody()->write('Hello World!');
     >     }
     > }
     > ```
@@ -194,6 +190,8 @@ Never used Composer, Slim or Symfony before? Here are some resources:
 8. Don't forget your web server configuration!
    - Panthor is just Slim under the hood, so it uses the same NGINX or Apache configuration as Slim (standard
      `index.php` rewrite).
+   - Check out the [slim documentation on web servers](http://www.slimframework.com/docs/start/web-servers.html)
+     for more details.
 
 Now just visit `localhost` (or your preferred virtual host name) and your controller should load!
 
@@ -225,8 +223,9 @@ slim/slim                        | `Bootstrap\`
 symfony/config                   | `Bootstrap\`
 symfony/dependency-injection     | `Bootstrap\`
 symfony/yaml                     | `Bootstrap\`
-psr/log                          | `Testing\Logger`, `ErrorHandling\`
-ql/mcp-common                    | `Encryption\`, `Twig\`
+psr/log                          | `ErrorHandling\`
+ql/mcp-common                    | `Encryption\`, `Twig\`, `HTTP\`, `Middleware\EncryptedCookiesMiddleware`
+dflydev/fig-cookies              | `HTTP\CookieHandler`, `Middleware\EncryptedCookiesMiddleware`
 
 ### Optional Dependencies
 
@@ -235,6 +234,6 @@ use the associated Panthor functionality.
 
 Library / Extension              | Required for
 -------------------------------- | -----------
-twig/twig                        | `Twig\`
+twig/twig                        | `Twig\`, `ErrorHandling\ContentHandler`
 paragonie/random_compat or PHP7  | `Encryption\`
-PECL Libsodium                   | `Encryption\`, `Http\EncryptedCookies\`
+PECL Libsodium                   | `Encryption\`, `Middleware\EncryptedCookiesMiddleware`

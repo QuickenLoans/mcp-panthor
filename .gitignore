@@ -9,3 +9,6 @@ phpunit.xml
 # package installation
 /composer.lock
 /vendor/
+
+#dev
+.idea

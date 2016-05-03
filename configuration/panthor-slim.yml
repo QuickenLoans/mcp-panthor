@@ -1,0 +1,72 @@
+# This is symfony DI configuration to replace Slim\DefaultServicesProvider
+parameters:
+
+    slim.settings.http_version: '1.1'
+    slim.settings.chunk_size: 4096
+    slim.settings.buffering: 'append'
+    slim.settings.determine_route_before_mw: false
+    slim.settings.display_errors: true
+
+    slim.settings:
+        httpVersion: '%slim.settings.http_version%'
+        responseChunkSize: '%slim.settings.chunk_size%'
+        outputBuffering: '%slim.settings.buffering%'
+        determineRouteBeforeAppMiddleware: '%slim.settings.determine_route_before_mw%'
+        displayErrorDetails: '%slim.settings.display_errors%'
+
+    slim.default_request_headers:
+        'Content-Type': 'text/html; charset=UTF-8'
+
+    slim.default_status_code: 200
+
+services:
+
+    slim.di:
+        class: 'Acclimate\Container\Adapter\SymfonyContainerAdapter'
+        arguments: ['@service_container']
+
+    settings:
+        class: 'Slim\Collection'
+        arguments: ['%slim.settings%']
+
+    slim:
+        class: 'Slim\App'
+        arguments: ['@slim.di']
+
+    environment:
+        class: 'Slim\Http\Environment'
+        factory: ['QL\Panthor\Bootstrap\SlimEnvironmentFactory', 'fromGlobal']
+
+    request:
+        class: 'Slim\Http\Request'
+        factory: ['Slim\Http\Request', 'createFromEnvironment']
+        arguments: ['@environment']
+
+    response.default_headers:
+        class: 'Slim\Http\Headers'
+        arguments: ['%slim.default_request_headers%']
+    response:
+        class: 'Slim\Http\Response'
+        arguments: ['%slim.default_status_code%', '@response.default_headers']
+
+    router:
+        class: 'Slim\Router'
+
+    callableResolver:
+        class: 'Slim\CallableResolver'
+        arguments: ['@slim.di']
+
+    foundHandler:
+        class: 'Slim\Handlers\Strategies\RequestResponse'
+    notFoundHandler:
+        class: 'Slim\Handlers\NotFound'
+    notAllowedHandler:
+        class: 'Slim\Handlers\NotAllowed'
+
+    phpErrorHandler:
+        class: 'Slim\Handlers\PhpError'
+        arguments: ['%slim.settings.display_errors%']
+    errorHandler:
+        class: 'Slim\Handlers\Error'
+        arguments: ['%slim.settings.display_errors%']
+

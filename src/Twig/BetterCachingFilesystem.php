@@ -34,7 +34,7 @@ use Twig_Loader_Filesystem;
 class BetterCachingFilesystem extends Twig_Loader_Filesystem
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getCacheKey($name)
     {

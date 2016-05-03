@@ -7,12 +7,19 @@
 
 namespace QL\Panthor;
 
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
 interface MiddlewareInterface
 {
     /**
-     * The primary action of this middleware. Any return from this method is ignored.
+     * The primary action of this middleware.
      *
-     * @return null
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param MiddlewareInterface|callable $next
+     *
+     * @return ResponseInterface
      */
-    public function __invoke();
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next);
 }

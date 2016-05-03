@@ -4,6 +4,7 @@
 - Application Structure
 - [How To Use](USAGE.md)
 - [Error Handling](ERRORS.md)
+- [Cookies](COOKIES.md)
 - [Web Server Configuration](SERVER.md)
 
 ```
@@ -85,18 +86,13 @@ to an environment, the matching file is found and merged into the general applic
 > Example:
 > ```yaml
 > imports:
+>     - resource: ../vendor/ql/mcp-panthor/configuration/panthor-slim.yml
 >     - resource: ../vendor/ql/mcp-panthor/configuration/panthor.yml
 >     - resource: di.yml
 >     - resource: routes.yml
 >
 > parameters:
 >     cookie.encryption.secret: '' # 128-character hexademical string. Used for cookie encryption with libsodium.
->
->     slim.hooks:
->         slim.before:
->             - 'testapplication.custom.hook'
->         slim.before.router:
->             - 'slim.hook.routes'
 > ```
 
 `di.yml`
@@ -107,8 +103,6 @@ to an environment, the matching file is found and merged into the general applic
 > services:
 >     page.hello_world:
 >         class: 'TestApplication\TestController'
->         arguments:
->             - '@slim.response'
 > ```
 
 `routes.yml`
@@ -125,15 +119,13 @@ to an environment, the matching file is found and merged into the general applic
 >             stack: ['page.hello_world']
 >
 >         # Route with parameter and conditions
->         # example.routeParameter:
+>         # example.route_parameter:
 >         #     method: 'GET'
->         #     route: '/example/entities/:id'
+>         #     route: '/example/entities/{id:[\d]+}'
 >         #     stack: ['page.example']
->         #     conditions:
->         #         id: '[\d]+'
 >
 >         # Route that matches multiple methods
->         # example.multipleMethods:
+>         # example.multiple_methods:
 >         #     method:
 >         #         - 'GET'
 >         #         - 'POST'
@@ -146,8 +138,18 @@ to an environment, the matching file is found and merged into the general applic
 >         #     method: 'GET'
 >         #     route: '/example/remove'
 >         #     stack:
->         #         - 'middleware.request_body'
+>         #         - 'middleware.example'
 >         #         - 'page.example'
+>
+>         # Route Group, contains other routes
+>         # Route Groups apply middleware to all routes underneath it
+>         # example.group:
+>         #     stack: ['middleware.example2']
+>         #     route: '/partial-path'
+>         #     routes:
+>         #         example.page2:
+>         #             route: '/example2'
+>         #             stack: ['page.example2']
 > ```
 
 #### src/
@@ -160,21 +162,16 @@ Example controller:
 >
 > namespace TestApplication;
 >
+> use Psr\Http\Message\ResponseInterface;
+> use Psr\Http\Message\ServerRequestInterface;
 > use QL\Panthor\ControllerInterface;
-> use Slim\Http\Response;
 >
 > class TestController implements ControllerInterface
 > {
->     private $response;
->
->     public function __construct(Response $response)
+>     public function __invoke(ResponseInterface $response, ServerRequestInterface $request)
 >     {
->         $this->response = $response;
->     }
->
->     public function __invoke()
->     {
->         $this->response->setBody('Hello World!');
+>         $response->getBody->write('Hello World!');
+>         return $response;
 >     }
 > }
 > ```

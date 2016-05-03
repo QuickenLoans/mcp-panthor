@@ -9,5 +9,8 @@
 - [Error Handling](ERRORS.md)
   > How to use the included error handler and logger.
 
+- [Cookies](COOKIES.md)
+  > How to manage cookies with PSR-7, and use Encrypted Cookies.
+
 - [Web Server Configuration](SERVER.md)
   > Example setups for nginx and apache.

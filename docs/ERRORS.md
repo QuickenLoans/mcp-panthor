@@ -4,6 +4,7 @@
 - [Application Structure](APPLICATION_STRUCTURE.md)
 - [How To Use](USAGE.md)
 - Error Handling
+- [Cookies](COOKIES.md)
 - [Web Server Configuration](SERVER.md)
 
 ### Table of Contents
@@ -12,8 +13,8 @@
 - [Usage](#usage)
     - [Error Logging](#error-logging)
     - [Customization](#customization)
-    - [Exception Handlers](#exception-handlers)
-    - [Writing an Exception Handler](#writing-an-exception-handler)
+    - [Exception Handler](#exception-handler)
+    - [Writing a Content Handler](#writing-a-content-handler)
 - [Error Handling for APIs](#error-handling-for-apis)
 
 ## Background
@@ -21,6 +22,7 @@
 Error handling in PHP sucks. "Errors" exhibit different behavior depending on their type.
 
 See [QL\Panthor\ErrorHandling\ErrorHandler](../src/ErrorHandling/ErrorHandler.php)
+See [QL\Panthor\ErrorHandling\ExceptionHandler](../src/ErrorHandling/ExceptionHandler.php)
 
 #### Errors (`E_WARN`, `E_NOTICE`, etc)
 
@@ -38,8 +40,8 @@ attached to the ErrorHandler.
 
 ## Usage
 
-**ErrorHandler** must be registered, and then attached to **Slim** to take over handling of **Errors** and
-**Not Founds**.
+**ErrorHandler** must be registered for both standard errors and shutdown (superfatals).
+Additionally, Slim should be attached to **ExceptionHandler** so proper responses can be output through Slim.
 
 The error handler has the following signature:
 ```php
@@ -49,7 +51,7 @@ use Exception;
 
 class ErrorHandler
 {
-    public function __construct(LoggerInterface $logger = null);
+    public function __construct(ExceptionHandlerInterface $exceptionHandler, LoggerInterface $logger = null);
 
     public function handleException($throwable);
     public function handleError($errno, $errstr, $errfile, $errline, array $errcontext = []);
@@ -66,13 +68,16 @@ Example `index.php`:
 // Enable error handler first
 $handler = $container->get('error.handler');
 $handler->register();
+$handler->registerShutdown();
 ini_set('display_errors', 0);
 
 // Fetch slim
 $app = $container->get('slim');
 
-// Attach error handler to Slim.
-$handler->attach($app);
+// Attach exception handler to Slim
+$container
+    ->get('exception.handler')
+    ->attachSlim($app);
 
 // Start app
 $app->run();
@@ -102,120 +107,170 @@ Splunk, LogEntries or some other logging service, be sure to customize this serv
 >
 > Default value: `\E_ALL`
 
-`ErrorHandler->handleNotFound()`
-> Convenience method to throw `QL\Panthor\Exception\NotFoundException`
+### Exception Handler
 
-### Exception Handlers
+Throwables are routed through the exception handler. The exception handler then renders exceptions through
+**Content Handlers**. There are a variety of content handlers provided with Panthor. These can be used to
+ensure your errors are output with the correct content type (such as html, json, etc) and whether error
+details should be hidden from the user.
 
-Throwables are routed through a list of exception handlers that act as a stack. We use a stack of separate handlers
-so different types of exceptions can be handled differently. For example, we may want to handle **NotFoundException**
-differently from **HTTPProblemException** or `\ErrorException`.
+A single content handler can be passed to the exception handler to always render errors the same way. But by default
+**Negotiating Content Handler** is used, which delegates to other handlers depending on the `Accept` header in the request.
 
-The throwable will be sent to the handler that responds that it can handle the exception class type. If the handler
-responds with `true`, **ErrorHandler** stops processing the stack and assumes the exception was handled.
+The default content handler list is as follows:
 
-Because of the way exceptions are processed through the stack, The **most specific handlers should be first
-in the stack**. Always have a generic `\Throwable` handler last. This ensures the exception will always be handled.
-Otherwise the exception will be an **unhandled exception** and cause a *white screen of death*.
+- [QL\Panthor\ErrorHandling\ContentHandler\HTMLTemplateContentHandler](../src/ErrorHandling/ContentHandler/HTMLTemplateContentHandler.php)
 
-The default handler stack for panthor is as follows:
-
-- `QL\Panthor\ErrorHandling\ExceptionHandler\NotFoundHandler`
-
-    > Handles **NotFoundException**.
+    > Handles `*/*` and `text/html` content types.
     >
     > By default this renders to the twig template at `$root/templates/error.html.twig`.
 
-- `QL\Panthor\ErrorHandling\ExceptionHandler\HTTPProblemHandler`
+- [QL\Panthor\ErrorHandling\ContentHandler\HTTPProblemContentHandler](../src/ErrorHandling/ContentHandler/HTTPProblemContentHandler.php)
 
-    > Handles **HTTPProblemException**.
+    > Handles `application/problem` content type.
     >
-    > By default this renders as HTTP Problem JSON through **HTTPProblem JsonRenderer**.
+    > By default this renders as HTTP Problem JSON through **HTTPProblem JSONRenderer**.
 
-- `QL\Panthor\ErrorHandling\ExceptionHandler\RequestExceptionHandler`
+- [QL\Panthor\ErrorHandling\ContentHandler\JSONContentHandler](../src/ErrorHandling/ContentHandler/JSONContentHandler.php)
 
-    > Handles **RequestException**.
+    > Handles `application/json` content type.
     >
-    > By default this renders errors from **RequestBodyMiddleware** as HTTP Problem JSON through **HTTPProblem JsonRenderer**.
+    > This renders errors as JSON.
 
-- `QL\Panthor\ErrorHandling\ExceptionHandler\BaseHandler`
+- [QL\Panthor\ErrorHandling\ContentHandler\PlainTextContentHandler](../src/ErrorHandling/ContentHandler/PlainTextContentHandler.php)
 
-    > Handles all exceptions.
+    > Handles `text/plain` content type.
     >
-    > As this is the last line of defense before an unhandled exception, all exceptions that reach here will be logged.
-    > By default this renders to the twig template at `$root/templates/error.html.twig`.
+    > This renders errors as plain text.
 
-This list may be customized, or added to by changing di configuration for the error handling services.
+This list may be customized, or added to by changing DI configuration for the `@content_handler` service.
 
-### Writing an Exception Handler
+Other Handlers:
+- [QL\Panthor\ErrorHandling\ContentHandler\NegotiatingContentHandler](../src/ErrorHandling/ContentHandler/NegotiatingContentHandler.php)
+- [QL\Panthor\ErrorHandling\ContentHandler\LoggingContentHandler](../src/ErrorHandling/ContentHandler/LoggingContentHandler.php)
 
-If you have exceptions you would like to handle in specific ways, you can write your own handler and attach it to the **ErrorHandler**.
+### Writing a Content Handler
 
-Exception Handlers must implement [ExceptionHandlerInterface](../src/ErrorHandling/ExceptionHandlerInterface.php):
+If you have media types you would like to handle in specific ways, you can write your own handler and pass it to the **ExceptionHandler**.
+
+Content Handlers must implement [ContentHandlerInterface](../src/ErrorHandling/ContentHandlerInterface.php):
 ```php
 namespace QL\Panthor\ErrorHandling;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
-interface ExceptionHandlerInterface
+interface ContentHandlerInterface
 {
     /**
-     * Handle a throwable, and return whether it was handled and the remaining stack should be aborted.
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
      *
-     * @param Exception|Throwable $throwable
-     *
-     * @return bool
+     * @return ResponseInterface
      */
-    public function handle($throwable);
+    public function handleNotFound(ServerRequestInterface $request, ResponseInterface $response);
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param string[] $methods
+     *
+     * @return ResponseInterface
+     */
+    public function handleNotAllowed(ServerRequestInterface $request, ResponseInterface $response, array $methods);
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param Exception $exception
+     *
+     * @return ResponseInterface
+     */
+    public function handleException(ServerRequestInterface $request, ResponseInterface $response, Exception $exception);
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param Throwable $throwable
+     *
+     * @return ResponseInterface
+     */
+    public function handleThrowable(ServerRequestInterface $request, ResponseInterface $response, Throwable $throwable);
 }
 ```
 
-[HandledExceptionsTrait](../src/ErrorHandling/ExceptionHandler/HandledExceptionsTrait.php) provides some convenience methods for configuring which throwables a handler should handle, and type checking against that list (including `\Throwable` and `\Exception` for both PHP 5.x and PHP 7 support).
-
-##### Example Exception Handler:
+##### Example Content Handler:
 ```php
-use QL\Panthor\ErrorHandling\ExceptionHandlerInterface;
-use FooException;
-use BarException;
+use Exception;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use QL\Panthor\ErrorHandling\ContentHandlerInterface;
+use QL\Panthor\HTTP\NewBodyTrait;
+use Throwable;
 
-class FoobarHandler implements ExceptionHandlerInterface
+class XMLHandler implements ContentHandlerInterface
 {
-    use HandledExceptionsTrait;
+    use NewBodyTrait;
 
-    public function __construct()
+    /**
+     * @inheritDoc
+     */
+    public function handleNotFound(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $this->setHandledThrowables([
-            FooException::class,
-            BarException::class
-        ]);
+        return $this
+            ->withNewBody($response, '<message>Not Found</message>')
+            ->withHeader('Content-Type', 'text/xml')
+            ->withStatus(404);
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function handle($throwable)
+    public function handleNotAllowed(ServerRequestInterface $request, ResponseInterface $response, array $methods)
     {
-        if (!$this->canHandleThrowable($throwable)) return false;
+        return $this
+            ->withNewBody($response, '<message>Method Not Allowed</message>')
+            ->withHeader('Content-Type', 'text/xml')
+            ->withStatus(405);
+    }
 
-        // render a custom error page here
+    /**
+     * @inheritDoc
+     */
+    public function handleException(ServerRequestInterface $request, ResponseInterface $response, Exception $exception)
+    {
+        return $this
+            ->withNewBody($response, '<message>Internal Server Error</message>')
+            ->withHeader('Content-Type', 'text/xml')
+            ->withStatus(500);
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function handleThrowable(ServerRequestInterface $request, ResponseInterface $response, Throwable $throwable)
+    {
+        return $this
+            ->withNewBody($response, '<message>Internal Server Error</message>')
+            ->withHeader('Content-Type', 'text/xml')
+            ->withStatus(500);
     }
 }
 ```
 
 ## Error Handling for APIs
 
-By default, errors are rendered to html templates and only as JSON if **HTTP Problem** is specifically used.
-For a quick and dirty way to render all errors as json, **Change the `html_renderer` service** to render problems.
+If you want to ensure errors are always handled with the same content type, simply define the `@content_handler` service
+to the handler of your choice.
 
 In application `di.yml`:
 ```yaml
-    # Change html renderer to always do http-problem
-    panthor.error_handling.html_renderer:
-        parent: 'panthor.error_handling.problem_renderer'
+    # Change content handler to always output JSON
+    content_handler:
+        class: 'QL\Panthor\ErrorHandling\ContentHandler\JSONContentHandler'
+        arguments: ['@json', '%slim.settings.display_errors%']
+        calls:
+            - ['setStacktraceLogging', ['%error_handling.log_stacktrace%']]
 ```
-
-If using this application in production, you should instead redefine the error handler service to make your error
-handling configuration explicit and clear.

@@ -18,12 +18,12 @@ use Twig_Environment;
 class EnvironmentConfigurator
 {
     /**
-     * @type bool
+     * @var bool
      */
     private $debugMode;
 
     /**
-     * @type string
+     * @var string
      */
     private $cacheDir;
 

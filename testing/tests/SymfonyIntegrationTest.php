@@ -21,6 +21,7 @@ class SymfonyIntegrationTest extends PHPUnit_Framework_TestCase
         $container = new ContainerBuilder;
         $builder = new YamlFileLoader($container, new FileLocator($configRoot));
         $builder->load('panthor.yml');
+        $builder->load('panthor-slim.yml');
 
         $container->compile();
     }

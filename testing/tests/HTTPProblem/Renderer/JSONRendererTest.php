@@ -9,6 +9,7 @@ namespace QL\Panthor\HTTPProblem\Renderer;
 
 use PHPUnit_Framework_TestCase;
 use QL\Panthor\HTTPProblem\HTTPProblem;
+use QL\Panthor\Utility\JSON;
 
 class JSONRendererTest extends PHPUnit_Framework_TestCase
 {
@@ -20,11 +21,7 @@ class JSONRendererTest extends PHPUnit_Framework_TestCase
         ];
 
         $expectedBody = <<<JSON
-{
-    "status": 500,
-    "title": "Internal Server Error",
-    "detail": "Error ahoy!"
-}
+{"status":500,"title":"Internal Server Error","detail":"Error ahoy!"}
 JSON;
 
         $problem = new HTTPProblem(500, 'Error ahoy!');
@@ -65,7 +62,9 @@ JSON;
             ->withType('http://example/problem1.html')
             ->withInstance('http://example/issue/12345.html');
 
-        $renderer = new JSONRenderer;
+        $json = new JSON;
+        $json->addEncodingOptions(\JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES);
+        $renderer = new JSONRenderer($json);
         $body = $renderer->body($problem);
 
         $this->assertSame($expectedBody, $body);
