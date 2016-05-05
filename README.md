@@ -182,7 +182,8 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     > {
     >     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     >     {
-    >         return $response->getBody()->write('Hello World!');
+    >         $response->getBody()->write('Hello World!');
+    >         return $response;
     >     }
     > }
     > ```
