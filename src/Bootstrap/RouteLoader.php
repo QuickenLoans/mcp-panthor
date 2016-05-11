@@ -81,6 +81,7 @@ class RouteLoader
 
             if ($children = $this->nullable('routes', $details)) {
                 $middleware = $this->nullable('stack', $details) ?: [];
+                $middleware = array_reverse($middleware);
                 $prefix = $this->nullable('route', $details) ?: '';
 
                 $loader = [$this, 'loadRoutes'];
@@ -115,6 +116,7 @@ class RouteLoader
 
         $stack = $details['stack'];
         $controller = array_pop($stack);
+        $stack = array_reverse($stack);
 
         $route = $slim->map($methods, $pattern, $controller);
         $route->setName($name);
