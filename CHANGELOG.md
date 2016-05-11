@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.0.1] - 2016-05-11
+
+### Changed
+
+- Require Slim 3.4
+- Update **CacheableRouter** to avoid error caused by Slim 3.4 update.
+
 ## [3.0.0] - 2016-05-02
 
 ### Changed

@@ -12,18 +12,14 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Slim\Router;
 
+/**
+ * This router overrides how cache settings are set on the Slim Router.
+ *
+ * We do this because Slim ensures the cache file directory is writeable, whereas we prefer to generate cached
+ * routes during a build step, and NEVER generate routes on the web server.
+ */
 class CacheableRouter extends Router
 {
-    /**
-     * @var string
-     */
-    private $cacheFile;
-
-    /**
-     * @var bool
-     */
-    private $isCacheDisabled;
-
     /**
      * @return void
      */
@@ -38,42 +34,10 @@ class CacheableRouter extends Router
      */
     public function setCaching($cacheFile, $isCacheDisabled)
     {
-        $this->cacheFile = $cacheFile;
-        $this->isCacheDisabled = $isCacheDisabled;
-    }
-
-    /**
-     * @return Dispatcher
-     */
-    protected function createDispatcher()
-    {
-        if ($this->dispatcher) {
-            return $this->dispatcher;
+        if ($isCacheDisabled) {
+            $this->setCacheFile(false);
+        } else {
+            $this->cacheFile = $cacheFile;
         }
-
-        $options = [
-          'routeParser' => $this->routeParser,
-          'cacheFile' => $this->cacheFile
-        ];
-
-        if ($this->cacheFile && !$this->isCacheDisabled) {
-            return \FastRoute\cachedDispatcher($this->fastRouteDefinitionCallback(), $options);
-        }
-
-        return \FastRoute\simpleDispatcher($this->fastRouteDefinitionCallback(), $options);
-    }
-
-    /**
-     * @return Closure
-     */
-    private function fastRouteDefinitionCallback()
-    {
-        $callback = function (RouteCollector $r) {
-            foreach ($this->getRoutes() as $route) {
-                $r->addRoute($route->getMethods(), $route->getPattern(), $route->getIdentifier());
-            }
-        };
-
-        return $callback;
     }
 }
