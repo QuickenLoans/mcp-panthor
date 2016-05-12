@@ -38,8 +38,56 @@ class RouteLoaderTest extends PHPUnit_Framework_TestCase
 
         $routes = $this->slim->getContainer()->get('router')->getRoutes();
 
-
         $this->assertCount(2, $routes);
+    }
+
+    public function testMultipleMiddlewareAreOrderedCorrectlyInReverse()
+    {
+        $di = $this->slim->getContainer();
+        $di['m.one'] = new TestCallable('one');
+        $di['m.two'] = new TestCallable('two');
+        $di['m.three'] = new TestCallable('three');
+        $di['gm.one'] = new TestCallable('gm.one');
+        $di['gm.two'] = new TestCallable('go.two');
+        $di['page'] = new TestCallable('controller');
+
+        $routes = [
+            'group1' => [
+                'route' => '/group1',
+                'stack' => ['gm.one:mw', 'gm.two:mw'],
+                'routes' => [
+                    'hello_world' => [
+                        'route' => '/',
+                        'stack' => ['m.one:mw', 'm.two:mw', 'm.three:mw', 'page:controller']
+                    ]
+                ]
+            ]
+        ];
+
+        $loader = new RouteLoader($routes);
+        $loader($this->slim);
+
+        $routes = $di->get('router')->getRoutes();
+
+        $route = array_shift($routes);
+        $route->finalize();
+        $route->run($di->get('request'), $di->get('response'));
+
+        $expected = <<<OUTPUT
+before-gm.one
+before-go.two
+before-one
+before-two
+before-three
+controller
+after-three
+after-two
+after-one
+after-go.two
+after-gm.one
+
+OUTPUT;
+        $this->assertSame($expected, TestCallable::$output);
     }
 
     public function testRoutesWithGroupAttached()
@@ -127,5 +175,30 @@ class RouteLoaderTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame('test3', $route1->getName());
         $this->assertSame('test', $route2->getName());
+    }
+}
+
+class TestCallable
+{
+    private $name;
+
+    public static $output;
+
+    public function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    public function mw($req, $res, $next)
+    {
+        self::$output .= sprintf("before-%s\n", $this->name);
+        $r = $next($req, $res);
+        self::$output .= sprintf("after-%s\n", $this->name);
+        return $r;
+    }
+
+    public function controller($req, $res)
+    {
+        self::$output .= sprintf("%s\n", $this->name);
     }
 }

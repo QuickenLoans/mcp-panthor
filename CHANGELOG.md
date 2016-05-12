@@ -2,6 +2,29 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.0.2] - 2016-05-12
+
+### Changed
+
+- When specifying multiple middleware, they are now executed in the correct order.
+
+  > Example route:
+  > ```yaml
+  > test_route:
+  >     route: '/page'
+        stack: ['mw.1', 'mw.2', 'mw.3', 'page']
+  > ```
+  >
+  > Previously this would execute in the following order:
+  > ```
+  > mw.3 -> mw.2 -> mw.1 -> page -> mw.1 -> mw.2 -> mw.3
+  > ```
+  >
+  > As of 3.0.2 middleware will correctly in this order:
+  > ```
+  > mw.1 -> mw.2 -> mw.3 -> page -> mw.3 -> mw.2 -> mw.1
+  > ```
+
 ## [3.0.1] - 2016-05-11
 
 ### Changed

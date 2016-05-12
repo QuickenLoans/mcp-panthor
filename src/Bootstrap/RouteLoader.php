@@ -80,7 +80,7 @@ class RouteLoader
         foreach ($routes as $name => $details) {
 
             if ($children = $this->nullable('routes', $details)) {
-                $middleware = $this->nullable('stack', $details) ?: [];
+                $middlewares = $this->nullable('stack', $details) ?: [];
                 $prefix = $this->nullable('route', $details) ?: '';
 
                 $loader = [$this, 'loadRoutes'];
@@ -89,7 +89,7 @@ class RouteLoader
                 };
 
                 $group = $slim->group($prefix, $groupLoader);
-                foreach ($middleware as $mw) {
+                while ($mw = array_pop($middlewares)) {
                     $group->add($mw);
                 }
 
@@ -119,7 +119,7 @@ class RouteLoader
         $route = $slim->map($methods, $pattern, $controller);
         $route->setName($name);
 
-        foreach ($stack as $middleware) {
+        while ($middleware = array_pop($stack)) {
             $route->add($middleware);
         }
 
