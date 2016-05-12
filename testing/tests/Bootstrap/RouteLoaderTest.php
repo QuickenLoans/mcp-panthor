@@ -48,7 +48,7 @@ class RouteLoaderTest extends PHPUnit_Framework_TestCase
         $di['m.two'] = new TestCallable('two');
         $di['m.three'] = new TestCallable('three');
         $di['gm.one'] = new TestCallable('gm.one');
-        $di['gm.two'] = new TestCallable('go.two');
+        $di['gm.two'] = new TestCallable('gm.two');
         $di['page'] = new TestCallable('controller');
 
         $routes = [
@@ -75,7 +75,7 @@ class RouteLoaderTest extends PHPUnit_Framework_TestCase
 
         $expected = <<<OUTPUT
 before-gm.one
-before-go.two
+before-gm.two
 before-one
 before-two
 before-three
@@ -83,7 +83,7 @@ controller
 after-three
 after-two
 after-one
-after-go.two
+after-gm.two
 after-gm.one
 
 OUTPUT;
