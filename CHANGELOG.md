@@ -20,7 +20,7 @@ See [keepachangelog.com](http://keepachangelog.com) for reference.
   > mw.3 -> mw.2 -> mw.1 -> page -> mw.1 -> mw.2 -> mw.3
   > ```
   >
-  > As of 3.0.2 middleware will correctly in this order:
+  > As of 3.0.2 middleware will run correctly in this order:
   > ```
   > mw.1 -> mw.2 -> mw.3 -> page -> mw.3 -> mw.2 -> mw.1
   > ```
