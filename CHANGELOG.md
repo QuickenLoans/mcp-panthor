@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.0.3] - 2016-07-21
+
+### Changed
+
+- Fixed broken `absoluteURIFor` method in URI Utility.
+- Fix URI test filename so test will be executed.
+
 ## [3.0.2] - 2016-05-12
 
 ### Changed

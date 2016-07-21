@@ -25,7 +25,7 @@ class URITest extends PHPUnit_Framework_TestCase
     {
         $url = new URI($this->router);
 
-        $this->assertSame('', $url->urlFor('', ['param1' => '1']));
+        $this->assertSame('', $url->uriFor('', ['param1' => '1']));
     }
 
     public function testUrlGetsRouteAndAppendsQueryString()
@@ -37,7 +37,7 @@ class URITest extends PHPUnit_Framework_TestCase
 
         $url = new URI($this->router);
 
-        $actual = $url->urlFor('route.name', ['param1' => '1'], ['query1' => '2']);
+        $actual = $url->uriFor('route.name', ['param1' => '1'], ['query1' => '2']);
         $this->assertSame('/path?query1=2', $actual);
     }
 
@@ -52,7 +52,7 @@ class URITest extends PHPUnit_Framework_TestCase
 
         $url = new URI($this->router);
 
-        $actual = $url->absoluteUrlFor($uri, 'route.name', ['param1' => '1']);
+        $actual = $url->absoluteURIFor($uri, 'route.name', ['param1' => '1']);
         $this->assertSame('https://example.com/test-route-page', $actual);
     }
 
@@ -67,7 +67,7 @@ class URITest extends PHPUnit_Framework_TestCase
 
         $url = new URI($this->router);
 
-        $actual = $url->absoluteUrlFor($uri, 'route.name', ['param1' => '1']);
+        $actual = $url->absoluteURIFor($uri, 'route.name', ['param1' => '1']);
         $this->assertSame('http://host:8443/test-route-page', $actual);
     }
 }

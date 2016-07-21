@@ -78,7 +78,7 @@ class URI
      */
     public function absoluteURIFor(UriInterface $uri, $route, array $params = [], array $query = [])
     {
-        $path = $this->urlFor($route, $params);
+        $path = $this->uriFor($route, $params);
 
         return (string) $uri
             ->withUserInfo('')
