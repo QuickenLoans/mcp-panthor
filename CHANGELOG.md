@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.0.4] - 2016-11-17
+
+### Changed
+
+- Fixed potential bug in `QL\Panthor\Twig\Context` when using deeply nested and self-referencing arrays. (#16)
+
 ## [3.0.3] - 2016-07-21
 
 ### Changed
