@@ -39,7 +39,7 @@ class Context implements Countable, IteratorAggregate
      */
     public function addContext(array $context)
     {
-        $this->context = array_merge_recursive($this->context, $context);
+        $this->context = array_replace_recursive($this->context, $context);
     }
 
     /**

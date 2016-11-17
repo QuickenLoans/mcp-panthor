@@ -70,4 +70,52 @@ class ContextTest extends PHPUnit_Framework_TestCase
         $this->assertSame(null, $context->get('test4'));
         $this->assertSame($raw, $context->get());
     }
+
+    public function testMergeReplace()
+    {
+        $context = new Context([
+            'test1' => 'value1',
+            'test2' => ['test3' => 'value3']
+        ]);
+
+        $context->addContext([
+            'test1' => 'value2',
+            'test2' => ['test4' => 'value4']
+        ]);
+
+        $expected = [
+            'test1' => 'value2',
+            'test2' => [
+                'test3' => 'value3',
+                'test4' => 'value4'
+            ]
+        ];
+
+        $this->assertSame($expected, $context->get());
+    }
+
+    /**
+     * Ensure that self-referencing objects do not cause a segfault. This can happen when array_merge_recursive
+     * is used to merge context.
+     */
+    public function testMergeSelfReferencingObjects()
+    {
+        $a = new \stdClass();
+
+        $a->a = $a;
+
+        $context = new Context([
+            'a' => $a
+        ]);
+
+        $context->addContext([
+            'a' => $a
+        ]);
+
+        $expected = [
+            'a' => $a
+        ];
+
+        $this->assertSame($expected, $context->get());
+    }
 }
