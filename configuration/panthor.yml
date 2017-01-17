@@ -23,7 +23,7 @@ parameters:
     cookie.settings:
         expires: 0
         maxAge: 0
-        path: ''
+        path: '/'
         domain: ''
         secure: false
         httpOnly: false
