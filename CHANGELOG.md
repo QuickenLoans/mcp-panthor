@@ -2,6 +2,41 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.1.0] - 2017-02-20
+
+### Added
+
+- Add `QL\Panthor\Bootstrap\GlobalMiddlewareLoader`
+    - This loader can be used to easily add global middleware to Slim.
+    - Example Usage:
+
+    >
+    > ```yml
+    > # configuration/di.yml
+    > parameters:
+    >    global.middleware:
+    >        - 'middleware1.service_name'
+    >        - 'middleware2.service_name'
+    > services:
+    >     global_middleware_loader:
+    >         class: 'QL\Panthor\Bootstrap\Setup\AttachGlobalMiddleware'
+    >         arguments: ['@service_container', '%global.middleware%']
+    > ```
+    >
+    > ```php
+    > # public/index.php
+    >
+    > $container
+    >     ->get('global_middleware_loader')
+    >     ->attach($app);
+    > ```
+
+### Changed
+
+- The default `path` in `cookie.settings` is now `/` (previously it was blank).
+    - This avoids a chrome bug which uses the current url page as the cookie
+      path if it is not provided in the http response.
+
 ## [3.0.4] - 2016-11-17
 
 ### Changed
