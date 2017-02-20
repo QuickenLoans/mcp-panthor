@@ -16,7 +16,7 @@ class SymfonyIntegrationTest extends PHPUnit_Framework_TestCase
 {
     public function testContainerCompiles()
     {
-        $configRoot = __DIR__ . '/../../configuration';
+        $configRoot = __DIR__ . '/../configuration';
 
         $container = new ContainerBuilder;
         $builder = new YamlFileLoader($container, new FileLocator($configRoot));

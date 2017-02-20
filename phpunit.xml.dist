@@ -19,7 +19,7 @@
         beStrictAboutTestsThatDoNotTestAnything="false"
         beStrictAboutOutputDuringTests="true"
         beStrictAboutTestSize="true"
-        checkForUnintentionallyCoveredCode="true"
+        beStrictAboutCoversAnnotation="true"
 
         timeoutForSmallTests="5"
         verbose="true">
@@ -50,7 +50,7 @@
 
     <testsuites>
         <testsuite name="Unit Tests">
-            <directory>testing/tests</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

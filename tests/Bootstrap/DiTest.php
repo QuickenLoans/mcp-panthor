@@ -16,7 +16,7 @@ class DiTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->root = __DIR__ . '/../../../';
+        $this->root = __DIR__ . '/../../';
     }
 
     public function testBuildDI()
