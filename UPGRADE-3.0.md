@@ -468,7 +468,7 @@ $app->run();
 This would register the Error Handler for **errors**, **exceptions**, and **superfatals** (shutdown). In addition, attaching
 Slim to the error handler allowed the error handler to send responses through Slim to be rendered.
 
-Registering sthe uperfatal handler has been split to a separate method, and must now be done separately:
+Registering the superfatal handler has been split to a separate method, and must now be done separately:
 ```php
 // Error handling
 $handler = $container->get('error.handler');
