@@ -63,16 +63,13 @@ root                     | The application root. NO TRAILING SLASH.
 slim                     | Slim\App
 environment              | Slim\Environment
 router                   | Slim\Router (or [CacheableRouter](../src/Bootstrap/CacheableRouter.php))
--                        | -
 uri                      | [URI](../src/Utility/URI.php) Utility
 json                     | [JSON](../src/Utility/JSON.php) Utility
 clock                    | Clock from MCP Common
 logger                   | PSR-3 Logger (NullLogger by default)
--                        | -
 twig.environment         | Twig Environment
 twig.template            | Base Twig Template
 twig.context             | Global Twig Context
--                        | -
 error.handler            | Error Handler
 exception.handler        | Exception Handler
 problem.renderer         | HTTP Problem Renderer (JSON by default)
