@@ -163,7 +163,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     > $slim = $container->get('slim');
     > $routes = $container->get('router.loader');
     >
-    > $routes($app);
+    > $routes($slim);
     > $slim->run();
     > ```
 
