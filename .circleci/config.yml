@@ -11,15 +11,16 @@ defaults: &defaults
 
 matrix_defaults: &matrix_defaults
     working_directory: '~/project'
-    steps:
-        - attach_workspace: { at: '.' }
 
-        - run:
-            name: 'Run tests'
-            command: './vendor/bin/phpunit'
+step_defaults: &step_defaults
+    - attach_workspace: { at: '.' }
 
-        - store_test_results:
-            path: '.phpunit/report'
+    - run:
+        name: 'Run tests'
+        command: './vendor/bin/phpunit'
+
+    - store_test_results:
+        path: '.phpunit/report'
 
 workflows:
 
@@ -80,13 +81,22 @@ jobs:
         <<: *matrix_defaults
         docker:
             - 'image': 'halplatform/hal-build-environments:php5.6-centos7'
+        steps:
+            <<: *step_defaults
 
     'php7.0':
         <<: *matrix_defaults
         docker:
             - 'image': 'halplatform/hal-build-environments:php7.0-centos7'
+        steps:
+            <<: *step_defaults
 
     'php7.1':
         <<: *matrix_defaults
         docker:
             - 'image': 'halplatform/hal-build-environments:php7.1-centos7'
+        steps:
+            <<: *step_defaults
+            - run:
+                name: 'Upload test coverage to Codacy'
+                command: './vendor/bin/codacycoverage clover ./phpunit/clover.xml'
