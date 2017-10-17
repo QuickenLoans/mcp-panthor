@@ -1,0 +1,99 @@
+# https://circleci.com/docs/2.0/language-php
+# https://circleci.com/docs/2.0/circleci-images
+# https://hub.docker.com/r/halplatform/hal-build-environments
+
+version: 2
+
+defaults: &defaults
+    working_directory: '~/project'
+    docker:
+        - 'image': 'halplatform/hal-build-environments:php5.6-centos7'
+
+matrix_defaults: &matrix_defaults
+    working_directory: '~/project'
+    steps:
+        - attach_workspace: { at: '.' }
+
+        - run:
+            name: 'Run tests'
+            command: './vendor/bin/phpunit'
+
+        - store_test_results:
+            path: '.phpunit/report'
+
+        - run:
+            name: 'Upload test coverage to Codacy (PHP 7.1 only)'
+            command: |
+                if [ "${CIRCLE_JOB}" == "php7.1" ] ; then
+                    ./vendor/bin/codacycoverage clover .phpunit/clover.xml
+                fi
+
+workflows:
+
+  version: 2
+
+  pipeline:
+    jobs:
+      - fetch_code
+      - install:
+          requires: [ fetch_code ]
+
+      - 'php5.6':
+          requires: [ install ]
+
+      - 'php7.0':
+          requires: [ install ]
+
+      - 'php7.1':
+          requires: [ install ]
+
+jobs:
+
+    fetch_code:
+        <<: *defaults
+
+        steps:
+            - checkout
+            - persist_to_workspace: { root: '.', paths: [ '.' ] }
+
+    install:
+        <<: *defaults
+
+        steps:
+            - attach_workspace: { at: '.' }
+
+            - restore_cache:
+                keys: [ 'v1-php-deps-{{ checksum "composer.json" }}', 'v1-php-deps-' ]
+
+            - run:
+                name: 'Update Composer'
+                command: 'composer self-update'
+
+            - run:
+                name: 'Install packages'
+                command: 'composer --no-interaction --no-progress install'
+
+            - run:
+                name: 'List installed packages'
+                command: 'composer show'
+
+            - save_cache:
+                key: 'v1-php-deps-{{ checksum "composer.json" }}'
+                paths: [ './vendor' ]
+
+            - persist_to_workspace: { root: '.', paths: [ '.' ] }
+
+    'php5.6':
+        <<: *matrix_defaults
+        docker:
+            - 'image': 'halplatform/hal-build-environments:php5.6-centos7'
+
+    'php7.0':
+        <<: *matrix_defaults
+        docker:
+            - 'image': 'halplatform/hal-build-environments:php7.0-centos7'
+
+    'php7.1':
+        <<: *matrix_defaults
+        docker:
+            - 'image': 'halplatform/hal-build-environments:php7.1-centos7'

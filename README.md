@@ -1,7 +1,9 @@
 # MCP Panthor
 
-[![Build Status](https://travis-ci.org/quickenloans-mcp/mcp-panthor.png)](https://travis-ci.org/quickenloans-mcp/mcp-panthor)
+[![CircleCI](https://circleci.com/gh/quickenloans-mcp/mcp-panthor.svg?style=svg)](https://circleci.com/gh/quickenloans-mcp/mcp-panthor)
 [![Code Climate](https://codeclimate.com/github/quickenloans-mcp/mcp-panthor/badges/gpa.svg)](https://codeclimate.com/github/quickenloans-mcp/mcp-panthor)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/72c07f5cc84147818e07938970637902)](https://www.codacy.com/app/skluck/mcp-panthor)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/72c07f5cc84147818e07938970637902)](https://www.codacy.com/app/skluck/mcp-panthor)
 [![Latest Stable Version](https://poser.pugx.org/ql/mcp-panthor/version)](https://packagist.org/packages/ql/mcp-panthor)
 [![License](https://poser.pugx.org/ql/mcp-panthor/license)](https://packagist.org/packages/ql/mcp-panthor)
 

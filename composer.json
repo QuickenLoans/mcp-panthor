@@ -37,7 +37,8 @@
     "require-dev": {
         "mockery/mockery":      "~0.9",
         "phpunit/phpunit":      "~5.6",
-
+        "codacy/coverage":      "~1.4",
+        
         "ext-libsodium":           "~1.0",
         "paragonie/random_compat": "~1.1",
 
