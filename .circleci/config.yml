@@ -21,12 +21,12 @@ matrix_defaults: &matrix_defaults
         - store_test_results:
             path: '.phpunit/report'
 
-            - run:
-                name: 'Upload test coverage to Codacy (PHP 7.1 only)'
-                command: |
-                    if [ "${CIRCLE_JOB}" == "php7.1" ] ; then
-                        ./vendor/bin/codacycoverage clover ./phpunit/clover.xml'
-                    fi
+        - run:
+            name: 'Upload test coverage to Codacy (PHP 7.1 only)'
+            command: |
+                if [ "${CIRCLE_JOB}" == "php7.1" ] ; then
+                    ./vendor/bin/codacycoverage clover ./phpunit/clover.xml'
+                fi
 
 workflows:
 
