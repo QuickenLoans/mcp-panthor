@@ -63,7 +63,7 @@ jobs:
             - attach_workspace: { at: '.' }
 
             - restore_cache:
-                keys: [ 'v1-php-deps-{{ checksum "composer.lock" }}', 'v1-php-deps-' ]
+                keys: [ 'v1-php-deps-{{ checksum "composer.json" }}', 'v1-php-deps-' ]
 
             - run:
                 name: 'Update Composer'
@@ -78,7 +78,7 @@ jobs:
                 command: 'composer show'
 
             - save_cache:
-                key: 'v1-php-deps-{{ checksum "composer.lock" }}'
+                key: 'v1-php-deps-{{ checksum "composer.json" }}'
                 paths: [ './vendor' ]
 
             - persist_to_workspace: { root: '.', paths: [ '.' ] }
