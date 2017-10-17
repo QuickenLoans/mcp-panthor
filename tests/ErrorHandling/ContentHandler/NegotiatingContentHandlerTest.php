@@ -32,14 +32,31 @@ class NegotiatingContentHandlerTest extends PHPUnit_Framework_TestCase
         $handler = new NegotiatingContentHandler;
         $response = $handler->handleNotFound($this->request, $this->response);
 
-        $expected = <<<HTML
-HTTP/1.1 404 Not Found
-Content-Type: application/json
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-{"message":"Not Found"}
-HTML;
+        $expectedStatusCode = 404;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Not Found';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '{"message":"Not Found"}';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowedWithEmptyListOnlyUsesPlaintext()
@@ -49,15 +66,34 @@ HTML;
         $handler = new NegotiatingContentHandler([]);
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 405 Method Not Allowed
-Content-Type: text/plain
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
+        $expectedStatusCode = 405;
+        $actualStatusCode = $response->getStatusCode();
+
+        $expectedReasonPhrase = 'Method Not Allowed';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/plain'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = <<<HTML
 Method not allowed.
 Allowed methods: PATCH, STEVE
 HTML;
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
 
-        $this->assertSame($expected, (string) $response);
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleExceptionNoMatchUsesFirstInList()
@@ -72,13 +108,30 @@ HTML;
 
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: application/json
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-{"error":"Application Error"}
-HTML;
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '{"error":"Application Error"}';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 }

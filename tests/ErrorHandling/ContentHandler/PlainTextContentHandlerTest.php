@@ -30,14 +30,31 @@ class PlainTextContentHandlerTest extends PHPUnit_Framework_TestCase
         $handler = new PlainTextContentHandler;
         $response = $handler->handleNotFound($this->request, $this->response);
 
-        $expected = <<<HTML
-HTTP/1.1 404 Not Found
-Content-Type: text/plain
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-Not Found.
-HTML;
+        $expectedStatusCode = 404;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Not Found';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/plain'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = 'Not Found.';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowed()
@@ -45,15 +62,34 @@ HTML;
         $handler = new PlainTextContentHandler;
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 405 Method Not Allowed
-Content-Type: text/plain
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
+        $expectedStatusCode = 405;
+        $actualStatusCode = $response->getStatusCode();
+
+        $expectedReasonPhrase = 'Method Not Allowed';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/plain'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = <<<HTML
 Method not allowed.
 Allowed methods: PATCH, STEVE
 HTML;
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
 
-        $this->assertSame($expected, (string) $response);
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowedSets200StatusIfOptionsRequest()
@@ -63,15 +99,34 @@ HTML;
         $handler = new PlainTextContentHandler;
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 200 OK
-Content-Type: text/plain
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
+        $expectedStatusCode = 200;
+        $actualStatusCode = $response->getStatusCode();
+
+        $expectedReasonPhrase = 'OK';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/plain'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = <<<HTML
 Method not allowed.
 Allowed methods: PATCH, STEVE
 HTML;
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
 
-        $this->assertSame($expected, (string) $response);
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleException()
@@ -81,14 +136,31 @@ HTML;
         $handler = new PlainTextContentHandler;
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: text/plain
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-Application Error
-HTML;
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/plain'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = 'Application Error';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleExceptionWithErrorDetails()
@@ -98,17 +170,36 @@ HTML;
         $handler = new PlainTextContentHandler(true);
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: text/plain
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
+
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/plain'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = <<<HTML
 Application Error
 exception message
 HTML;
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+        $rendered = $actualBody->getContents();
 
-        $rendered = (string) $response;
-        $this->assertContains($expected, $rendered);
-        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:96', $rendered);
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertContains($expectedBody, $rendered);
+        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:168', $rendered);
         $this->assertContains('Error Details:', $rendered);
     }
 }

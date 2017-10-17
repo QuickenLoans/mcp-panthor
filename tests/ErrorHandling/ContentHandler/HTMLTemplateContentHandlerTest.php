@@ -45,14 +45,31 @@ class HTMLTemplateContentHandlerTest extends PHPUnit_Framework_TestCase
 
         $response = $handler->handleNotFound($this->request, $this->response);
 
-        $expected = <<<HTML
-HTTP/1.1 404 Not Found
-Content-Type: text/html
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-<html>derp</html>
-HTML;
+        $expectedStatusCode = 404;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Not Found';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/html'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '<html>derp</html>';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowed()
@@ -69,14 +86,31 @@ HTML;
 
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 405 Method Not Allowed
-Content-Type: text/html
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-<html>derp</html>
-HTML;
+        $expectedStatusCode = 405;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Method Not Allowed';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/html'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '<html>derp</html>';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowedSets200StatusIfOptionsRequest()
@@ -91,18 +125,36 @@ HTML;
                 'allowed_methods' => 'PATCH, STEVE'
             ])
             ->andReturn('<html>derp</html>');
+
         $handler = new HTMLTemplateContentHandler($this->template);
 
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 200 OK
-Content-Type: text/html
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-<html>derp</html>
-HTML;
+        $expectedStatusCode = 200;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'OK';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/html'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '<html>derp</html>';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleException()
@@ -122,14 +174,31 @@ HTML;
         $handler = new HTMLTemplateContentHandler($this->template);
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: text/html
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-<html>error</html>
-HTML;
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/html'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '<html>error</html>';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleExceptionWithErrorDetails()
@@ -144,20 +213,37 @@ HTML;
         $handler = new HTMLTemplateContentHandler($this->template, true);
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: text/html
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-<html>error</html>
-HTML;
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'text/html'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '<html>error</html>';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
 
         $captured = $spy();
         $this->assertSame('exception message', $captured['message']);
         $this->assertSame(500, $captured['status']);
         $this->assertSame('E_ERROR', $captured['severity']);
         $this->assertSame($ex, $captured['throwable']);
-        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:137', $captured['details']);
+        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:206', $captured['details']);
     }
 }
