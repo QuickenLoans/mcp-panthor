@@ -25,7 +25,7 @@ matrix_defaults: &matrix_defaults
             name: 'Upload test coverage to Codacy (PHP 7.1 only)'
             command: |
                 if [ "${CIRCLE_JOB}" == "php7.1" ] ; then
-                    ./vendor/bin/codacycoverage clover ./phpunit/clover.xml
+                    ./vendor/bin/codacycoverage clover .phpunit/clover.xml
                 fi
 
 workflows:
