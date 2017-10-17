@@ -32,15 +32,32 @@ class ProblemRendereringTraitTest extends PHPUnit_Framework_TestCase
 
         $rendering = new ProblemRenderingTraitStub;
         $output = $rendering->renderProblem($this->response, $this->renderer, $problem);
-        $expected = <<<'HTTP'
-HTTP/1.1 418 I'm a teapot
-Content-Type: application/problem+json
 
-{"status":418,"title":"I\u0027m a teapot","detail":"Something bad happened!","extra_context":"data1","test_extension":"data2"}
-HTTP;
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $output->getProtocolVersion();
 
-        $this->assertSame($expected, (string) $output);
+        $expectedStatusCode = 418;
+        $actualStatusCode = $output->getStatusCode();
 
+        $expectedReasonPhrase = 'I\'m a teapot';
+        $actualReasonPhrase = $output->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/problem+json'
+            ]
+        ];
+        $actualHeaders = $output->getHeaders();
+
+        $expectedBody = '{"status":418,"title":"I\u0027m a teapot","detail":"Something bad happened!","extra_context":"data1","test_extension":"data2"}';
+        $actualBody = $output->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 }
 

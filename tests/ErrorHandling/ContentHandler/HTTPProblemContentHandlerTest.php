@@ -30,14 +30,31 @@ class HTTPProblemContentHandlerTest extends PHPUnit_Framework_TestCase
         $handler = new HTTPProblemContentHandler;
         $response = $handler->handleNotFound($this->request, $this->response);
 
-        $expected = <<<HTML
-HTTP/1.1 404 Not Found
-Content-Type: application/problem+json
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-{"status":404,"title":"Not Found"}
-HTML;
+        $expectedStatusCode = 404;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Not Found';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/problem+json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '{"status":404,"title":"Not Found"}';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowed()
@@ -45,14 +62,31 @@ HTML;
         $handler = new HTTPProblemContentHandler;
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 405 Method Not Allowed
-Content-Type: application/problem+json
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-{"status":405,"title":"Method Not Allowed","detail":"Allowed methods: PATCH, STEVE","allowed_methods":["PATCH","STEVE"]}
-HTML;
+        $expectedStatusCode = 405;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Method Not Allowed';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/problem+json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '{"status":405,"title":"Method Not Allowed","detail":"Allowed methods: PATCH, STEVE","allowed_methods":["PATCH","STEVE"]}';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testNotAllowedSets200StatusIfOptionsRequest()
@@ -62,14 +96,31 @@ HTML;
         $handler = new HTTPProblemContentHandler;
         $response = $handler->handleNotAllowed($this->request, $this->response, ['PATCH', 'STEVE']);
 
-        $expected = <<<HTML
-HTTP/1.1 200 OK
-Content-Type: application/problem+json
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-{"status":200,"title":"OK","detail":"Allowed methods: PATCH, STEVE","allowed_methods":["PATCH","STEVE"]}
-HTML;
+        $expectedStatusCode = 200;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'OK';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/problem+json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '{"status":200,"title":"OK","detail":"Allowed methods: PATCH, STEVE","allowed_methods":["PATCH","STEVE"]}';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleException()
@@ -79,14 +130,31 @@ HTML;
         $handler = new HTTPProblemContentHandler;
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: application/problem+json
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-{"status":500,"title":"Internal Server Error","detail":"Internal Server Error"}
-HTML;
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
 
-        $this->assertSame($expected, (string) $response);
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/problem+json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $expectedBody = '{"status":500,"title":"Internal Server Error","detail":"Internal Server Error"}';
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 
     public function testHandleExceptionWithDetails()
@@ -96,13 +164,30 @@ HTML;
         $handler = new HTTPProblemContentHandler(null, true);
         $response = $handler->handleException($this->request, $this->response, $ex);
 
-        $expected = <<<HTML
-HTTP/1.1 500 Internal Server Error
-Content-Type: application/problem+json
-HTML;
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $response->getProtocolVersion();
 
-        $rendered = (string) $response;
-        $this->assertContains($expected, $rendered);
+        $expectedStatusCode = 500;
+        $actualStatusCode = $response->getStatusCode();
+
+        $expectedReasonPhrase = 'Internal Server Error';
+        $actualReasonPhrase = $response->getReasonPhrase();
+
+        $expectedHeaders = [
+            'Content-Type' => [
+                'application/problem+json'
+            ]
+        ];
+        $actualHeaders = $response->getHeaders();
+
+        $actualBody = $response->getBody();
+        $actualBody->rewind();
+        $rendered = $actualBody->getContents();
+
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedHeaders, $actualHeaders);
         $this->assertContains('"detail":"exception message"', $rendered);
         $this->assertContains('"error_details":"ERR ', $rendered);
     }

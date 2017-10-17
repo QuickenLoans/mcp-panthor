@@ -24,15 +24,27 @@ class NewBodyTraitTest extends PHPUnit_Framework_TestCase
     {
         $newBody = new NewBodyTraitStub;
         $output = $newBody->withNewBody($this->response, "data data\nmore data");
-        $expected = <<<'HTTP'
-HTTP/1.1 200 OK
 
+        $expectedHTTPVersion = '1.1';
+        $actualHTTPVersion = $output->getProtocolVersion();
+
+        $expectedStatusCode = 200;
+        $actualStatusCode = $output->getStatusCode();
+
+        $expectedReasonPhrase = 'OK';
+        $actualReasonPhrase = $output->getReasonPhrase();
+
+        $expectedBody = <<<'HTTP'
 data data
 more data
 HTTP;
+        $actualBody = $output->getBody();
+        $actualBody->rewind();
 
-        $this->assertSame($expected, (string) $output);
-
+        $this->assertSame($expectedHTTPVersion, $actualHTTPVersion);
+        $this->assertSame($expectedStatusCode, $actualStatusCode);
+        $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
+        $this->assertSame($expectedBody, $actualBody->getContents());
     }
 }
 
