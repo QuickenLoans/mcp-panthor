@@ -30,15 +30,15 @@
 
         "symfony/config":               "~3.0",
         "symfony/dependency-injection": "~3.0",
-        "symfony/yaml":                 "~3.0"
-
+        "symfony/yaml":                 "~3.0",
+        "symfony/proxy-manager-bridge": "~3.3"
     },
 
     "require-dev": {
         "mockery/mockery":      "~0.9",
         "phpunit/phpunit":      "~5.6",
         "codacy/coverage":      "~1.4",
-        
+
         "ext-libsodium":           "~1.0",
         "paragonie/random_compat": "~1.1",
 

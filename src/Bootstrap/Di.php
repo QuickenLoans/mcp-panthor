@@ -1,135 +1,135 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2017 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
 namespace QL\Panthor\Bootstrap;
 
+use RuntimeException;
+use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
  * Utility to handle container building and caching.
  */
-class Di
+class DI
 {
-    /**
-     * The primary configuration file. The entry point of all configuration.
-     *
-     * @var string
-     */
-    const PRIMARY_CONFIGURATION_FILE = 'configuration/config.yml';
+    const PRIMARY_CONFIGURATION_FILE = 'config/config.yaml';
+    const ENV_CACHE_DISABLED = 'HAL_DI_DISABLE_CACHE_ON';
+
+    // When the container is built (dev-mode), this dumps and loads the cached
+    // container instead of using "ContainerBuilder"
+    const BUILD_AND_CACHE = false;
+
+    const DI_EXTENSIONS = [];
 
     /**
-     * The parameter to check whether the container should be cached.
-     *
-     * Using a prefix of "@" will check a service instead of parameter.
-     *
-     * @var string
-     */
-    const KEY_PREVENT_CACHING = 'symfony.debug';
-
-    /**
-     * Service key for root path
-     *
-     * @var string
-     */
-    const KEY_ROOT_PATH = 'root';
-
-    /**
-     * @param string $root The application root directory.
-     * @param callable $containerModifier Modify the container with a callable before it is compiled.
+     * @param string $root
+     * @param bool $resolveEnvironment
      *
      * @return ContainerBuilder
      */
-    public static function buildDi($root, callable $containerModifier = null)
-    {
-        $container = new ContainerBuilder;
-        $builder = new YamlFileLoader($container, new FileLocator($root));
-        $builder->load(static::PRIMARY_CONFIGURATION_FILE);
-
-        if (is_callable($containerModifier)) {
-            $containerModifier($container);
-        }
-
-        $container->compile();
-
-        return $container;
-    }
-
-    /**
-     * @param ContainerBuilder $container  The built container, ready for caching.
-     * @param string           $class      Fully qualified class name of the cached container.
-     * @param string           $baseClass  Optionally pass a base_class for the cached container.
-     *
-     * @return string The cached container file contents.
-     */
-    public static function dumpDi(ContainerBuilder $container, $class, $baseClass = null)
-    {
-        $exploded = explode('\\', $class);
-        $config = [
-            'class' => array_pop($exploded),
-            'namespace' => implode('\\', $exploded)
-        ];
-
-        if ($baseClass) {
-            $config['base_class'] = $baseClass;
-        }
-
-        return (new PhpDumper($container))->dump($config);
-    }
-
-    /**
-     * @param  string $root  The application root directory.
-     * @param  string $class Fully qualified class name of the cached container.
-     * @param  callable $containerModifier Modify the container with a callable before it is compiled.
-     *
-     * @return ContainerInterface A service container. This may or may not be a cached container.
-     */
-    public static function getDi($root, $class, callable $containerModifier = null)
+    public static function buildDI(string $root, bool $resolveEnvironment = false)
     {
         $root = rtrim($root, '/');
 
-        if (class_exists($class)) {
-            $container = new $class;
+        $container = new ContainerBuilder;
+        $loader = new YamlFileLoader($container, new FileLocator($root));
 
-            // Force a fresh container in debug mode
-            if (static::shouldRefreshContainer($container)) {
-                $container = static::buildDi($root, $containerModifier);
+        $extensions = [];
+        foreach (static::DI_EXTENSIONS as $extClass) {
+            if (!class_exists($extClass)) {
+                throw new RuntimeException("Symfony DI Extension not found: \"${extClass}\"");
             }
 
-        } else {
-            $container = static::buildDi($root, $containerModifier);
+            $extensions[] = new $extClass;
         }
 
-        // Set the synthetic root service. This must not ever be cached.
-        $container->set(static::KEY_ROOT_PATH, $root);
+        foreach ($extensions as $ext) {
+            $container->registerExtension($ext);
+        }
+
+        $loader->load(static::PRIMARY_CONFIGURATION_FILE);
+
+        foreach ($extensions as $ext) {
+            $container->loadFromExtension($ext->getAlias());
+        }
+
+        $container->compile($resolveEnvironment);
 
         return $container;
     }
 
     /**
-     * @param ContainerInterface $container
+     * @param string $root
+     * @param array $options
      *
-     * @return bool
+     * @return ContainerBuilder
      */
-    protected static function shouldRefreshContainer(ContainerInterface $container)
+    public static function getDI(string $root, array $options)
     {
-        $lookup = static::KEY_PREVENT_CACHING;
-        $isService = substr($lookup, 0, 1) === '@';
-        if ($isService) {
-            $lookup = substr($lookup, 1);
+        $class = $options['class'] ?? '';
+        if (!$class) {
+            return false;
         }
 
-        if ($isService) {
-            return $container->has($lookup) && $container->get($lookup);
+        $cacheDisabled = getenv(static::ENV_CACHE_DISABLED);
+
+        if ($cacheDisabled) {
+
+            $container = static::buildDI($root, !static::BUILD_AND_CACHE);
+
+            if (static::BUILD_AND_CACHE) {
+                $cached = static::cacheDI($container, $options);
+
+                $content = str_replace('<?php', '', $cached);
+                eval($content);
+                $container = new $class;
+            }
+
+        } else {
+            if (!class_exists($class)) {
+                throw new RuntimeException("DI Cached Container class not found: \"${class}\"");
+            }
+
+            $container = new $class;
         }
 
-        return $container->hasParameter($lookup) && $container->getParameter($lookup);
+        // @todo remove
+        $container->set('root', 'derpherp');
+
+        return $container;
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $options
+     *
+     * @return string The cached container file contents.
+     */
+    public static function cacheDI(ContainerBuilder $container, array $options)
+    {
+        $class = $options['class'] ?? '';
+        if (!$class) {
+            return false;
+        }
+
+        $exploded = explode('\\', $class);
+        $config = array_merge($options, [
+            'class' => array_pop($exploded),
+            'namespace' => implode('\\', $exploded)
+        ]);
+
+        $dumper = new PhpDumper($container);
+        if (class_exists(PhpDumper::class)) {
+            $dumper->setProxyDumper(new ProxyDumper);
+        }
+
+        return $dumper->dump($config);
     }
 }
