@@ -12,8 +12,8 @@ parameters:
 
     # twig defaults
     twig.debug: true
-    twig.template.dir: 'templates'
-    twig.cache.dir: '.twig'
+    twig.template.dir: '%env(PANTHOR_WEBROOT)%/templates'
+    twig.cache.dir: '%env(PANTHOR_WEBROOT)%/.twig'
 
     # cookie
     cookie.encryption.secret: ''
@@ -62,9 +62,6 @@ services:
     cookie.encryption:              { alias: panthor.cookie.encryption }
     cookie.handler:                 { alias: panthor.cookie.handler }
 
-    twig.cache.dir:                 { alias: panthor.twig.cache.dir }
-    twig.template.dir:              { alias: panthor.twig.template.dir }
-
     twig.template:                  { parent: panthor.twig.template }
     twig.context:                   { alias: panthor.twig.context }
 
@@ -89,11 +86,7 @@ services:
     panthor.router:
         class: 'QL\Panthor\Bootstrap\CacheableRouter'
         calls:
-            - ['setCaching', ['@panthor.router.cache_file', '%routes.cache_disabled%']]
-    panthor.router.cache_file:
-        class: 'string'
-        factory: ['QL\Panthor\Utility\Stringify', 'template']
-        arguments: ['%%s/%%s', ['@root', '%routes.cached%']]
+            - ['setCaching', ['%env(PANTHOR_WEBROOT)%/%routes.cached%', '%routes.cache_disabled%']]
 
     ############################################################################
     # Panthor Cookies
@@ -288,7 +281,7 @@ services:
 
     panthor.twig.configurator:
         class: 'QL\Panthor\Twig\EnvironmentConfigurator'
-        arguments: ['%twig.debug%', '@twig.cache.dir']
+        arguments: ['%twig.debug%', '%twig.cache.dir%']
 
     panthor.twig.template:
         class: 'QL\Panthor\Twig\LazyTwig'
@@ -296,19 +289,9 @@ services:
     panthor.twig.context:
         class: 'QL\Panthor\Twig\Context'
 
-    panthor.twig.template.dir:
-        class: 'Factory_generated_scalar'
-        factory: ['QL\Panthor\Utility\Stringify', 'template']
-        arguments: ['%%s/%%s', ['@root', '%twig.template.dir%']]
-
-    panthor.twig.cache.dir:
-        class: 'Factory_generated_scalar'
-        factory: ['QL\Panthor\Utility\Stringify', 'template']
-        arguments: ['%%s/%%s', ['@root', '%twig.cache.dir%']]
-
     panthor.twig.loader:
         class: 'QL\Panthor\Twig\BetterCachingFilesystem'
-        arguments: ['@panthor.twig.template.dir']
+        arguments: ['%twig.template.dir%']
 
     panthor.twig.environment:
         class: 'Twig_Environment'
