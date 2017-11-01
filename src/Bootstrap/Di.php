@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 class DI
 {
     const PRIMARY_CONFIGURATION_FILE = 'config/config.yaml';
-    const ENV_CACHE_DISABLED = 'HAL_DI_DISABLE_CACHE_ON';
+    const ENV_CACHE_DISABLED = 'PANTHOR_DI_DISABLE_CACHE_ON';
 
     // When the container is built (dev-mode), this dumps and loads the cached
     // container instead of using "ContainerBuilder"
@@ -34,7 +34,7 @@ class DI
      *
      * @return ContainerBuilder
      */
-    public static function buildDI(string $root, bool $resolveEnvironment = false)
+    public static function buildDI($root, $resolveEnvironment = false)
     {
         $root = rtrim($root, '/');
 
@@ -71,9 +71,9 @@ class DI
      *
      * @return ContainerBuilder
      */
-    public static function getDI(string $root, array $options)
+    public static function getDI($root, array $options)
     {
-        $class = $options['class'] ?? '';
+        $class = $options['class'] ?: '';
         if (!$class) {
             return false;
         }
@@ -114,7 +114,7 @@ class DI
      */
     public static function cacheDI(ContainerBuilder $container, array $options)
     {
-        $class = $options['class'] ?? '';
+        $class = $options['class'] ?: '';
         if (!$class) {
             return false;
         }
@@ -126,7 +126,7 @@ class DI
         ]);
 
         $dumper = new PhpDumper($container);
-        if (class_exists(PhpDumper::class)) {
+        if (class_exists(ProxyDumper::class)) {
             $dumper->setProxyDumper(new ProxyDumper);
         }
 
