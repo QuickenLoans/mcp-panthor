@@ -21,44 +21,34 @@ class DiTest extends PHPUnit_Framework_TestCase
 
     public function testBuildDI()
     {
-        $di = TestDi::buildDi($this->root);
+        $di = TestDi::buildDI($this->root);
 
         $this->assertInstanceOf(ContainerInterface::class, $di);
     }
 
-    public function testBuildDIWithModifier()
-    {
-        $spy = null;
-        $callback = function($container) use (&$spy) {
-            $spy = $container;
-        };
-
-        $di = TestDi::buildDi($this->root, $callback);
-
-        $this->assertSame($spy, $di);
-    }
-
     public function testCacheDI()
     {
-        $di = TestDi::buildDi($this->root);
+        $di = TestDi::buildDI($this->root);
 
-        $cachedDI = TestDi::dumpDi($di, 'MyDIClass');
+        $cachedDI = TestDi::cacheDI($di, [ 'class' => 'MyDIClass' ]);
 
         $this->assertContains('class MyDIClass extends Container', $cachedDI);
     }
 
     public function testLoadingCachedDI()
     {
-        $containerClass = 'MyDIClass' . mt_rand(1000, 2000);
+        $cacheOptions = [
+            'class' => 'MyDIClass' . mt_rand(1000, 2000)
+        ];
 
-        $di = TestDi::buildDi($this->root);
-        $cachedDI = TestDi::dumpDi($di, $containerClass);
+        $di = TestDi::buildDI($this->root);
+        $cachedDI = TestDi::cacheDI($di, $cacheOptions);
 
         eval(strstr($cachedDI, "\n"));
 
-        $di = TestDi::getDi($this->root, $containerClass);
+        $di = TestDi::getDI($this->root, $cacheOptions);
 
-        $this->assertInstanceOf($containerClass, $di);
+        $this->assertInstanceOf($cacheOptions['class'], $di);
     }
 }
 
