@@ -59,7 +59,7 @@ This configuration provides many boilerplates services.
 
 Service                  | Description
 ------------------------ | -----------
-root                     | The application root. NO TRAILING SLASH.
+env(PANTHOR_APPROOT)     | The application root. NO TRAILING SLASH.
 slim                     | Slim\App
 environment              | Slim\Environment
 router                   | Slim\Router (or [CacheableRouter](../src/Bootstrap/CacheableRouter.php))

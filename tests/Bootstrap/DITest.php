@@ -10,7 +10,7 @@ namespace QL\Panthor\Bootstrap;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class DiTest extends PHPUnit_Framework_TestCase
+class DITest extends PHPUnit_Framework_TestCase
 {
     public $root;
 
@@ -21,16 +21,16 @@ class DiTest extends PHPUnit_Framework_TestCase
 
     public function testBuildDI()
     {
-        $di = TestDi::buildDI($this->root);
+        $di = TestDI::buildDI($this->root);
 
         $this->assertInstanceOf(ContainerInterface::class, $di);
     }
 
     public function testCacheDI()
     {
-        $di = TestDi::buildDI($this->root);
+        $di = TestDI::buildDI($this->root);
 
-        $cachedDI = TestDi::cacheDI($di, [ 'class' => 'MyDIClass' ]);
+        $cachedDI = TestDI::cacheDI($di, [ 'class' => 'MyDIClass' ]);
 
         $this->assertContains('class MyDIClass extends Container', $cachedDI);
     }
@@ -41,18 +41,18 @@ class DiTest extends PHPUnit_Framework_TestCase
             'class' => 'MyDIClass' . mt_rand(1000, 2000)
         ];
 
-        $di = TestDi::buildDI($this->root);
-        $cachedDI = TestDi::cacheDI($di, $cacheOptions);
+        $di = TestDI::buildDI($this->root);
+        $cachedDI = TestDI::cacheDI($di, $cacheOptions);
 
         eval(strstr($cachedDI, "\n"));
 
-        $di = TestDi::getDI($this->root, $cacheOptions);
+        $di = TestDI::getDI($this->root, $cacheOptions);
 
         $this->assertInstanceOf($cacheOptions['class'], $di);
     }
 }
 
-class TestDi extends Di
+class TestDI extends DI
 {
     const PRIMARY_CONFIGURATION_FILE = 'configuration/panthor-slim.yml';
 }

@@ -13,12 +13,7 @@ ROOT
 │   └─ executables
 │
 ├─ configuration
-│   ├─ environment
-│   │   ├─ dev.yml
-│   │   ├─ test.yml
-│   │   ├─ beta.yml
-│   │   └─ prod.yml
-│   │
+│   ├─ .env
 │   ├─ bootstrap.php
 │   ├─ config.yml
 │   ├─ di.yml
@@ -59,11 +54,11 @@ to an environment, the matching file is found and merged into the general applic
 >
 > namespace TestApplication\Bootstrap;
 >
-> use QL\Panthor\Bootstrap\Di;
+> use QL\Panthor\Bootstrap\DI;
 > use TestApplication\CachedContainer;
 >
 > $root = __DIR__ . '/..';
-> require_once $root . '/vendor/autoload.php';
+> require_once "${root}/vendor/autoload.php";
 >
 > // Set Timezone to UTC
 > ini_set('date.timezone', 'UTC');
@@ -73,7 +68,13 @@ to an environment, the matching file is found and merged into the general applic
 > mb_internal_encoding('UTF-8');
 > mb_regex_encoding('UTF-8');
 >
-> $container = Di::getDi($root, CachedContainer::class);
+> # $dotenv = new Dotenv;
+> # $dotenv->load("${root}/config/.env");
+>
+> $container = DI::getDi($root, [
+>     'file'  => "${root}/src/CachedContainer.php",
+>     'class' => CachedContainer::class
+> ]);
 >
 > return $container;
 > ```
@@ -93,6 +94,9 @@ to an environment, the matching file is found and merged into the general applic
 >
 > parameters:
 >     cookie.encryption.secret: '' # 128-character hexademical string. Used for cookie encryption with libsodium.
+>
+>     # We recommend using Symfony/Dotenv instead!
+>     env(PANTHOR_APPROOT): '/full/path/to/application'
 > ```
 
 `di.yml`

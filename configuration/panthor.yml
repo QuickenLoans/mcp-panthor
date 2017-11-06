@@ -12,8 +12,8 @@ parameters:
 
     # twig defaults
     twig.debug: true
-    twig.template.dir: '%env(PANTHOR_WEBROOT)%/templates'
-    twig.cache.dir: '%env(PANTHOR_WEBROOT)%/.twig'
+    twig.template.dir: '%env(PANTHOR_APPROOT)%/templates'
+    twig.cache.dir: '%env(PANTHOR_APPROOT)%/.twig'
 
     # cookie
     cookie.encryption.secret: ''
@@ -86,7 +86,7 @@ services:
     panthor.router:
         class: 'QL\Panthor\Bootstrap\CacheableRouter'
         calls:
-            - ['setCaching', ['%env(PANTHOR_WEBROOT)%/%routes.cached%', '%routes.cache_disabled%']]
+            - ['setCaching', ['%env(PANTHOR_APPROOT)%/%routes.cached%', '%routes.cache_disabled%']]
 
     ############################################################################
     # Panthor Cookies
