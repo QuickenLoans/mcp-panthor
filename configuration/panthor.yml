@@ -281,7 +281,7 @@ services:
 
     panthor.twig.configurator:
         class: 'QL\Panthor\Twig\EnvironmentConfigurator'
-        arguments: ['%twig.debug%', '%twig.cache.dir%']
+        arguments: ['%twig.debug%', '@panthor.twig.cache']
 
     panthor.twig.template:
         class: 'QL\Panthor\Twig\LazyTwig'
@@ -290,8 +290,12 @@ services:
         class: 'QL\Panthor\Twig\Context'
 
     panthor.twig.loader:
-        class: 'QL\Panthor\Twig\BetterCachingFilesystem'
+        class: 'Twig_Loader_Filesystem'
         arguments: ['%twig.template.dir%']
+
+    panthor.twig.cache:
+        class: 'Twig_Cache_Filesystem'
+        arguments: ['%twig.cache.dir%']
 
     panthor.twig.environment:
         class: 'Twig_Environment'
