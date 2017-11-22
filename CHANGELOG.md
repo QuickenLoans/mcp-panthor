@@ -2,6 +2,31 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.2.0] - 2017-11-??
+
+### Added
+
+### Changed
+- **LibsodiumSymmetricCrypto** (used for cookie encrption) is now compatible
+  with `ext-sodium` and PHP 7.2.
+- *[BC BREAK]* Changed **Di** utility class to **DI** and changed many methods and parameters.
+  - Removed `symfony.debug` to control symfony DI caching
+    > Use environment variable `PANTHOR_DI_DISABLE_CACHE_ON` instead.
+  - Changed default config entrypoint from `configuration/config.yml` to `config/config.yaml`.
+  - `buildDi($root, callable $modifier = null)` to `Di::buildDI($root, $resolveEnv = false)`
+  - `Di:getDi($root, $class, callable $modifier = null)` to `getDI($root, array $options)`
+  - `Di::dumpDi(ContainerBuilder $container, $class, $baseClass = null)` to `Di::cacheDI(ContainerBuilder $container, array $options)`
+  - The only option generally needed is `class` - the fully qualified class name of your cached container.
+
+### Removed
+- Removed **BetterCachingFilesystem** from twig add-ons.
+  > This replacement for Twig Filesystem was used to allow twig caches to be
+  > generated on a build server, which may have a different absolute path (which
+  > twig previously used for the cache key). Use `twig/twig >= ~1.27`.
+- Removed `@root` synthetic path to application root in the DI container.
+  > Set environment variable `PANTHOR_APPROOT` instead. We **highly recommend**
+  > using `symfony/dotenv` for managing environment config.
+
 ## [3.1.0] - 2017-02-20
 
 ### Added

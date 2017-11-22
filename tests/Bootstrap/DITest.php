@@ -35,6 +35,22 @@ class DITest extends PHPUnit_Framework_TestCase
         $this->assertContains('class MyDIClass extends Container', $cachedDI);
     }
 
+    public function invalidOptionsForGetReturnsNull()
+    {
+        $di = TestDI::getDI($this->root, []);
+
+        $this->assertSame(null, $di);
+    }
+
+    public function invalidOptionsForCacheReturnsNull()
+    {
+        $di = TestDI::buildDI($this->root);
+
+        $cachedDI = TestDI::cacheDI($di, []);
+
+        $this->assertSame(null, $cachedDI);
+    }
+
     public function testLoadingCachedDI()
     {
         $cacheOptions = [

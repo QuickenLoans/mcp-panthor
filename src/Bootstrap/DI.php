@@ -69,13 +69,13 @@ class DI
      * @param string $root
      * @param array $options
      *
-     * @return ContainerBuilder
+     * @return ContainerBuilder|null
      */
     public static function getDI($root, array $options)
     {
         $class = $options['class'] ?: '';
         if (!$class) {
-            return false;
+            return null;
         }
 
         $cacheDisabled = getenv(static::ENV_CACHE_DISABLED);
@@ -100,9 +100,6 @@ class DI
             $container = new $class;
         }
 
-        // @todo remove
-        $container->set('root', 'derpherp');
-
         return $container;
     }
 
@@ -110,13 +107,13 @@ class DI
      * @param ContainerBuilder $container
      * @param array $options
      *
-     * @return string The cached container file contents.
+     * @return string|null The cached container file contents.
      */
     public static function cacheDI(ContainerBuilder $container, array $options)
     {
         $class = $options['class'] ?: '';
         if (!$class) {
-            return false;
+            return null;
         }
 
         $exploded = explode('\\', $class);
