@@ -96,7 +96,6 @@ class SessionMiddleware implements MiddlewareInterface
     private function serializeSession(ResponseInterface $response, SessionInterface $session)
     {
         if ($session->hasChanged()) {
-
             $serialized = call_user_func([$this->options['session_class'], 'toSerialized'], $session);
 
             $response = $this->handler->withCookie(
