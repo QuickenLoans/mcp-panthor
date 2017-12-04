@@ -44,15 +44,15 @@ Here's a few of the features Panthor provides:
 ## Compatibility
 
 - **Panthor 1**
-    - Slim ~2.0
-    - Symfony ~2.0
+    - Slim `~2.0`
+    - Symfony `~2.0`
 - **Panthor 2**
-    - Slim ~2.0
-    - Symfony ~2.0
+    - Slim `~2.0`
+    - Symfony `~2.0`
 - **Panthor 3**
-    - Slim ~3.3
-    - Symfony ~3.0
-    - PHP ~5.6 || ~7.0
+    - Slim `~3.3`
+    - Symfony `~3.0 || ~4.0`
+    - PHP `~5.6 || ~7.0`
 
 ## Starting a new application?
 

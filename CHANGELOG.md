@@ -2,9 +2,11 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
-## [3.2.0] - 2017-11-??
+## [3.2.0] - 2017-12-??
 
 ### Added
+- **SessionInterface** and **JSONEncodedSession** for attaching Session to the request context.
+  - Also added **SessionMiddleware** for loading session data from the cookie (Uses `CookieHandler`).
 
 ### Changed
 - **LibsodiumSymmetricCrypto** (used for cookie encrption) is now compatible
