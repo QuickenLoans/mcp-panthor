@@ -291,7 +291,7 @@ services:
 
     panthor.twig.loader:
         class: 'Twig_Loader_Filesystem'
-        arguments: ['%twig.template.dir%']
+        arguments: ['%twig.template.dir%', '%env(PANTHOR_APPROOT)%']
 
     panthor.twig.cache:
         class: 'Twig_Cache_Filesystem'
