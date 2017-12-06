@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
-## [3.2.0] - 2017-12-??
+## [3.2.0] - 2017-12-06
 
 ### Added
 - **SessionInterface** and **JSONEncodedSession** for attaching Session to the request context.
