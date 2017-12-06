@@ -112,8 +112,8 @@ class RouteLoader
     {
         $methods = $this->methods($details);
         $pattern = $this->nullable('route', $details);
+        $stack = $this->nullable('stack', $details) ?: [];
 
-        $stack = $details['stack'];
         $controller = array_pop($stack);
 
         $route = $slim->map($methods, $pattern, $controller);

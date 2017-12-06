@@ -28,9 +28,9 @@
         "ql/mcp-common":       "~1.0",
         "slim/slim":           "~3.4",
 
-        "symfony/config":               "~3.0",
-        "symfony/dependency-injection": "~3.0",
-        "symfony/yaml":                 "~3.0"
+        "symfony/config":               "~3.0 || ~4.0",
+        "symfony/dependency-injection": "~3.0 || ~4.0",
+        "symfony/yaml":                 "~3.0 || ~4.0"
     },
 
     "require-dev": {
@@ -41,12 +41,11 @@
         "ext-libsodium":           "~1.0",
         "paragonie/random_compat": "~1.1",
 
-        "symfony/proxy-manager-bridge": "~3.3",
-
-        "twig/twig": "*"
+        "symfony/proxy-manager-bridge": "~3.3 || ~4.0",
+        "twig/twig": "~1.27"
     },
 
     "suggest": {
-        "ext-libsodium": "~1.0 PECL Libsodium recommended for secure cookie encryption."
+        "ext-libsodium": "~1.0 || ~2.0 PECL Libsodium recommended for secure cookie encryption."
     }
 }

@@ -12,8 +12,8 @@ parameters:
 
     # twig defaults
     twig.debug: true
-    twig.template.dir: '%env(PANTHOR_WEBROOT)%/templates'
-    twig.cache.dir: '%env(PANTHOR_WEBROOT)%/.twig'
+    twig.template.dir: '%env(PANTHOR_APPROOT)%/templates'
+    twig.cache.dir: '%env(PANTHOR_APPROOT)%/.twig'
 
     # cookie
     cookie.encryption.secret: ''
@@ -86,7 +86,7 @@ services:
     panthor.router:
         class: 'QL\Panthor\Bootstrap\CacheableRouter'
         calls:
-            - ['setCaching', ['%env(PANTHOR_WEBROOT)%/%routes.cached%', '%routes.cache_disabled%']]
+            - ['setCaching', ['%env(PANTHOR_APPROOT)%/%routes.cached%', '%routes.cache_disabled%']]
 
     ############################################################################
     # Panthor Cookies
@@ -281,7 +281,7 @@ services:
 
     panthor.twig.configurator:
         class: 'QL\Panthor\Twig\EnvironmentConfigurator'
-        arguments: ['%twig.debug%', '%twig.cache.dir%']
+        arguments: ['%twig.debug%', '@panthor.twig.cache']
 
     panthor.twig.template:
         class: 'QL\Panthor\Twig\LazyTwig'
@@ -290,8 +290,12 @@ services:
         class: 'QL\Panthor\Twig\Context'
 
     panthor.twig.loader:
-        class: 'QL\Panthor\Twig\BetterCachingFilesystem'
-        arguments: ['%twig.template.dir%']
+        class: 'Twig_Loader_Filesystem'
+        arguments: ['%twig.template.dir%', '%env(PANTHOR_APPROOT)%']
+
+    panthor.twig.cache:
+        class: 'Twig_Cache_Filesystem'
+        arguments: ['%twig.cache.dir%']
 
     panthor.twig.environment:
         class: 'Twig_Environment'

@@ -7,6 +7,7 @@
 
 namespace QL\Panthor\Twig;
 
+use Twig_CacheInterface;
 use Twig_Environment;
 
 /**
@@ -23,18 +24,18 @@ class EnvironmentConfigurator
     private $debugMode;
 
     /**
-     * @var string
+     * @var Twig_CacheInterface
      */
-    private $cacheDir;
+    private $cache;
 
     /**
      * @param bool $debugMode
-     * @param string $cacheDir
+     * @param Twig_CacheInterface $cache
      */
-    public function __construct($debugMode, $cacheDir)
+    public function __construct($debugMode, Twig_CacheInterface $cache)
     {
         $this->debugMode = $debugMode;
-        $this->cacheDir = $cacheDir;
+        $this->cache = $cache;
     }
 
     /**
@@ -50,7 +51,7 @@ class EnvironmentConfigurator
         } else {
             $environment->disableDebug();
             $environment->disableAutoReload();
-            $environment->setCache($this->cacheDir);
+            $environment->setCache($this->cache);
         }
 
         $this->applicationConfigure($environment);

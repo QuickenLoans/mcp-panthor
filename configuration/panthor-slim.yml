@@ -69,4 +69,3 @@ services:
     errorHandler:
         class: 'Slim\Handlers\Error'
         arguments: ['%slim.settings.display_errors%']
-

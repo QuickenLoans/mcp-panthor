@@ -10,8 +10,9 @@ namespace QL\Panthor\Bootstrap;
 use RuntimeException;
 use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
@@ -69,54 +70,34 @@ class DI
      * @param string $root
      * @param array $options
      *
-     * @return ContainerBuilder
+     * @return ContainerBuilder|null
      */
     public static function getDI($root, array $options)
     {
         $class = $options['class'] ?: '';
         if (!$class) {
-            return false;
+            return null;
         }
 
         $cacheDisabled = getenv(static::ENV_CACHE_DISABLED);
-
         if ($cacheDisabled) {
-
-            $container = static::buildDI($root, !static::BUILD_AND_CACHE);
-
-            if (static::BUILD_AND_CACHE) {
-                $cached = static::cacheDI($container, $options);
-
-                $content = str_replace('<?php', '', $cached);
-                eval($content);
-                $container = new $class;
-            }
-
-        } else {
-            if (!class_exists($class)) {
-                throw new RuntimeException("DI Cached Container class not found: \"${class}\"");
-            }
-
-            $container = new $class;
+            return self::buildContainer($root, $class, $options);
         }
 
-        // @todo remove
-        $container->set('root', 'derpherp');
-
-        return $container;
+        return self::getCachedContainer($class);
     }
 
     /**
      * @param ContainerBuilder $container
      * @param array $options
      *
-     * @return string The cached container file contents.
+     * @return string|null The cached container file contents.
      */
     public static function cacheDI(ContainerBuilder $container, array $options)
     {
         $class = $options['class'] ?: '';
         if (!$class) {
-            return false;
+            return null;
         }
 
         $exploded = explode('\\', $class);
@@ -131,5 +112,41 @@ class DI
         }
 
         return $dumper->dump($config);
+    }
+
+    /**
+     * @param string $class
+     *
+     * @return ContainerInterface
+     */
+    private static function getCachedContainer($class)
+    {
+        if (!class_exists($class)) {
+            throw new RuntimeException("DI Cached Container class not found: \"${class}\"");
+        }
+
+        return new $class;
+    }
+
+    /**
+     * @param string $root
+     * @param string $class
+     * @param array $options
+     *
+     * @return ContainerInterface
+     */
+    private static function buildContainer($root, $class, $options)
+    {
+        $container = static::buildDI($root, !static::BUILD_AND_CACHE);
+
+        if (static::BUILD_AND_CACHE) {
+            $cached = static::cacheDI($container, $options);
+
+            $content = str_replace('<?php', '', $cached);
+            eval($content);
+            $container = new $class;
+        }
+
+        return $container;
     }
 }

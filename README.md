@@ -44,15 +44,15 @@ Here's a few of the features Panthor provides:
 ## Compatibility
 
 - **Panthor 1**
-    - Slim ~2.0
-    - Symfony ~2.0
+    - Slim `~2.0`
+    - Symfony `~2.0`
 - **Panthor 2**
-    - Slim ~2.0
-    - Symfony ~2.0
+    - Slim `~2.0`
+    - Symfony `~2.0`
 - **Panthor 3**
-    - Slim ~3.3
-    - Symfony ~3.0
-    - PHP ~5.6 || ~7.0
+    - Slim `~3.3`
+    - Symfony `~3.0 || ~4.0`
+    - PHP `~5.6 || ~7.0`
 
 ## Starting a new application?
 
@@ -111,6 +111,9 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >     - resource: ../vendor/ql/mcp-panthor/configuration/panthor.yml
     >     - resource: di.yml
     >     - resource: routes.yml
+    >
+    > parameters:
+    >     env(PANTHOR_APPROOT): '/full/path/to/application' # We recommend using Symfony/Dotenv instead!
     > ```
 
 4. `configuration/di.yml` will contain service definitions for your application, such as controllers.
@@ -140,13 +143,16 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >
     > namespace TestApplication\Bootstrap;
     >
-    > use QL\Panthor\Bootstrap\Di;
+    > use QL\Panthor\Bootstrap\DI;
     > use TestApplication\CachedContainer;
     >
     > $root = __DIR__ . '/..';
-    > require_once $root . '/vendor/autoload.php';
+    > require_once "${root}/vendor/autoload.php";
     >
-    > return Di::getDi($root, CachedContainer::class);
+    > return DI::getDi($root, [
+    >     'file'  => "${root}/src/CachedContainer.php",
+    >     'class' => CachedContainer::class
+    > ]);
     > ```
 
 7. `public/index.php` loads the bootstrap, attaches routes and starts **Slim**.
@@ -207,7 +213,7 @@ Check the documentation links below for further details.
   > Details on where code and configuration goes.
 
 - [How To Use](docs/USAGE.md)
-  > Explanations of controllers and middleware, as well as services injected into the Di Container by Panthor.
+  > Explanations of controllers and middleware, as well as services injected into the DI Container by Panthor.
 
 - [Error Handling](docs/ERRORS.md)
   > How to use the included error handler and logger.
