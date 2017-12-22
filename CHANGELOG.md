@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.2.1] - 2017-12-22
+
+### Changed
+- All services in `panthor-slim.yml` and `panthor.yml` are now public by default to enable Symfony 4 support.
+- Bumped minimum symfony versions to `~3.3 || ~4.0`
+
 ## [3.2.0] - 2017-12-06
 
 ### Added
