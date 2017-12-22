@@ -35,6 +35,9 @@ parameters:
     error_handling.html_template: 'error.html.twig'
 
 services:
+    _defaults:
+        public: true
+
     # Injected at runtime by the Bootstrap
     # Note: This path has NO TRAILING SLASH
     root:               { synthetic: true }
@@ -62,7 +65,7 @@ services:
     cookie.encryption:              { alias: panthor.cookie.encryption }
     cookie.handler:                 { alias: panthor.cookie.handler }
 
-    twig.template:                  { parent: panthor.twig.template }
+    twig.template:                  { parent: panthor.twig.template, public: true }
     twig.context:                   { alias: panthor.twig.context }
 
     twig.loader:                    { alias: panthor.twig.loader }

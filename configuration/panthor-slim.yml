@@ -20,6 +20,8 @@ parameters:
     slim.default_status_code: 200
 
 services:
+    _defaults:
+        public: true
 
     slim.di:
         class: 'Acclimate\Container\Adapter\SymfonyContainerAdapter'
