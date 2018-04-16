@@ -51,7 +51,7 @@ In included DI configuration has been split into two files:
 - `panthor-slim.yml` (Standard definitions for slim components)
 - `panthor.yml` (DI Definitions for panthor components and add-ons)
 
-If you use the included configs, include them in your `config.yml`:
+If you use the included configs, include them in your `config.yaml`:
 ```yaml
 imports:
     - resource: ../vendor/ql/mcp-panthor/configuration/panthor-slim.yml
@@ -163,7 +163,7 @@ And generate cached routes by running a script like so during your build process
 
 ```php
 $root = __DIR__;
-if (!$container = @include $root . '/configuration/bootstrap.php') {
+if (!$container = @include $root . '/config/bootstrap.php') {
     echo "An error occured while attempting to cache routes.\n";
     exit(1);
 };
