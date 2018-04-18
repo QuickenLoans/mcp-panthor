@@ -12,10 +12,10 @@ ROOT
 ├─ bin
 │   └─ executables
 │
-├─ configuration
+├─ config
 │   ├─ .env
 │   ├─ bootstrap.php
-│   ├─ config.yml
+│   ├─ config.yaml
 │   ├─ di.yml
 │   └─ routes.yml
 │
@@ -36,7 +36,7 @@ ROOT
        └─ ... tests
 ```
 
-#### configuration/
+#### config/
 
 The configuration directory contains all configuration files, usually in YAML.
 
@@ -79,7 +79,7 @@ to an environment, the matching file is found and merged into the general applic
 > return $container;
 > ```
 
-`config.yml`
+`config.yaml`
 > It is used for environment-independent configuration and is the common configuration file that loads all other
 > configuration. If you would like to break up your config or DI settings into multiple files to maintain your
 > sanity, just add them to the list of imports at the top of the file.

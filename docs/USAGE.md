@@ -38,9 +38,9 @@ controllers may implement, but no type checks are performed.
 #### Dependency Injection Configuration
 
 It is recommended applications import the panthor `panthor-slim.yml` and `panthor.yml` configuration files in their
-application `config.yml` file.
+application `config.yaml` file.
 
-Example `config.yml`:
+Example `config.yaml`:
 ```yaml
 imports:
     - resource: ../vendor/ql/mcp-panthor/configuration/panthor-slim.yml

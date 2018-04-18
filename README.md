@@ -74,9 +74,9 @@ Never used Composer, Slim or Symfony before? Here are some resources:
 1. Create an application with the following file hiearchy:
 
    > ```
-   > configuration/
+   > config/
    >     bootstrap.php
-   >     config.yml
+   >     config.yaml
    >     di.yml
    >     routes.yml
    > public/
@@ -103,7 +103,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
    > }
    > ```
 
-3. `configuration/config.yml` should import other config resources.
+3. `config/config.yaml` should import other config resources.
 
     > ```yaml
     > imports:
@@ -116,7 +116,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >     env(PANTHOR_APPROOT): '/full/path/to/application' # We recommend using Symfony/Dotenv instead!
     > ```
 
-4. `configuration/di.yml` will contain service definitions for your application, such as controllers.
+4. `config/di.yml` will contain service definitions for your application, such as controllers.
 
     > ```yaml
     > services:
@@ -124,7 +124,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >         class: 'TestApplication\TestController'
     > ```
 
-5. `configuration/routes.yml` contains routes.
+5. `config/routes.yml` contains routes.
 
     > Routes is simply another config parameter passed into the DI container. It maps a route name to a url and list of
     > services to call.
@@ -136,7 +136,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >             stack: ['page.hello_world']
     > ```
 
-6. `configuration/bootstrap.php` should load the composer autoloader and return the DI container.
+6. `config/bootstrap.php` should load the composer autoloader and return the DI container.
 
     > ```php
     > <?php
@@ -162,7 +162,7 @@ Never used Composer, Slim or Symfony before? Here are some resources:
     >
     > namespace TestApplication\Bootstrap;
     >
-    > if (!$container = @include __DIR__ . '/../configuration/bootstrap.php') {
+    > if (!$container = @include __DIR__ . '/../config/bootstrap.php') {
     >     http_response_code(500);
     >     echo "The application failed to start.\n";
     >     exit;
