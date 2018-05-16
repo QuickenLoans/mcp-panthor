@@ -52,7 +52,7 @@ See [keepachangelog.com](http://keepachangelog.com) for reference.
     >        - 'middleware2.service_name'
     > services:
     >     global_middleware_loader:
-    >         class: 'QL\Panthor\Bootstrap\Setup\AttachGlobalMiddleware'
+    >         class: 'QL\Panthor\Bootstrap\Setup\GlobalMiddlewareLoader'
     >         arguments: ['@service_container', '%global.middleware%']
     > ```
     >
