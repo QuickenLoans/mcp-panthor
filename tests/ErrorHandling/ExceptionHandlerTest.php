@@ -9,15 +9,18 @@ namespace QL\Panthor\ErrorHandling;
 
 use ErrorException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
 use Slim\App;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class ExceptionHandlerTest extends PHPUnit_Framework_TestCase
+class ExceptionHandlerTest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     private $request;
     private $response;
     private $contentHandler;

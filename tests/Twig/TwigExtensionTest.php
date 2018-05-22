@@ -10,14 +10,17 @@ namespace QL\Panthor\Twig;
 use DateTime;
 use DateTimeZone;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\MCP\Common\Time\Clock;
 use QL\MCP\Common\Time\TimePoint;
 use QL\Panthor\Utility\URI;
 use stdClass;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class TwigExtensionTest extends PHPUnit_Framework_TestCase
+class TwigExtensionTest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     public $uri;
     public $clock;
 

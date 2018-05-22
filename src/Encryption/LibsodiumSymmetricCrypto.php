@@ -12,7 +12,7 @@ use QL\MCP\Common\Utility\ByteString;
 use QL\Panthor\Exception\CryptoException;
 
 /**
- * This uses libsodium encryption from Libsodium ~1.0 or Libsodium ~2.0
+ * This uses libsodium encryption from Libsodium ~2.0
  *
  * @see https://pecl.php.net/package/libsodium
  * @see https://github.com/jedisct1/libsodium-php
@@ -176,7 +176,7 @@ class LibsodiumSymmetricCrypto
      */
     private function sodiumHex2bin($var)
     {
-        if ($this->libsodiumVersion === '2') {
+        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
             return \sodium_hex2bin($var);
         }
 
@@ -195,7 +195,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoAuth($message, $key)
     {
-        if ($this->libsodiumVersion === '2') {
+        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
             return \sodium_crypto_auth($message, $key);
         }
 
@@ -211,7 +211,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoBytes()
     {
-        if ($this->libsodiumVersion === '2') {
+        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
             return SODIUM_CRYPTO_AUTH_BYTES;
         }
 
@@ -231,7 +231,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoAuthVerify($mac, $message, $key)
     {
-        if ($this->libsodiumVersion === '2') {
+        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
             return \sodium_crypto_auth_verify($mac, $message, $key);
         }
 
@@ -251,7 +251,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumSecretBox($message, $nonce, $key)
     {
-        if ($this->libsodiumVersion === '2') {
+        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
             return \sodium_crypto_secretbox($message, $nonce, $key);
         }
 
@@ -271,7 +271,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumSecretBoxOpen($message, $nonce, $key)
     {
-        if ($this->libsodiumVersion === '2') {
+        if ($this->libsodiumVersion === '2'|| $this->libsodiumVersion === '7') {
             return \sodium_crypto_secretbox_open($message, $nonce, $key);
         }
 

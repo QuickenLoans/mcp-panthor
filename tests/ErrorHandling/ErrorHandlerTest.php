@@ -9,13 +9,13 @@ namespace QL\Panthor\ErrorHandling;
 
 use ErrorException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
-use QL\MCP\Common\Testing\MemoryLogger;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use QL\Panthor\Exception\Exception;
 use QL\Panthor\Testing\MockeryAssistantTrait;
 use Slim\App;
 
-class ErrorHandlerTest extends PHPUnit_Framework_TestCase
+class ErrorHandlerTest extends TestCase
 {
     use MockeryAssistantTrait;
 
@@ -92,16 +92,14 @@ class ErrorHandlerTest extends PHPUnit_Framework_TestCase
 
     public function testLoggableErrorIsLoggedIfNotThrown()
     {
-        $logger = new MemoryLogger;
+        $logger = Mockery::mock(LoggerInterface::class);
         $handler = new ErrorHandler($this->exHandler, $logger);
         $handler->setThrownErrors(\E_NOTICE);
         $handler->setLoggedErrors(\E_DEPRECATED);
 
-        $isHandled = $handler->handleError(\E_DEPRECATED, 'error message', 'filename.php', '80');
+        $logger->shouldReceive('log')->with(Mockery::any(), 'Deprecated: error message', Mockery::any());
 
-        $this->assertSame(true, $isHandled);
-        $this->assertCount(1, $logger->messages);
-        $this->assertSame('Deprecated: error message', $logger->messages[0]['message']);
+        $isHandled = $handler->handleError(\E_DEPRECATED, 'error message', 'filename.php', '80');
     }
 
     public function testErrorSeverityType()

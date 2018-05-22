@@ -8,12 +8,15 @@
 namespace QL\Panthor\Utility;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Slim\Http\Uri as SlimUri;
 use Slim\Router;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class URITest extends PHPUnit_Framework_TestCase
+class URITest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     private $router;
 
     public function setUp()
@@ -71,4 +74,3 @@ class URITest extends PHPUnit_Framework_TestCase
         $this->assertSame('http://host:8443/test-route-page', $actual);
     }
 }
-

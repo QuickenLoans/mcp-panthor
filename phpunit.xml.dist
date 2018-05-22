@@ -9,7 +9,7 @@
         convertWarningsToExceptions="true"
         forceCoversAnnotation="false"
         mapTestClassNameToCoveredClassName="true"
-        printerClass="PHPUnit_TextUI_ResultPrinter"
+        printerClass="PHPUnit\TextUI\ResultPrinter"
         processIsolation="false"
         stopOnError="true"
         stopOnFailure="true"

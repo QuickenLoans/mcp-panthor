@@ -9,13 +9,15 @@ namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
-use QL\MCP\Common\Testing\MemoryLogger;
+use PHPUnit\Framework\TestCase;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use QL\MCP\Logger\MemoryLogger;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
 
-class LoggingContentHandlerTest extends PHPUnit_Framework_TestCase
+class LoggingContentHandlerTest extends TestCase
 {
     private $request;
     private $response;
@@ -26,7 +28,28 @@ class LoggingContentHandlerTest extends PHPUnit_Framework_TestCase
     {
         $this->request = Request::createFromEnvironment(Environment::mock());
         $this->response = new Response;
-        $this->logger = new MemoryLogger;
+
+        //Because I can
+        $this->logger = new class() implements LoggerInterface {
+            use LoggerTrait;
+
+            public $messages = [];
+            /**
+             * @param mixed $level
+             * @param string $message
+             * @param array $context
+             * @return null
+             */
+            public function log($level, $message, array $context = [])
+            {
+                $this->messages[] = [
+                    'level' => $level,
+                    'message' => $message,
+                    'context' => $context
+                ];
+            }
+        };
+
         $this->config = [
             'error' => 'critical',
             'not-allowed' => 'info',

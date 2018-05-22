@@ -7,10 +7,10 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class DITest extends PHPUnit_Framework_TestCase
+class DITest extends TestCase
 {
     public $root;
 

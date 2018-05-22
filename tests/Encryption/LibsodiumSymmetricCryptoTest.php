@@ -7,10 +7,10 @@
 
 namespace QL\Panthor\Encryption;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 
-class LibsodiumSymmetricCryptoTest extends PHPUnit_Framework_TestCase
+class LibsodiumSymmetricCryptoTest extends TestCase
 {
     private $secret;
 

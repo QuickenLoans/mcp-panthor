@@ -8,9 +8,12 @@
 namespace QL\Panthor\Testing;
 
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 trait MockeryAssistantTrait
 {
+    use MockeryPHPUnitIntegration;
+
     private $spies;
 
     /**

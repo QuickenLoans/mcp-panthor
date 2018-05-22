@@ -8,12 +8,15 @@
 namespace QL\Panthor\HTTP\CookieEncryption;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\Encryption\LibsodiumSymmetricCrypto;
 use QL\Panthor\Exception\CryptoException;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class LibsodiumCookieEncryptionTest extends PHPUnit_Framework_TestCase
+class LibsodiumCookieEncryptionTest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     public $crypto;
     public $binaryData;
 

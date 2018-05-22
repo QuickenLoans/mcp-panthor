@@ -7,9 +7,9 @@
 
 namespace QL\Panthor\HTTPProblem;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class HTTPProblemTest extends PHPUnit_Framework_TestCase
+class HTTPProblemTest extends TestCase
 {
     public function testMinimumValidProblem()
     {
