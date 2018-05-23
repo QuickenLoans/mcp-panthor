@@ -11,7 +11,7 @@ use DateTime;
 use DateTimeZone;
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use QL\MCP\Common\Time\Clock;
+use QL\MCP\Common\Clock;
 use QL\MCP\Common\Time\TimePoint;
 use QL\Panthor\Utility\URI;
 use stdClass;

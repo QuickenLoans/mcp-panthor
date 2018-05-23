@@ -254,7 +254,7 @@ services:
         arguments: ['@router']
 
     panthor.clock:
-        class: 'QL\MCP\Common\Time\Clock'
+        class: 'QL\MCP\Common\Clock'
         arguments: ['now', '%panthor.internal.timezone%']
 
     panthor.json:
