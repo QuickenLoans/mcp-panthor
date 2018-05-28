@@ -23,17 +23,13 @@ services:
     _defaults:
         public: true
 
-    slim.di:
-        class: 'Acclimate\Container\Adapter\SymfonyContainerAdapter'
-        arguments: ['@service_container']
-
     settings:
         class: 'Slim\Collection'
         arguments: ['%slim.settings%']
 
     slim:
         class: 'Slim\App'
-        arguments: ['@slim.di']
+        arguments: ['@service_container']
 
     environment:
         class: 'Slim\Http\Environment'
@@ -56,7 +52,7 @@ services:
 
     callableResolver:
         class: 'Slim\CallableResolver'
-        arguments: ['@slim.di']
+        arguments: ['@service_container']
 
     foundHandler:
         class: 'Slim\Handlers\Strategies\RequestResponse'

@@ -14,17 +14,13 @@
         "psr-4": { "QL\\Panthor\\": "src" }
     },
 
-    "archive": {
-        "exclude": [ "/tests", "/phpunit.xml.dist" ]
-    },
-
     "require": {
         "php": "~7.1",
 
-        "acclimate/container": "~2.0.0",
         "dflydev/fig-cookies": "~1.0",
+        "psr/container":       "~1.0",
         "psr/http-message":    "~1.0",
-        "psr/log":             "*",
+        "psr/log":             "~1.0",
         "ql/mcp-common":       "~2.0",
         "slim/slim":           "~3.10",
 
@@ -34,14 +30,14 @@
     },
 
     "require-dev": {
-        "mockery/mockery":      "~1.1",
-        "phpunit/phpunit":      "~6.5",
-        "codacy/coverage":      "~1.4",
+        "mockery/mockery": "~1.0",
+        "phpunit/phpunit": "~6.0",
+        "codacy/coverage": "~1.4",
 
-        "ext-sodium":           "~2.0 || ~7.2",
+        "ext-sodium": "~2.0 || ~7.2",
 
         "symfony/proxy-manager-bridge": "~4.0",
-        "twig/twig": "~2.4"
+        "twig/twig":                    "~2.4"
     },
 
     "suggest": {
