@@ -19,9 +19,21 @@ persist_workspace: &persist_workspace
         root: '.'
         paths: [ '.' ]
 
+install_libsodium: &install_libsodium
+    run:
+      name: 'Install PECL Libsodium (PHP 7.1 only)'
+      command: |
+        php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+        if [ "${php_version}" == "7.1" ] ; then
+          sudo apt-get install libsodium-dev
+          sudo pecl install libsodium
+          sudo docker-php-ext-enable sodium
+        fi
+
 run_tests_steps: &run_tests_steps
     steps:
         - *attach_workspace
+        - *install_libsodium
         - run:
             name: 'Run unit tests'
             command: 'phpdbg -qrr vendor/bin/phpunit'
@@ -30,7 +42,8 @@ run_tests_steps: &run_tests_steps
         - run:
             name: 'Upload test coverage to Codacy (PHP 7.1 only)'
             command: |
-                if [ "${CIRCLE_JOB}" == "unit_tests_71" ] ; then
+                php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+                if [ "${php_version}" == "7.1" ] ; then
                     ./vendor/bin/codacycoverage clover .phpunit/clover.xml
                 fi
 
@@ -67,6 +80,7 @@ jobs:
         <<: *php71_defaults
         steps:
             - *attach_workspace
+            - *install_libsodium
 
             - restore_cache:
                 keys: [ 'v2-php-deps-{{ checksum "composer.json" }}', 'v2-php-deps' ]
@@ -86,6 +100,7 @@ jobs:
         <<: *php71_defaults
         steps:
             - *attach_workspace
+            - *install_libsodium
             - run:
                 name: 'Run static analysis'
                 command: |
