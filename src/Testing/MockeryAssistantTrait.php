@@ -46,11 +46,11 @@ trait MockeryAssistantTrait
 
         $should = $mock->shouldReceive($method);
 
-        array_walk($parameters, function(&$v) {
+        array_walk($parameters, function (&$v) {
             if ($v instanceof Spy) {
                 $spy = $v;
 
-                $v = Mockery::on(function($v) use ($spy) {
+                $v = Mockery::on(function ($v) use ($spy) {
                     $spy($v);
                     return true;
                 });

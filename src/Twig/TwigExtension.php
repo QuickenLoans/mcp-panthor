@@ -44,13 +44,13 @@ class TwigExtension extends AbstractExtension
      * @param string $timezone
      * @param bool $isDebugMode
      */
-    public function __construct(URI $uri, Clock $clock, $timezone, $isDebugMode)
+    public function __construct(URI $uri, Clock $clock, string $timezone, bool $isDebugMode)
     {
         $this->uri = $uri;
         $this->clock = $clock;
 
         $this->displayTimezone = $timezone;
-        $this->isDebugMode = (bool) $isDebugMode;
+        $this->isDebugMode = $isDebugMode;
     }
 
     /**

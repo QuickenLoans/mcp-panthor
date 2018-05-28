@@ -7,7 +7,7 @@
 
 namespace QL\Panthor\Twig;
 
-use Twig\CacheInterface;
+use Twig\Cache\CacheInterface;
 use Twig\Environment;
 
 /**

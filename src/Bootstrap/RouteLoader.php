@@ -8,6 +8,7 @@
 namespace QL\Panthor\Bootstrap;
 
 use Slim\App;
+use Slim\Interfaces\RouteInterface;
 
 /**
  * Converts route configuration into slim routes and attaches them to Slim.
@@ -78,13 +79,12 @@ class RouteLoader
     public function loadRoutes(App $slim, array $routes)
     {
         foreach ($routes as $name => $details) {
-
             if ($children = $this->nullable('routes', $details)) {
                 $middlewares = $this->nullable('stack', $details) ?: [];
                 $prefix = $this->nullable('route', $details) ?: '';
 
                 $loader = [$this, 'loadRoutes'];
-                $groupLoader = function() use ($slim, $children, $loader) {
+                $groupLoader = function () use ($slim, $children, $loader) {
                     $loader($slim, $children);
                 };
 
@@ -106,7 +106,7 @@ class RouteLoader
      * @param string $name
      * @param array $details
      *
-     * @return Route
+     * @return RouteInterface
      */
     private function loadRoute(App $slim, $name, array $details)
     {

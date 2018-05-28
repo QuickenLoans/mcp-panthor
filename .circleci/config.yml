@@ -1,30 +1,36 @@
-# https://circleci.com/docs/2.0/language-php
-# https://circleci.com/docs/2.0/circleci-images
-# https://hub.docker.com/r/halplatform/hal-build-environments
-
 version: 2
 
-defaults: &defaults
+php71_defaults: &php71_defaults
     working_directory: '~/project'
     docker:
-        - 'image': 'halplatform/hal-build-environments:php5.6-centos7'
+        - image: 'circleci/php:7.1'
 
-matrix_defaults: &matrix_defaults
+php72_defaults: &php72_defaults
     working_directory: '~/project'
+    docker:
+        - image: 'circleci/php:7.2'
+
+attach_workspace: &attach_workspace
+    attach_workspace:
+        at: '.'
+
+persist_workspace: &persist_workspace
+    persist_to_workspace:
+        root: '.'
+        paths: [ '.' ]
+
+run_tests_steps: &run_tests_steps
     steps:
-        - attach_workspace: { at: '.' }
-
+        - *attach_workspace
         - run:
-            name: 'Run tests'
-            command: './vendor/bin/phpunit'
-
+            name: 'Run unit tests'
+            command: 'phpdbg -qrr vendor/bin/phpunit'
         - store_test_results:
             path: '.phpunit/report'
-
         - run:
             name: 'Upload test coverage to Codacy (PHP 7.1 only)'
             command: |
-                if [ "${CIRCLE_JOB}" == "php7.1" ] ; then
+                if [ "${CIRCLE_JOB}" == "unit_tests_71" ] ; then
                     ./vendor/bin/codacycoverage clover .phpunit/clover.xml
                 fi
 
@@ -35,65 +41,76 @@ workflows:
   pipeline:
     jobs:
       - fetch_code
-      - install:
+      - install_php_dependencies:
           requires: [ fetch_code ]
 
-      - 'php5.6':
-          requires: [ install ]
+      - linting:
+          requires: [ install_php_dependencies ]
+      - static_analysis:
+          requires: [ install_php_dependencies ]
 
-      - 'php7.0':
-          requires: [ install ]
+      - unit_tests_71:
+          requires: [ linting ]
 
-      - 'php7.1':
-          requires: [ install ]
+      - unit_tests_72:
+          requires: [ linting ]
 
 jobs:
 
     fetch_code:
-        <<: *defaults
-
+        <<: *php71_defaults
         steps:
             - checkout
-            - persist_to_workspace: { root: '.', paths: [ '.' ] }
+            - *persist_workspace
 
-    install:
-        <<: *defaults
-
+    install_php_dependencies:
+        <<: *php71_defaults
         steps:
-            - attach_workspace: { at: '.' }
+            - *attach_workspace
 
             - restore_cache:
-                keys: [ 'v1-php-deps-{{ checksum "composer.json" }}', 'v1-php-deps-' ]
+                keys: [ 'v1-php-deps-{{ checksum "composer.json" }}', 'v1-php-deps' ]
 
             - run:
-                name: 'Update Composer'
-                command: 'composer self-update'
-
-            - run:
-                name: 'Install packages'
-                command: 'composer --no-interaction --no-progress install'
-
-            - run:
-                name: 'List installed packages'
-                command: 'composer show'
-
+                name: 'Install PHP dependencies'
+                command: |
+                    composer --no-interaction --no-progress install
+                    composer show
             - save_cache:
                 key: 'v1-php-deps-{{ checksum "composer.json" }}'
-                paths: [ './vendor' ]
+                paths: [ 'vendor' ]
 
-            - persist_to_workspace: { root: '.', paths: [ '.' ] }
+            - *persist_workspace
 
-    'php5.6':
-        <<: *matrix_defaults
-        docker:
-            - 'image': 'halplatform/hal-build-environments:php5.6-centos7'
+    static_analysis:
+        <<: *php71_defaults
+        steps:
+            - *attach_workspace
+            - run:
+                name: 'Run static analysis'
+                command: |
+                    vendor/bin/phpstan analyse \
+                    -l 4 \
+                    --configuration=phpstan.neon \
+                    --memory-limit=1G \
+                    src
+    linting:
+        <<: *php71_defaults
+        steps:
+            - *attach_workspace
 
-    'php7.0':
-        <<: *matrix_defaults
-        docker:
-            - 'image': 'halplatform/hal-build-environments:php7.0-centos7'
+            - run:
+                name: 'Run syntax check'
+                command: 'vendor/bin/phplint --no-cache --ansi src'
 
-    'php7.1':
-        <<: *matrix_defaults
-        docker:
-            - 'image': 'halplatform/hal-build-environments:php7.1-centos7'
+            - run:
+                name: 'Run code formatting check'
+                command: 'vendor/bin/phpcs -n --colors src'
+
+    unit_tests_71:
+        <<: *php71_defaults
+        <<: *run_tests_steps
+
+    unit_tests_72:
+        <<: *php72_defaults
+        <<: *run_tests_steps

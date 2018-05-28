@@ -25,6 +25,11 @@ class HTMLTemplateContentHandler implements ContentHandlerInterface
     use StacktraceFormatterTrait;
 
     /**
+     * @var TemplateInterface
+     */
+    private $template;
+
+    /**
      * @var bool
      */
     private $displayErrorDetails;

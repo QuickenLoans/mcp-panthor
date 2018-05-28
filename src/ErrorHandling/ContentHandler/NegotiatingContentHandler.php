@@ -131,7 +131,7 @@ class NegotiatingContentHandler implements ContentHandlerInterface
      *
      * Falls back to default handler if no matches found.
      *
-     * @param ServerRequestInterface $acceptHeader
+     * @param ServerRequestInterface $request
      *
      * @return ContentHandlerInterface
      */

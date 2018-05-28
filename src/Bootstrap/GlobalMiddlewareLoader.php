@@ -57,7 +57,7 @@ class GlobalMiddlewareLoader
     /**
      * @param string $name
      *
-     * @return callable
+     * @return callable|object
      */
     private function getService($name)
     {

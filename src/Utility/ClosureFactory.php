@@ -25,7 +25,7 @@ class ClosureFactory
             throw new Exception('Invalid callable provided.');
         }
 
-        return function() use ($callable) {
+        return function () use ($callable) {
             return call_user_func_array($callable, func_get_args());
         };
     }

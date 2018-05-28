@@ -1,0 +1,5 @@
+parameters:
+    ignoreErrors:
+        - '#Instanceof between string|null and QL\\MCP\\Common\\OpaqueProperty will always evaluate to false#'
+        - '#Call to function is_callable\(\) will always evaluate to false#'
+

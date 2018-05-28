@@ -149,7 +149,7 @@ trait StacktraceFormatterTrait
         if ($entry['class']) {
             $function = $entry['class'] . $entry['type'] . $entry['function'];
             $args = $entry['args'];
-            array_walk($args, function(&$v) {
+            array_walk($args, function (&$v) {
                 $v = is_object($v) ? get_class($v) : gettype($v);
             });
             $function .= sprintf('(%s)', implode(', ', $args));

@@ -7,6 +7,7 @@
 
 namespace QL\Panthor\Encryption;
 
+use Exception;
 use QL\MCP\Common\OpaqueProperty;
 use QL\MCP\Common\Utility\ByteString;
 use QL\Panthor\Exception\CryptoException;
@@ -163,7 +164,7 @@ class LibsodiumSymmetricCrypto
     }
 
     /**
-     * @param string
+     * @param string $var
      *
      * @return string
      */

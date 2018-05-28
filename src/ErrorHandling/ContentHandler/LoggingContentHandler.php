@@ -41,9 +41,14 @@ class LoggingContentHandler implements ContentHandlerInterface
     use StacktraceFormatterTrait;
 
     /**
-     * @var LoggerInterface
+     * @var ContentHandlerInterface
      */
     private $handler;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var array
@@ -158,11 +163,11 @@ class LoggingContentHandler implements ContentHandlerInterface
         $level = strtolower($level);
 
         if (!$level) {
-            return;
+            return '';
         }
 
         if (!isset(self::$levels[$level])) {
-            return;
+            return '';
         }
 
         return $level;
@@ -180,7 +185,7 @@ class LoggingContentHandler implements ContentHandlerInterface
         if ($event === 'not-allowed') {
             $message = sprintf('Method Not Allowed: %s', $message);
         } elseif ($event === 'not-found') {
-            $message = sprintf('Page Not Found: %s',  $message);
+            $message = sprintf('Page Not Found: %s', $message);
         }
 
         $this->logger->$level($message);

@@ -83,11 +83,11 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      * @param string[] $unencryptedCookies
      * @param bool $deleteInvalid
      */
-    public function __construct(CookieEncryptionInterface $encryption, array $unencryptedCookies = [], $deleteInvalid = true)
+    public function __construct(CookieEncryptionInterface $encryption, array $unencryptedCookies = [], bool $deleteInvalid = true)
     {
         $this->encryption = $encryption;
         $this->unencryptedCookies = $unencryptedCookies;
-        $this->deleteInvalid = (bool) $deleteInvalid;
+        $this->deleteInvalid = $deleteInvalid;
 
         $this->cookieName = static::RESPONSE_COOKIE_NAME;
         $this->attributeName = static::REQUEST_COOKIE_ATTRIBUTE;
@@ -128,7 +128,9 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
         foreach ($reqCookies->getAll() as $cookie) {
             $name = $cookie->getName();
 
-            if (in_array($name, $this->unencryptedCookies)) continue;
+            if (in_array($name, $this->unencryptedCookies)) {
+                continue;
+            }
 
             $decrypted = $this->encryption->decrypt($cookie->getValue());
             if (is_string($decrypted)) {
@@ -155,7 +157,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      *
      * Cookies will be automatically deduped.
      *
-     * @param SetCookie[]|string[] $reqCookies
+     * @param SetCookie[]|string[] $resCookies
      *
      * @return string[]
      */
@@ -164,13 +166,11 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
         $renderable = [];
 
         foreach ($resCookies as $cookie) {
-
             if (is_string($cookie)) {
                 $cookie = SetCookie::fromSetCookieString($cookie);
             }
 
             if ($cookie instanceof SetCookie) {
-
                 $val = $cookie->getValue();
                 if ($val instanceof OpaqueProperty) {
                     $val = $val->getValue();

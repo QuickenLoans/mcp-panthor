@@ -11,10 +11,11 @@
         mapTestClassNameToCoveredClassName="true"
         printerClass="PHPUnit\TextUI\ResultPrinter"
         processIsolation="false"
-        stopOnError="true"
-        stopOnFailure="true"
-        stopOnIncomplete="true"
-        stopOnSkipped="true"
+
+        stopOnError="false"
+        stopOnFailure="false"
+        stopOnIncomplete="false"
+        stopOnSkipped="false"
 
         beStrictAboutTestsThatDoNotTestAnything="false"
         beStrictAboutOutputDuringTests="true"
@@ -27,9 +28,6 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory>src</directory>
-            <exclude>
-                <file>src/CachedContainer.php</file>
-            </exclude>
         </whitelist>
     </filter>
 

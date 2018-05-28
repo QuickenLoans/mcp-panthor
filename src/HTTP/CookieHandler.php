@@ -63,12 +63,12 @@ class CookieHandler
     const ERR_BAD_HTTP = 'Invalid cookie parameter "httpOnly" specified. Expected a boolean.';
 
     /**
-     * @param array
+     * @var array
      */
     private $configuration;
 
     /**
-     * @param array $cookieConfiguration
+     * @param array $cookieSettings
      */
     public function __construct(array $cookieSettings = [])
     {

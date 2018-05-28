@@ -174,13 +174,14 @@ class ErrorHandler
         $isHandled = false;
         try {
             $isHandled = $this->handler->handle($exception);
+        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
         }
-        catch (Exception $ex) {}
-        catch (Throwable $ex) {}
 
         // Bomb out if handler returns true, since was able to render something to the client
-        if ($isHandled) exit;
-
+        if ($isHandled) {
+            exit;
+        }
 
         // Rethrow to be handled by default php exception handling.
         throw $exception;
@@ -232,7 +233,6 @@ class ErrorHandler
         $error = error_get_last();
 
         if ($error && $error['type'] &= E_PARSE | E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR) {
-
             $msg = sprintf('%s: %s', self::getErrorDescription($error['type']), $error['message']);
 
             if (0 === strpos($error['message'], 'Allowed memory') || 0 === strpos($error['message'], 'Out of memory')) {

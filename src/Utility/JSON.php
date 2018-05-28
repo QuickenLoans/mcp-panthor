@@ -101,9 +101,9 @@ class JSON
      *
      * @return void
      */
-    public function setEncodingOptions($encodingOptions)
+    public function setEncodingOptions(int $encodingOptions)
     {
-        $this->encodingOptions = (int) $encodingOptions;
+        $this->encodingOptions = $encodingOptions;
     }
     /**
      * @see http://php.net/manual/en/json.constants.php
@@ -112,8 +112,8 @@ class JSON
      *
      * @return void
      */
-    public function addEncodingOptions($encodingOptions)
+    public function addEncodingOptions(int $encodingOptions)
     {
-        $this->encodingOptions = $this->encodingOptions | (int) $encodingOptions;
+        $this->encodingOptions = $this->encodingOptions | $encodingOptions;
     }
 }
