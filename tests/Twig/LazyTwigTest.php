@@ -10,6 +10,8 @@ namespace QL\Panthor\Twig;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
+use Twig\Environment;
+use Twig\Template;
 
 class LazyTwigTest extends TestCase
 {
@@ -20,7 +22,7 @@ class LazyTwigTest extends TestCase
      */
     public function testMissingTemplateThrowsException()
     {
-        $env = Mockery::mock('Twig_Environment');
+        $env = Mockery::mock(Environment::class);
         $twig = new LazyTwig($env, new Context);
 
         $twig->render();
@@ -28,8 +30,8 @@ class LazyTwigTest extends TestCase
 
     public function testRenderIsPassedThroughToRealTwig()
     {
-        $realTwig = Mockery::mock('Twig_Template', ['render' => null]);
-        $env = Mockery::mock('Twig_Environment');
+        $realTwig = Mockery::mock(Template::class, ['render' => null]);
+        $env = Mockery::mock(Environment::class);
         $env
             ->shouldReceive('loadTemplate')
             ->with('path/to/template/file')
@@ -43,8 +45,8 @@ class LazyTwigTest extends TestCase
 
     public function testTemplateSetterOverridesConstructorTemplate()
     {
-        $realTwig = Mockery::mock('Twig_Template', ['render' => null]);
-        $env = Mockery::mock('Twig_Environment');
+        $realTwig = Mockery::mock(Template::class, ['render' => null]);
+        $env = Mockery::mock(Environment::class);
         $env
             ->shouldReceive('loadTemplate')
             ->with('real/file')
@@ -59,8 +61,8 @@ class LazyTwigTest extends TestCase
 
     public function testContextIsMergedOnRenderIfProvided()
     {
-        $realTwig = Mockery::mock('Twig_Template', ['render' => null]);
-        $env = Mockery::mock('Twig_Environment', ['loadTemplate' => $realTwig]);
+        $realTwig = Mockery::mock(Template::class, ['render' => null]);
+        $env = Mockery::mock(Environment::class, ['loadTemplate' => $realTwig]);
         $context = new Context;
 
         $twig = new LazyTwig($env, $context, 'path/to/template/file');
@@ -71,12 +73,12 @@ class LazyTwigTest extends TestCase
 
     public function testNonRenderMethodIsPassedThrough()
     {
-        $realTwig = Mockery::mock('Twig_Template');
+        $realTwig = Mockery::mock(Template::class);
         $realTwig
             ->shouldReceive('testing')
             ->once();
 
-        $env = Mockery::mock('Twig_Environment', ['loadTemplate' => $realTwig]);
+        $env = Mockery::mock(Environment::class, ['loadTemplate' => $realTwig]);
 
         $twig = new LazyTwig($env, new Context, 'path/to/template/file');
         $twig->testing();

@@ -203,7 +203,7 @@ services:
         arguments: ['@panthor.handler.twig_base', '@twig.context']
 
     panthor.handler.twig_base:
-        class: 'Twig_Template'
+        class: 'Twig\Template'
         factory: ['@twig.environment', 'loadTemplate']
         arguments: ['%error_handling.html_template%']
 
@@ -293,15 +293,15 @@ services:
         class: 'QL\Panthor\Twig\Context'
 
     panthor.twig.loader:
-        class: 'Twig_Loader_Filesystem'
+        class: 'Twig\Loader\Filesystem'
         arguments: ['%twig.template.dir%', '%env(PANTHOR_APPROOT)%']
 
     panthor.twig.cache:
-        class: 'Twig_Cache_Filesystem'
+        class: 'Twig\Cache\Filesystem'
         arguments: ['%twig.cache.dir%']
 
     panthor.twig.environment:
-        class: 'Twig_Environment'
+        class: 'Twig\Environment'
         arguments: ['@twig.loader']
         configurator: ['@panthor.twig.configurator', 'configure']
         calls:

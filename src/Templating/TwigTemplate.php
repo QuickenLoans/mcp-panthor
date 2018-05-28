@@ -9,7 +9,7 @@ namespace QL\Panthor\Templating;
 
 use QL\Panthor\TemplateInterface;
 use QL\Panthor\Twig\Context;
-use Twig_Template;
+use Twig\Template;
 
 /**
  * Twig Template implementation.
@@ -21,7 +21,7 @@ use Twig_Template;
 class TwigTemplate implements TemplateInterface
 {
     /**
-     * @var Twig_Template
+     * @var Template
      */
     private $twig;
 
@@ -31,10 +31,10 @@ class TwigTemplate implements TemplateInterface
     private $context;
 
     /**
-     * @param Twig_Template $twig
+     * @param Template $twig
      * @param Context|null $context
      */
-    public function __construct(Twig_Template $twig, Context $context = null)
+    public function __construct(Template $twig, Context $context = null)
     {
         $this->twig = $twig;
         $this->context = $context ?: new Context;

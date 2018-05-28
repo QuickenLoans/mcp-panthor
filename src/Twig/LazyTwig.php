@@ -9,8 +9,8 @@ namespace QL\Panthor\Twig;
 
 use InvalidArgumentException;
 use QL\Panthor\TemplateInterface;
-use Twig_Environment;
-use Twig_Template;
+use Twig\Environment;
+use Twig\Template;
 
 /**
  * A simple proxy for twig to lazy load templates and allow incremental context loading.
@@ -32,7 +32,7 @@ use Twig_Template;
 class LazyTwig implements TemplateInterface
 {
     /**
-     * @var Twig_Environment
+     * @var Environment
      */
     private $environment;
 
@@ -42,7 +42,7 @@ class LazyTwig implements TemplateInterface
     private $context;
 
     /**
-     * @var Twig_Template|null
+     * @var Template|null
      */
     private $twig;
 
@@ -56,11 +56,11 @@ class LazyTwig implements TemplateInterface
     /**
      * The relative path the template itself is optional and may be specified later.
      *
-     * @param Twig_Environment $environment
+     * @param Environment $environment
      * @param Context|null $context
      * @param string|null $template
      */
-    public function __construct(Twig_Environment $environment, Context $context = null, $template = null)
+    public function __construct(Environment $environment, Context $context = null, $template = null)
     {
         $this->environment = $environment;
         $this->context = $context ?: new Context;
@@ -104,7 +104,7 @@ class LazyTwig implements TemplateInterface
     }
 
     /**
-     * Convenience method if you need access to the Twig_Template directly.
+     * Convenience method if you need access to the Template directly.
      *
      * You should not need to use this.
      *
@@ -121,7 +121,7 @@ class LazyTwig implements TemplateInterface
     /**
      * @throws InvalidArgumentException
      *
-     * @return Twig_Template
+     * @return Template
      */
     private function lazy()
     {

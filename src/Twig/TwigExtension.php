@@ -12,11 +12,11 @@ use DateTimeZone;
 use QL\MCP\Common\Clock;
 use QL\MCP\Common\Time\TimePoint;
 use QL\Panthor\Utility\URI;
-use Twig_Extension;
-use Twig_SimpleFilter;
-use Twig_SimpleFunction;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
-class TwigExtension extends Twig_Extension
+class TwigExtension extends AbstractExtension
 {
     /**
      * @var URI
@@ -67,7 +67,7 @@ class TwigExtension extends Twig_Extension
     public function getFilters()
     {
         return [
-            new Twig_SimpleFilter('timepoint', [$this, 'formatTimePoint']),
+            new TwigFilter('timepoint', [$this, 'formatTimePoint']),
         ];
     }
 
@@ -77,11 +77,11 @@ class TwigExtension extends Twig_Extension
     public function getFunctions()
     {
         return [
-            new Twig_SimpleFunction('uriFor', [$this->uri, 'uriFor']),
+            new TwigFunction('uriFor', [$this->uri, 'uriFor']),
 
-            new Twig_SimpleFunction('isDebugMode', [$this, 'isDebugMode']),
+            new TwigFunction('isDebugMode', [$this, 'isDebugMode']),
 
-            new Twig_SimpleFunction('timepoint', [$this, 'getTimepoint'])
+            new TwigFunction('timepoint', [$this, 'getTimepoint'])
         ];
     }
 

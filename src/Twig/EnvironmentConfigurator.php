@@ -7,8 +7,8 @@
 
 namespace QL\Panthor\Twig;
 
-use Twig_CacheInterface;
-use Twig_Environment;
+use Twig\CacheInterface;
+use Twig\Environment;
 
 /**
  * This configurator is used to customize the Twig Environment after it is built.
@@ -24,26 +24,26 @@ class EnvironmentConfigurator
     private $debugMode;
 
     /**
-     * @var Twig_CacheInterface
+     * @var CacheInterface
      */
     private $cache;
 
     /**
      * @param bool $debugMode
-     * @param Twig_CacheInterface $cache
+     * @param CacheInterface $cache
      */
-    public function __construct($debugMode, Twig_CacheInterface $cache)
+    public function __construct($debugMode, CacheInterface $cache)
     {
         $this->debugMode = $debugMode;
         $this->cache = $cache;
     }
 
     /**
-     * @param Twig_Environment $environment
+     * @param Environment $environment
      *
      * @return void
      */
-    public function configure(Twig_Environment $environment)
+    public function configure(Environment $environment)
     {
         if ($this->debugMode) {
             $environment->enableDebug();
@@ -60,11 +60,11 @@ class EnvironmentConfigurator
     /**
      * Extend and override this method if you wish to customize twig for your application.
      *
-     * @param Twig_Environment $environment
+     * @param Environment $environment
      *
      * @return void
      */
-    protected function applicationConfigure(Twig_Environment $environment)
+    protected function applicationConfigure(Environment $environment)
     {
     }
 }

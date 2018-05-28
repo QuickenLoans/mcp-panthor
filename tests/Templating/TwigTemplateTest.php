@@ -9,8 +9,8 @@ namespace QL\Panthor\Templating;
 
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\Twig\Context;
-use Twig_Environment;
-use Twig_Loader_Array;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 
 class TwigTemplateTest extends TestCase
 {
@@ -18,7 +18,7 @@ class TwigTemplateTest extends TestCase
 
     public function setUp()
     {
-        $this->twig = new Twig_Environment(new Twig_Loader_Array([]));
+        $this->twig = new Environment(new ArrayLoader([]));
     }
 
     public function testTwigTemplateRenders()
