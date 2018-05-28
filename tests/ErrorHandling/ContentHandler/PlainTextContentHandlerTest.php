@@ -8,7 +8,6 @@
 namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
-use Mockery;
 use PHPUnit\Framework\TestCase;
 use Slim\Http\Environment;
 use Slim\Http\Request;
@@ -199,7 +198,7 @@ HTML;
         $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
         $this->assertSame($expectedHeaders, $actualHeaders);
         $this->assertContains($expectedBody, $rendered);
-        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:168', $rendered);
+        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:167', $rendered);
         $this->assertContains('Error Details:', $rendered);
     }
 }

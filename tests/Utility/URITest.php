@@ -8,14 +8,14 @@
 namespace QL\Panthor\Utility;
 
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use Slim\Http\Uri as SlimUri;
 use Slim\Router;
-use QL\Panthor\Testing\MockeryAssistantTrait;
 
 class URITest extends TestCase
 {
-    use MockeryAssistantTrait;
+    use MockeryPHPUnitIntegration;
 
     private $router;
 

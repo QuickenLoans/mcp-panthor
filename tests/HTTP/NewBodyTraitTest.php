@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\HTTP;
 
-use Mockery;
 use PHPUnit\Framework\TestCase;
 use Slim\Http\Response;
 

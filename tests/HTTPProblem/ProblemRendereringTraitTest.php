@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\HTTPProblem;
 
-use Mockery;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\HTTPProblem\Renderer\JSONRenderer;
 use Slim\Http\Response;

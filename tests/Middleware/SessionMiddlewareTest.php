@@ -8,17 +8,17 @@
 namespace QL\Panthor\Middleware;
 
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\HTTP\CookieHandler;
 use QL\Panthor\Session\SessionInterface;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use QL\Panthor\Testing\MockeryAssistantTrait;
 
 class SessionMiddlewareTest extends TestCase
 {
-    use MockeryAssistantTrait;
+    use MockeryPHPUnitIntegration;
 
     private $handler;
 

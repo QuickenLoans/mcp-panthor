@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\Templating;
 
-use Mockery;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\Twig\Context;
 use Twig_Environment;

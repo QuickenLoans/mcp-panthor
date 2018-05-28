@@ -9,6 +9,7 @@ namespace QL\Panthor\ErrorHandling;
 
 use ErrorException;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use QL\Panthor\Exception\Exception;
@@ -18,6 +19,7 @@ use Slim\App;
 class ErrorHandlerTest extends TestCase
 {
     use MockeryAssistantTrait;
+    use MockeryPHPUnitIntegration;
 
     public $exHandler;
 
@@ -97,7 +99,9 @@ class ErrorHandlerTest extends TestCase
         $handler->setThrownErrors(\E_NOTICE);
         $handler->setLoggedErrors(\E_DEPRECATED);
 
-        $logger->shouldReceive('log')->with(Mockery::any(), 'Deprecated: error message', Mockery::any());
+        $logger
+            ->shouldReceive('log')
+            ->with(Mockery::any(), 'Deprecated: error message', Mockery::any());
 
         $isHandled = $handler->handleError(\E_DEPRECATED, 'error message', 'filename.php', '80');
     }

@@ -9,11 +9,11 @@ namespace QL\Panthor\Bootstrap;
 
 use InvalidArgumentException;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
 use Slim\App;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 class GlobalMiddlewareLoaderTest extends TestCase
 {

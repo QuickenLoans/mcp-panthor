@@ -8,7 +8,6 @@
 namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
-use Mockery;
 use PHPUnit\Framework\TestCase;
 use Slim\Http\Environment;
 use Slim\Http\Request;

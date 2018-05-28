@@ -10,6 +10,7 @@ namespace QL\Panthor\Twig;
 use DateTime;
 use DateTimeZone;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\MCP\Common\Clock;
 use QL\MCP\Common\Time\TimePoint;
@@ -20,6 +21,7 @@ use QL\Panthor\Testing\MockeryAssistantTrait;
 class TwigExtensionTest extends TestCase
 {
     use MockeryAssistantTrait;
+    use MockeryPHPUnitIntegration;
 
     public $uri;
     public $clock;

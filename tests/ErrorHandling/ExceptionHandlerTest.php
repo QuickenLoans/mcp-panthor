@@ -9,6 +9,7 @@ namespace QL\Panthor\ErrorHandling;
 
 use ErrorException;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
 use Slim\App;
@@ -20,6 +21,7 @@ use QL\Panthor\Testing\MockeryAssistantTrait;
 class ExceptionHandlerTest extends TestCase
 {
     use MockeryAssistantTrait;
+    use MockeryPHPUnitIntegration;
 
     private $request;
     private $response;

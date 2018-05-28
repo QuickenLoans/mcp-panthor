@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\Session;
 
-use Mockery;
 use PHPUnit\Framework\TestCase;
 
 class JSONEncodedSessionTest extends TestCase

@@ -8,14 +8,13 @@
 namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
-use Mockery;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
+use QL\MCP\Logger\MemoryLogger;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use QL\MCP\Logger\MemoryLogger;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerTrait;
 
 class LoggingContentHandlerTest extends TestCase
 {
@@ -34,12 +33,7 @@ class LoggingContentHandlerTest extends TestCase
             use LoggerTrait;
 
             public $messages = [];
-            /**
-             * @param mixed $level
-             * @param string $message
-             * @param array $context
-             * @return null
-             */
+
             public function log($level, $message, array $context = [])
             {
                 $this->messages[] = [

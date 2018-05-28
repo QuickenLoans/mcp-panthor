@@ -9,6 +9,7 @@ namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\TemplateInterface;
 use QL\Panthor\Testing\MockeryAssistantTrait;
@@ -19,6 +20,7 @@ use Slim\Http\Response;
 class HTMLTemplateContentHandlerTest extends TestCase
 {
     use MockeryAssistantTrait;
+    use MockeryPHPUnitIntegration;
 
     private $request;
     private $response;
@@ -244,6 +246,6 @@ class HTMLTemplateContentHandlerTest extends TestCase
         $this->assertSame(500, $captured['status']);
         $this->assertSame('E_ERROR', $captured['severity']);
         $this->assertSame($ex, $captured['throwable']);
-        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:206', $captured['details']);
+        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:208', $captured['details']);
     }
 }

@@ -9,7 +9,6 @@ namespace QL\Panthor\HTTP;
 
 use Dflydev\FigCookies\Cookie;
 use Dflydev\FigCookies\Cookies;
-use Mockery;
 use PHPUnit\Framework\TestCase;
 use QL\MCP\Common\OpaqueProperty;
 use QL\Panthor\Exception\Exception;
