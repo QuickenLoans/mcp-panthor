@@ -293,11 +293,11 @@ services:
         class: 'QL\Panthor\Twig\Context'
 
     panthor.twig.loader:
-        class: 'Twig\Loader\Filesystem'
+        class: 'Twig\Loader\FilesystemLoader'
         arguments: ['%twig.template.dir%', '%env(PANTHOR_APPROOT)%']
 
     panthor.twig.cache:
-        class: 'Twig\Cache\Filesystem'
+        class: 'Twig\Cache\FilesystemCache'
         arguments: ['%twig.cache.dir%']
 
     panthor.twig.environment:
