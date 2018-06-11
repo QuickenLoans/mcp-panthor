@@ -62,7 +62,7 @@ class LibsodiumSymmetricCrypto
     /**
      * @var string
      */
-    private $libsodiumVersion;
+    private $libsodiumInterface;
 
     /**
      * $secret should each be a 128-character hexademical value.
@@ -77,7 +77,7 @@ class LibsodiumSymmetricCrypto
      */
     public function __construct($secret)
     {
-        $this->libsodiumVersion = self::getSodiumVersion();
+        $this->libsodiumInterface = self::getSodiumInterface();
 
         if (!function_exists(self::FQDN_RANDOMBYTES)) {
             throw new CryptoException(self::ERR_CSPRNG);
@@ -176,11 +176,11 @@ class LibsodiumSymmetricCrypto
      */
     private function sodiumHex2bin($var)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
+        if ($this->libsodiumInterface === 'sodium') {
             return \sodium_hex2bin($var);
         }
 
-        if ($this->libsodiumVersion === '1') {
+        if ($this->libsodiumInterface === 'libsodium') {
             return \Sodium\hex2bin($var);
         }
 
@@ -195,11 +195,11 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoAuth($message, $key)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
+        if ($this->libsodiumInterface === 'sodium') {
             return \sodium_crypto_auth($message, $key);
         }
 
-        if ($this->libsodiumVersion === '1') {
+        if ($this->libsodiumInterface === 'libsodium') {
             return \Sodium\crypto_auth($message, $key);
         }
 
@@ -211,11 +211,11 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoBytes()
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
+        if ($this->libsodiumInterface === 'sodium') {
             return SODIUM_CRYPTO_AUTH_BYTES;
         }
 
-        if ($this->libsodiumVersion === '1') {
+        if ($this->libsodiumInterface === 'libsodium') {
             return \Sodium\CRYPTO_AUTH_BYTES;
         }
 
@@ -231,11 +231,11 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoAuthVerify($mac, $message, $key)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
+        if ($this->libsodiumInterface === 'sodium') {
             return \sodium_crypto_auth_verify($mac, $message, $key);
         }
 
-        if ($this->libsodiumVersion === '1') {
+        if ($this->libsodiumInterface === 'libsodium') {
             return \Sodium\crypto_auth_verify($mac, $message, $key);
         }
 
@@ -251,11 +251,11 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumSecretBox($message, $nonce, $key)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
+        if ($this->libsodiumInterface === 'sodium') {
             return \sodium_crypto_secretbox($message, $nonce, $key);
         }
 
-        if ($this->libsodiumVersion === '1') {
+        if ($this->libsodiumInterface === 'libsodium') {
             return \Sodium\crypto_secretbox($message, $nonce, $key);
         }
 
@@ -271,14 +271,31 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumSecretBoxOpen($message, $nonce, $key)
     {
-        if ($this->libsodiumVersion === '2'|| $this->libsodiumVersion === '7') {
+        if ($this->libsodiumInterface === 'sodium') {
             return \sodium_crypto_secretbox_open($message, $nonce, $key);
         }
 
-        if ($this->libsodiumVersion === '1') {
+        if ($this->libsodiumInterface === 'libsodium') {
             return \Sodium\crypto_secretbox_open($message, $nonce, $key);
         }
 
+        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getSodiumInterface()
+    {
+        if (phpversion('libsodium') !== false) {
+            return 'libsodium';
+        }
+
+        if (phpversion('sodium') !== false) {
+            return 'sodium';
+        }
+
+        // uh oh not installed!
         throw new CryptoException(self::ERR_NEED_MORE_SALT);
     }
 
