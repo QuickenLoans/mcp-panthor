@@ -38,7 +38,6 @@
         "phpunit/phpunit":      "~5.6",
         "codacy/coverage":      "~1.4",
 
-        "ext-libsodium":           "~1.0",
         "paragonie/random_compat": "~1.1",
 
         "symfony/proxy-manager-bridge": "~3.3 || ~4.0",
@@ -46,6 +45,7 @@
     },
 
     "suggest": {
-        "ext-libsodium": "~1.0 || ~2.0 PECL Libsodium recommended for secure cookie encryption."
+        "ext-libsodium": "~1.0 || ~2.0 PECL Libsodium recommended for secure cookie encryption.",
+        "ext-sodium": "~2.0 || ~7.2 Libsodium recommended for secure cookie encryption."
     }
 }
