@@ -12,7 +12,7 @@ use QL\MCP\Common\Utility\ByteString;
 use QL\Panthor\Exception\CryptoException;
 
 /**
- * This uses libsodium encryption from Libsodium ~2.0
+ * This uses libsodium encryption from libsodium ~2.0
  *
  * @see https://pecl.php.net/package/libsodium
  * @see https://github.com/jedisct1/libsodium-php
@@ -29,7 +29,7 @@ class LibsodiumSymmetricCrypto
     /**
      * Setup errors
      */
-    const ERR_NEED_MORE_SALT = 'Libsodium extension is not installed. Please install "ext-libsodium" (<7.0) or "ext-sodium" (>=7.0).';
+    const ERR_NEED_MORE_SALT = 'Libsodium extension is not installed. Please install "ext-sodium" (>=7.0).';
     const ERR_CSPRNG = 'CSPRNG "random_bytes" not found. Please use PHP 7.0 or install paragonie/random_compat.';
     const ERR_INVALID_SECRET = 'Invalid encryption secret. Secret must be 128 hexadecimal characters.';
 
@@ -77,7 +77,9 @@ class LibsodiumSymmetricCrypto
      */
     public function __construct($secret)
     {
-        $this->libsodiumVersion = self::getSodiumVersion();
+        if (!extension_loaded('sodium')) {
+            throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        }
 
         if (!function_exists(self::FQDN_RANDOMBYTES)) {
             throw new CryptoException(self::ERR_CSPRNG);
@@ -176,15 +178,7 @@ class LibsodiumSymmetricCrypto
      */
     private function sodiumHex2bin($var)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
-            return \sodium_hex2bin($var);
-        }
-
-        if ($this->libsodiumVersion === '1') {
-            return \Sodium\hex2bin($var);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        return \sodium_hex2bin($var);
     }
 
     /**
@@ -195,15 +189,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoAuth($message, $key)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
-            return \sodium_crypto_auth($message, $key);
-        }
-
-        if ($this->libsodiumVersion === '1') {
-            return \Sodium\crypto_auth($message, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        return \sodium_crypto_auth($message, $key);
     }
 
     /**
@@ -211,15 +197,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoBytes()
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
-            return SODIUM_CRYPTO_AUTH_BYTES;
-        }
-
-        if ($this->libsodiumVersion === '1') {
-            return \Sodium\CRYPTO_AUTH_BYTES;
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        return SODIUM_CRYPTO_AUTH_BYTES;
     }
 
     /**
@@ -231,15 +209,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumCryptoAuthVerify($mac, $message, $key)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
-            return \sodium_crypto_auth_verify($mac, $message, $key);
-        }
-
-        if ($this->libsodiumVersion === '1') {
-            return \Sodium\crypto_auth_verify($mac, $message, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        return \sodium_crypto_auth_verify($mac, $message, $key);
     }
 
     /**
@@ -251,15 +221,7 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumSecretBox($message, $nonce, $key)
     {
-        if ($this->libsodiumVersion === '2' || $this->libsodiumVersion === '7') {
-            return \sodium_crypto_secretbox($message, $nonce, $key);
-        }
-
-        if ($this->libsodiumVersion === '1') {
-            return \Sodium\crypto_secretbox($message, $nonce, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        return \sodium_crypto_secretbox($message, $nonce, $key);
     }
 
     /**
@@ -271,34 +233,6 @@ class LibsodiumSymmetricCrypto
      */
     public function sodiumSecretBoxOpen($message, $nonce, $key)
     {
-        if ($this->libsodiumVersion === '2'|| $this->libsodiumVersion === '7') {
-            return \sodium_crypto_secretbox_open($message, $nonce, $key);
-        }
-
-        if ($this->libsodiumVersion === '1') {
-            return \Sodium\crypto_secretbox_open($message, $nonce, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
-     * @return string
-     */
-    public static function getSodiumVersion()
-    {
-        $php71orLower = phpversion('libsodium');
-        $php7orGreater = phpversion('sodium');
-
-        if ($php7orGreater !== false) {
-            return substr($php7orGreater, 0, 1);
-        }
-
-        if ($php71orLower !== false) {
-            return substr($php71orLower, 0, 1);
-        }
-
-        // uh oh not installed!
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
+        return \sodium_crypto_secretbox_open($message, $nonce, $key);
     }
 }
