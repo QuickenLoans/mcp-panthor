@@ -12,7 +12,6 @@ use QL\Panthor\MiddlewareInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-
 class PanthorCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)

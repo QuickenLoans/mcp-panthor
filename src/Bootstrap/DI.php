@@ -30,7 +30,9 @@ class DI
     const BUILD_AND_CACHE = false;
 
     const DI_EXTENSIONS = [];
-    const DI_COMPILER_PASSES = [PanthorCompilerPass::class => ['type' => PassConfig::TYPE_BEFORE_REMOVING, 'priority' => '1']];
+    const DI_COMPILER_PASSES = [
+        PanthorCompilerPass::class => ['type' => PassConfig::TYPE_BEFORE_REMOVING, 'priority' => '1']
+    ];
 
     /**
      * @param string $root
@@ -127,7 +129,7 @@ class DI
      */
     private static function addCompilerPasses(ContainerInterface $container)
     {
-        foreach(static::DI_COMPILER_PASSES as $passClass => $options) {
+        foreach (static::DI_COMPILER_PASSES as $passClass => $options) {
             if (!class_exists($passClass)) {
                 throw new RuntimeException("Symfony DI CompilerPass not found: \"${passClass}\"");
             }
