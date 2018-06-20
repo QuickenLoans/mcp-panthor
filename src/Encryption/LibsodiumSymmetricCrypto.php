@@ -62,7 +62,7 @@ class LibsodiumSymmetricCrypto
     /**
      * @var string
      */
-    private $libsodiumVersion;
+    private $libsodiumInterface;
 
     /**
      * $secret should each be a 128-character hexademical value.
