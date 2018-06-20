@@ -60,11 +60,6 @@ class LibsodiumSymmetricCrypto
     private $authSecret;
 
     /**
-     * @var string
-     */
-    private $libsodiumInterface;
-
-    /**
      * $secret should each be a 128-character hexademical value.
      *
      * This will be broken into 2 64-character parts: crypto secret and auth secret.

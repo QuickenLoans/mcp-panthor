@@ -64,17 +64,7 @@ class DI
             $container->loadFromExtension($ext->getAlias());
         }
 
-        foreach(static::DI_COMPILER_PASSES as $passClass => $options) {
-            if (!class_exists($passClass)) {
-                throw new RuntimeException("Symfony DI CompilerPass not found: \"${passClass}\"");
-            }
-
-            $pass = new $passClass;
-            $type = $options['type'] ?? PassConfig::TYPE_BEFORE_OPTIMIZATION;
-            $priority = $options['priority'] ?? 1000;
-
-            $container->addCompilerPass($pass, $type, $priority);
-        }
+        $container = static::addCompilerPasses($container);
 
         $container->compile($resolveEnvironment);
 
@@ -127,6 +117,29 @@ class DI
         }
 
         return $dumper->dump($config);
+    }
+
+    /**
+     * Adds compiler passes to container
+     *
+     * @param ContainerInterface $container
+     * @return void
+     */
+    private static function addCompilerPasses(ContainerInterface $container)
+    {
+        foreach(static::DI_COMPILER_PASSES as $passClass => $options) {
+            if (!class_exists($passClass)) {
+                throw new RuntimeException("Symfony DI CompilerPass not found: \"${passClass}\"");
+            }
+
+            $pass = new $passClass;
+            $type = $options['type'] ?? PassConfig::TYPE_BEFORE_OPTIMIZATION;
+            $priority = $options['priority'] ?? 1000;
+
+            $container->addCompilerPass($pass, $type, $priority);
+        }
+
+        return $container;
     }
 
     /**
