@@ -9,12 +9,12 @@ namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class NegotiatingContentHandlerTest extends PHPUnit_Framework_TestCase
+class NegotiatingContentHandlerTest extends TestCase
 {
     private $request;
     private $response;

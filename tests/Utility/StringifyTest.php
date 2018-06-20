@@ -7,9 +7,9 @@
 
 namespace QL\Panthor\Utility;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class StringifyTest extends PHPUnit_Framework_TestCase
+class StringifyTest extends TestCase
 {
     public function testTemplate()
     {

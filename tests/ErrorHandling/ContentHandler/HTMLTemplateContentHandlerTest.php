@@ -9,14 +9,14 @@ namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\TemplateInterface;
 use QL\Panthor\Testing\MockeryAssistantTrait;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class HTMLTemplateContentHandlerTest extends PHPUnit_Framework_TestCase
+class HTMLTemplateContentHandlerTest extends TestCase
 {
     use MockeryAssistantTrait;
 

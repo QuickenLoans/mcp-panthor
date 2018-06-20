@@ -8,12 +8,12 @@
 namespace QL\Panthor\Templating;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\Twig\Context;
 use Twig_Environment;
 use Twig_Loader_Array;
 
-class TwigTemplateTest extends PHPUnit_Framework_TestCase
+class TwigTemplateTest extends TestCase
 {
     public $twig;
 

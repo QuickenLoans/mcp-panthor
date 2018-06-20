@@ -8,11 +8,11 @@
 namespace QL\Panthor\HTTPProblem;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\HTTPProblem\Renderer\JSONRenderer;
 use Slim\Http\Response;
 
-class ProblemRendereringTraitTest extends PHPUnit_Framework_TestCase
+class ProblemRendereringTraitTest extends TestCase
 {
     public $response;
     public $renderer;

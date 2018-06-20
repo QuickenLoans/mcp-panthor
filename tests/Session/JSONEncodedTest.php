@@ -8,9 +8,9 @@
 namespace QL\Panthor\Session;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class JSONEncodedSessionTest extends PHPUnit_Framework_TestCase
+class JSONEncodedSessionTest extends TestCase
 {
     public function testAccessors()
     {

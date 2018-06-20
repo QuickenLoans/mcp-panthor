@@ -10,14 +10,14 @@ namespace QL\Panthor\HTTP;
 use Dflydev\FigCookies\Cookie;
 use Dflydev\FigCookies\Cookies;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\MCP\Common\OpaqueProperty;
 use QL\Panthor\Exception\Exception;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class CookieHandlerTest extends PHPUnit_Framework_TestCase
+class CookieHandlerTest extends TestCase
 {
     private $request;
     private $reponse;
@@ -30,7 +30,8 @@ class CookieHandlerTest extends PHPUnit_Framework_TestCase
 
     public function testBadExpiresCookieConfiguration()
     {
-        $this->setExpectedException(Exception::class, CookieHandler::ERR_BAD_EXPIRES);
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage(CookieHandler::ERR_BAD_EXPIRES);
 
         new CookieHandler([
             'expires' => ['bad-value']
@@ -39,7 +40,8 @@ class CookieHandlerTest extends PHPUnit_Framework_TestCase
 
     public function testBadSecureCookieConfiguration()
     {
-        $this->setExpectedException(Exception::class, CookieHandler::ERR_BAD_SECURE);
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage(CookieHandler::ERR_BAD_SECURE);
 
         new CookieHandler([
             'secure' => ['bad-value']
@@ -48,7 +50,8 @@ class CookieHandlerTest extends PHPUnit_Framework_TestCase
 
     public function testBadHttpOnlyCookieConfiguration()
     {
-        $this->setExpectedException(Exception::class, CookieHandler::ERR_BAD_HTTP);
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage(CookieHandler::ERR_BAD_HTTP);
 
         new CookieHandler([
             'httpOnly' => ['bad-value']

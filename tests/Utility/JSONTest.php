@@ -7,10 +7,10 @@
 
 namespace QL\Panthor\Utility;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 
-class JSONTest extends PHPUnit_Framework_TestCase
+class JSONTest extends TestCase
 {
     public function testEncoding()
     {

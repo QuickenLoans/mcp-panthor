@@ -8,10 +8,10 @@
 namespace QL\Panthor\HTTP;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Slim\Http\Response;
 
-class NewBodyTraitTest extends PHPUnit_Framework_TestCase
+class NewBodyTraitTest extends TestCase
 {
     public $response;
 

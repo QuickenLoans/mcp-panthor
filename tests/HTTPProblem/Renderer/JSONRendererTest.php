@@ -7,11 +7,11 @@
 
 namespace QL\Panthor\HTTPProblem\Renderer;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\HTTPProblem\HTTPProblem;
 use QL\Panthor\Utility\JSON;
 
-class JSONRendererTest extends PHPUnit_Framework_TestCase
+class JSONRendererTest extends TestCase
 {
     public function testOptionalPropertiesNotRendered()
     {

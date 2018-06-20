@@ -7,9 +7,9 @@
 
 namespace QL\Panthor\Twig;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ContextTest extends PHPUnit_Framework_TestCase
+class ContextTest extends TestCase
 {
     public function testInitiallyLoadedContext()
     {

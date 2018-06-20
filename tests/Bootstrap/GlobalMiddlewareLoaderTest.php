@@ -9,13 +9,16 @@ namespace QL\Panthor\Bootstrap;
 
 use InvalidArgumentException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
 use Slim\App;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
-class GlobalMiddlewareLoaderTest extends PHPUnit_Framework_TestCase
+class GlobalMiddlewareLoaderTest extends TestCase
 {
+    use MockeryPHPUnitIntegration;
+
     public function testMiddlewareIsAttached()
     {
         $middlewares = [

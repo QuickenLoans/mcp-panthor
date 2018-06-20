@@ -9,7 +9,7 @@ namespace QL\Panthor\Twig;
 
 use DateTime;
 use DateTimeZone;
-use QL\MCP\Common\Time\Clock;
+use QL\MCP\Common\Clock;
 use QL\MCP\Common\Time\TimePoint;
 use QL\Panthor\Utility\URI;
 use Twig_Extension;

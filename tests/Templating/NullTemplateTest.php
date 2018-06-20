@@ -7,9 +7,9 @@
 
 namespace QL\Panthor\Templating;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class NullTemplateTest extends PHPUnit_Framework_TestCase
+class NullTemplateTest extends TestCase
 {
     public function testNullTemplateRendersEmptyString()
     {

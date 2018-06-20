@@ -7,11 +7,11 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Slim\App;
 use Slim\RouteGroup;
 
-class RouteLoaderTest extends PHPUnit_Framework_TestCase
+class RouteLoaderTest extends TestCase
 {
     public $slim;
 

@@ -7,9 +7,9 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CacheableRouterTest extends PHPUnit_Framework_TestCase
+class CacheableRouterTest extends TestCase
 {
     public $cacheFile;
 
@@ -55,20 +55,23 @@ class CacheableRouterTest extends PHPUnit_Framework_TestCase
 
         $expected = <<<'ROUTE_FILE'
 <?php return array (
-  0 => 
+  0 =>
   array (
-    'GET' => 
+    'GET' =>
     array (
       '/page' => 'route0',
     ),
   ),
-  1 => 
+  1 =>
   array (
   ),
 );
 ROUTE_FILE;
 
         $this->assertFileExists($this->cacheFile);
-        $this->assertEquals($expected, file_get_contents($this->cacheFile));
+        $expected = preg_replace('/[\n ]/', '', $expected);
+        $actual = file_get_contents($this->cacheFile);
+        $actual = preg_replace('/[\n ]/', '', $actual);;
+        $this->assertEquals($expected, $actual);
     }
 }

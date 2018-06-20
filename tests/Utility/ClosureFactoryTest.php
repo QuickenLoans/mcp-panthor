@@ -7,14 +7,15 @@
 
 namespace QL\Panthor\Utility;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
 
-class ClosureFactoryTest extends PHPUnit_Framework_TestCase
+class ClosureFactoryTest extends TestCase
 {
     public function testNonCallableThrowsException()
     {
-        $this->setExpectedException(Exception::class, 'Invalid callable provided.');
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid callable provided.');
 
         ClosureFactory::buildClosure('that', 'this');
     }

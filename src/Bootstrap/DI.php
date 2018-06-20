@@ -14,6 +14,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use QL\Panthor\Bootstrap\DependencyInjection\PanthorCompilerPass;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 
 /**
  * Utility to handle container building and caching.
@@ -28,6 +30,9 @@ class DI
     const BUILD_AND_CACHE = false;
 
     const DI_EXTENSIONS = [];
+    const DI_COMPILER_PASSES = [
+        PanthorCompilerPass::class => ['type' => PassConfig::TYPE_BEFORE_REMOVING, 'priority' => '1']
+    ];
 
     /**
      * @param string $root
@@ -60,6 +65,8 @@ class DI
         foreach ($extensions as $ext) {
             $container->loadFromExtension($ext->getAlias());
         }
+
+        $container = static::addCompilerPasses($container);
 
         $container->compile($resolveEnvironment);
 
@@ -112,6 +119,29 @@ class DI
         }
 
         return $dumper->dump($config);
+    }
+
+    /**
+     * Adds compiler passes to container
+     *
+     * @param ContainerInterface $container
+     * @return void
+     */
+    private static function addCompilerPasses(ContainerInterface $container)
+    {
+        foreach (static::DI_COMPILER_PASSES as $passClass => $options) {
+            if (!class_exists($passClass)) {
+                throw new RuntimeException("Symfony DI CompilerPass not found: \"${passClass}\"");
+            }
+
+            $pass = new $passClass;
+            $type = $options['type'] ?? PassConfig::TYPE_BEFORE_OPTIMIZATION;
+            $priority = $options['priority'] ?? 1000;
+
+            $container->addCompilerPass($pass, $type, $priority);
+        }
+
+        return $container;
     }
 
     /**

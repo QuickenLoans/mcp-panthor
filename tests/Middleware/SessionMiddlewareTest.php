@@ -8,15 +8,18 @@
 namespace QL\Panthor\Middleware;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\Panthor\HTTP\CookieHandler;
 use QL\Panthor\Session\SessionInterface;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class SessionMiddlewareTest extends PHPUnit_Framework_TestCase
+class SessionMiddlewareTest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     private $handler;
 
     private $request;

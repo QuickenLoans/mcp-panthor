@@ -8,10 +8,13 @@
 namespace QL\Panthor\Twig;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class LazyTwigTest extends PHPUnit_Framework_TestCase
+class LazyTwigTest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     /**
      * @expectedException InvalidArgumentException
      */

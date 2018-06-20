@@ -10,15 +10,18 @@ namespace QL\Panthor\Middleware;
 use Dflydev\FigCookies\Cookies;
 use Dflydev\FigCookies\SetCookie;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use QL\MCP\Common\OpaqueProperty;
 use QL\Panthor\HTTP\CookieEncryptionInterface;
 use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use QL\Panthor\Testing\MockeryAssistantTrait;
 
-class EncryptedCookiesMiddlewareTest extends PHPUnit_Framework_TestCase
+class EncryptedCookiesMiddlewareTest extends TestCase
 {
+    use MockeryAssistantTrait;
+
     private $encryption;
 
     private $request;
