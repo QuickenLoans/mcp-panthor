@@ -1,13 +1,12 @@
 <?php
 /**
- * @copyright (c) 2017 Quicken Loans Inc.
+ * @copyright (c) 2018 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
 namespace QL\Panthor\Bootstrap;
 
-use RuntimeException;
 use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -47,18 +46,7 @@ class DI
         $container = new ContainerBuilder;
         $loader = new YamlFileLoader($container, new FileLocator($root));
 
-        $extensions = [];
-        foreach (static::DI_EXTENSIONS as $extClass) {
-            if (!class_exists($extClass)) {
-                throw new RuntimeException("Symfony DI Extension not found: \"${extClass}\"");
-            }
-
-            $extensions[] = new $extClass;
-        }
-
-        foreach ($extensions as $ext) {
-            $container->registerExtension($ext);
-        }
+        $extensions = static::addExtensions($container, static::DI_EXTENSIONS);
 
         $loader->load(static::PRIMARY_CONFIGURATION_FILE);
 
@@ -66,7 +54,7 @@ class DI
             $container->loadFromExtension($ext->getAlias());
         }
 
-        $container = static::addCompilerPasses($container);
+        $container = static::addCompilerPasses($container, static::DI_COMPILER_PASSES);
 
         $container->compile($resolveEnvironment);
 
@@ -122,29 +110,6 @@ class DI
     }
 
     /**
-     * Adds compiler passes to container
-     *
-     * @param ContainerInterface $container
-     * @return void
-     */
-    private static function addCompilerPasses(ContainerInterface $container)
-    {
-        foreach (static::DI_COMPILER_PASSES as $passClass => $options) {
-            if (!class_exists($passClass)) {
-                throw new RuntimeException("Symfony DI CompilerPass not found: \"${passClass}\"");
-            }
-
-            $pass = new $passClass;
-            $type = $options['type'] ?? PassConfig::TYPE_BEFORE_OPTIMIZATION;
-            $priority = $options['priority'] ?? 1000;
-
-            $container->addCompilerPass($pass, $type, $priority);
-        }
-
-        return $container;
-    }
-
-    /**
      * @param string $class
      *
      * @return ContainerInterface
@@ -178,5 +143,53 @@ class DI
         }
 
         return $container;
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $passes
+     *
+     * @return void
+     */
+    private static function addCompilerPasses(ContainerBuilder $container, array $passes)
+    {
+        foreach ($passes as $passClass => $options) {
+            if (!class_exists($passClass)) {
+                throw new RuntimeException("Symfony DI CompilerPass not found: \"${passClass}\"");
+            }
+
+            $pass = new $passClass;
+            $type = $options['type'] ?? PassConfig::TYPE_BEFORE_OPTIMIZATION;
+            $priority = $options['priority'] ?? 1000;
+
+            $container->addCompilerPass($pass, $type, $priority);
+        }
+
+        return $container;
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $extensions
+     *
+     * @return array
+     */
+    private static function addExtensions(ContainerBuilder $container, array $extensions)
+    {
+        $resolved = [];
+
+        foreach ($extensions as $extClass) {
+            if (!class_exists($extClass)) {
+                throw new RuntimeException("Symfony DI Extension not found: \"${extClass}\"");
+            }
+
+            $resolved[] = new $extClass;
+        }
+
+        foreach ($resolved as $ext) {
+            $container->registerExtension($ext);
+        }
+
+        return $resolved;
     }
 }
