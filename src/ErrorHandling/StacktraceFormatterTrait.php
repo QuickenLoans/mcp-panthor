@@ -27,21 +27,21 @@ trait StacktraceFormatterTrait
      *
      * @return void
      */
-    public function setStacktraceLogging($enableLogging)
+    public function setStacktraceLogging(bool $enableLogging)
     {
-        $this->logStacktraces = (bool) $enableLogging;
+        $this->logStacktraces = $enableLogging;
     }
 
     /**
      * Unpack nested throwables into a flat array
      *
-     * @param Throwable|Exception $parent
+     * @param Throwable$throwable
      *
-     * @return Throwable[]|Exception[]
+     * @return Throwable[]
      */
     private function unpackThrowables($throwable)
     {
-        if (!$throwable instanceof Throwable && !$throwable instanceof Exception) {
+        if (!$throwable instanceof Throwable) {
             return [];
         }
 
@@ -93,7 +93,7 @@ trait StacktraceFormatterTrait
 
         $trace = '';
         foreach ($exceptions as $ex) {
-            if ($ex instanceof Exception || $ex instanceof Throwable) {
+            if ($ex instanceof Throwable) {
                 $trace .= $this->formatExceptionStacktrace($ex);
             }
         }
@@ -108,7 +108,7 @@ trait StacktraceFormatterTrait
      */
     private function formatExceptionStacktrace($exception)
     {
-        if (!$exception instanceof Exception && !$exception instanceof Throwable) {
+        if (!$exception instanceof Throwable) {
             return '';
         }
 

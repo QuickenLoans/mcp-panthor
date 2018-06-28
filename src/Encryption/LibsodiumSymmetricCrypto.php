@@ -209,7 +209,7 @@ class LibsodiumSymmetricCrypto
      * @param string $message
      * @param string $key
      *
-     * @return string
+     * @return bool
      */
     public function sodiumCryptoAuthVerify($mac, $message, $key)
     {

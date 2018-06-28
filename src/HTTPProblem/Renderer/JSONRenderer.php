@@ -69,7 +69,7 @@ class JSONRenderer implements ProblemRendererInterface
             $data['instance'] = $problem->instance();
         }
 
-        $data += $problem->extensions();
+        $data = array_merge($data, $problem->extensions());
 
         return $this->json->encode($data);
     }

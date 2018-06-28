@@ -7,6 +7,7 @@
 
 namespace QL\Panthor\Bootstrap;
 
+use RuntimeException;
 use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -54,7 +55,7 @@ class DI
             $container->loadFromExtension($ext->getAlias());
         }
 
-        $container = static::addCompilerPasses($container, static::DI_COMPILER_PASSES);
+        static::addCompilerPasses($container, static::DI_COMPILER_PASSES);
 
         $container->compile($resolveEnvironment);
 
@@ -132,9 +133,9 @@ class DI
      */
     private static function buildContainer($root, $class, $options)
     {
-        $container = static::buildDI($root, !static::BUILD_AND_CACHE);
+        $container = static::buildDI($root, !self::shouldBuildImmediately());
 
-        if (static::BUILD_AND_CACHE) {
+        if (self::shouldBuildImmediately()) {
             $cached = static::cacheDI($container, $options);
 
             $content = str_replace('<?php', '', $cached);
@@ -143,6 +144,14 @@ class DI
         }
 
         return $container;
+    }
+
+    /**
+     * @return bool
+     */
+    private static function shouldBuildImmediately(): bool
+    {
+        return static::BUILD_AND_CACHE;
     }
 
     /**
@@ -164,8 +173,6 @@ class DI
 
             $container->addCompilerPass($pass, $type, $priority);
         }
-
-        return $container;
     }
 
     /**

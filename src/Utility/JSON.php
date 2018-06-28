@@ -22,23 +22,6 @@ class JSON
     }
 
     /**
-     * @var array
-     */
-    private static $jsonErrors = [
-        JSON_ERROR_NONE => 'No error',
-        JSON_ERROR_DEPTH => 'The maximum stack depth has been exceeded',
-        JSON_ERROR_STATE_MISMATCH => 'Invalid or malformed JSON',
-        JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
-        JSON_ERROR_SYNTAX => 'Syntax error',
-        JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded',
-
-        // Encoding errors
-        JSON_ERROR_RECURSION => 'The object or array includes recursive references and cannot be encoded',
-        JSON_ERROR_INF_OR_NAN => 'The value passed to json_encode() includes either NAN or INF',
-        JSON_ERROR_UNSUPPORTED_TYPE => 'A value of an unsupported type was given to json_encode(), such as a resource'
-    ];
-
-    /**
      * Convenience method to decode json to an array, or return an error string on failure.
      *
      * @param string $json
@@ -49,7 +32,7 @@ class JSON
     {
         $decoded = $this->decode($json);
         if ($decoded === null || !is_array($decoded)) {
-            return sprintf('Invalid json (%s)', $this->lastJsonErrorMessage());
+            return sprintf('Invalid json (%s)', json_last_error_msg());
         }
 
         return $decoded;
@@ -60,12 +43,7 @@ class JSON
      */
     public function lastJsonErrorMessage()
     {
-        $error = json_last_error();
-        if (isset(self::$jsonErrors[$error])) {
-            return self::$jsonErrors[$error];
-        }
-
-        return $error;
+        return json_last_error_msg();
     }
 
     /**

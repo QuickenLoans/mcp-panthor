@@ -84,7 +84,7 @@ class ErrorHandler
     /**
      * Exception handler for errors only caught by the shutdown handler.
      *
-     * @var callable
+     * @var callable|null
      */
     private static $exceptionHandler;
 
