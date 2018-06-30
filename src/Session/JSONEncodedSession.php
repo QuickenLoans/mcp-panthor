@@ -8,8 +8,8 @@
 namespace QL\Panthor\Session;
 
 use JsonSerializable;
-use const JSON_UNESCAPED_SLASHES;
 use const JSON_PRESERVE_ZERO_FRACTION;
+use const JSON_UNESCAPED_SLASHES;
 
 class JSONEncodedSession implements SessionInterface
 {

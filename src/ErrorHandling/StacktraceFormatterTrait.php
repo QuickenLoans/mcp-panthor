@@ -115,7 +115,7 @@ trait StacktraceFormatterTrait
         $trace = $this->formatStacktraceEntry('ERR', [
             'function' => $exception->getMessage(),
             'file' => $exception->getFile(),
-            'line' => $exception->getLine()
+            'line' => $exception->getLine(),
         ]);
 
         if (!$this->logStacktraces) {

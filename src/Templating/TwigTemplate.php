@@ -34,7 +34,7 @@ class TwigTemplate implements TemplateInterface
      * @param Template $twig
      * @param Context|null $context
      */
-    public function __construct(Template $twig, Context $context = null)
+    public function __construct(Template $twig, ?Context $context = null)
     {
         $this->twig = $twig;
         $this->context = $context ?: new Context;

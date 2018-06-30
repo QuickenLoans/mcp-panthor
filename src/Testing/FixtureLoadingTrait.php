@@ -61,7 +61,9 @@ trait FixtureLoadingTrait
 
     /**
      * @param string $basePath
+     *
      * @throws InvalidArgumentException
+     *
      * @return string
      */
     private function getBasePath($basePath)
@@ -100,6 +102,7 @@ trait FixtureLoadingTrait
 
     /**
      * @param string $providedPath
+     *
      * @throws InvalidArgumentException
      *
      * @return string

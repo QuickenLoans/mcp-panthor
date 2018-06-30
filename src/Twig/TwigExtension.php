@@ -81,7 +81,7 @@ class TwigExtension extends AbstractExtension
 
             new TwigFunction('isDebugMode', [$this, 'isDebugMode']),
 
-            new TwigFunction('timepoint', [$this, 'getTimepoint'])
+            new TwigFunction('timepoint', [$this, 'getTimepoint']),
         ];
     }
 

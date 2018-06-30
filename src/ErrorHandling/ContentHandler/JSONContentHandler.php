@@ -32,10 +32,10 @@ class JSONContentHandler implements ContentHandlerInterface
     private $displayErrorDetails;
 
     /**
-     * @param JSON $json
+     * @param JSON|null $json
      * @param bool $displayErrorDetails
      */
-    public function __construct(JSON $json = null, $displayErrorDetails = false)
+    public function __construct(?JSON $json = null, bool $displayErrorDetails = false)
     {
         $this->json = $json ?: new JSON;
 
@@ -51,7 +51,7 @@ class JSONContentHandler implements ContentHandlerInterface
     public function handleNotFound(ServerRequestInterface $request, ResponseInterface $response)
     {
         $contents = [
-            'message' => 'Not Found'
+            'message' => 'Not Found',
         ];
 
         return $this
@@ -72,7 +72,7 @@ class JSONContentHandler implements ContentHandlerInterface
 
         $contents = [
             'message' => 'Method not allowed.',
-            'allowed_methods' => implode(', ', $methods)
+            'allowed_methods' => implode(', ', $methods),
         ];
 
         return $this
@@ -113,14 +113,14 @@ class JSONContentHandler implements ContentHandlerInterface
     private function withError(ResponseInterface $response, $throwable)
     {
         $contents = [
-            'error' => 'Application Error'
+            'error' => 'Application Error',
         ];
 
         if ($this->displayErrorDetails) {
             $throwables = $this->unpackThrowables($throwable);
             $contents = [
                 'error' => $throwable->getMessage(),
-                'details' => $this->formatStacktraceForExceptions($throwables)
+                'details' => $this->formatStacktraceForExceptions($throwables),
             ];
         }
 

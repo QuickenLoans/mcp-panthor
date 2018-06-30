@@ -55,7 +55,7 @@ class JSON
     {
         $decoded = json_decode($json, true);
 
-        if (JSON_ERROR_NONE !== json_last_error()) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
             return null;
         }
 

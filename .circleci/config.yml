@@ -120,7 +120,11 @@ jobs:
 
             - run:
                 name: 'Run code formatting check'
-                command: 'vendor/bin/phpcs -n --colors src'
+                command: |
+                    vendor/bin/phpcs \
+                    --colors \
+                    --runtime-set ignore_warnings_on_exit true \
+                    src
 
     unit_tests_71:
         <<: *php71_defaults

@@ -7,9 +7,6 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use Closure;
-use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
 use Slim\Router;
 
 /**

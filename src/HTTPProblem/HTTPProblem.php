@@ -255,7 +255,7 @@ class HTTPProblem
      */
     public function withType($typeURI)
     {
-        if ($typeURI == 'about:blank' || false !== filter_var($typeURI, FILTER_VALIDATE_URL)) {
+        if ($typeURI == 'about:blank' || filter_var($typeURI, FILTER_VALIDATE_URL) !== false) {
             $this->type = $typeURI;
         } else {
             $this->type = null;
@@ -271,7 +271,7 @@ class HTTPProblem
      */
     public function withInstance($instanceURI)
     {
-        if (false !== filter_var($instanceURI, FILTER_VALIDATE_URL)) {
+        if (filter_var($instanceURI, FILTER_VALIDATE_URL) !== false) {
             $this->instance = $instanceURI;
         } else {
             $this->instance = null;

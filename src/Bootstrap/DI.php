@@ -7,15 +7,15 @@
 
 namespace QL\Panthor\Bootstrap;
 
+use QL\Panthor\Bootstrap\DependencyInjection\PanthorCompilerPass;
 use RuntimeException;
 use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use QL\Panthor\Bootstrap\DependencyInjection\PanthorCompilerPass;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 
 /**
  * Utility to handle container building and caching.
@@ -31,7 +31,7 @@ class DI
 
     const DI_EXTENSIONS = [];
     const DI_COMPILER_PASSES = [
-        PanthorCompilerPass::class => ['type' => PassConfig::TYPE_BEFORE_REMOVING, 'priority' => '1']
+        PanthorCompilerPass::class => ['type' => PassConfig::TYPE_BEFORE_REMOVING, 'priority' => '1'],
     ];
 
     /**
@@ -99,7 +99,7 @@ class DI
         $exploded = explode('\\', $class);
         $config = array_merge($options, [
             'class' => array_pop($exploded),
-            'namespace' => implode('\\', $exploded)
+            'namespace' => implode('\\', $exploded),
         ]);
 
         $dumper = new PhpDumper($container);

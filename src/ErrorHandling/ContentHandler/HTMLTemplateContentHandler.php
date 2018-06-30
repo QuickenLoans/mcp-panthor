@@ -35,10 +35,10 @@ class HTMLTemplateContentHandler implements ContentHandlerInterface
     private $displayErrorDetails;
 
     /**
-     * @param TemplateInterface $template
+     * @param TemplateInterface|null $template
      * @param bool $displayErrorDetails
      */
-    public function __construct(TemplateInterface $template = null, $displayErrorDetails = false)
+    public function __construct(?TemplateInterface $template = null, bool $displayErrorDetails = false)
     {
         $this->template = $template ?: new NullTemplate;
         $this->displayErrorDetails = $displayErrorDetails;
@@ -54,7 +54,7 @@ class HTMLTemplateContentHandler implements ContentHandlerInterface
     {
         $contents = [
             'message' => 'Not Found',
-            'status' => 404
+            'status' => 404,
         ];
 
         return $this
@@ -76,7 +76,7 @@ class HTMLTemplateContentHandler implements ContentHandlerInterface
         $contents = [
             'message' => 'Method not allowed',
             'status' => $status,
-            'allowed_methods' => implode(', ', $methods)
+            'allowed_methods' => implode(', ', $methods),
         ];
 
         return $this

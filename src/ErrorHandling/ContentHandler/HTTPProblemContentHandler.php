@@ -34,10 +34,10 @@ class HTTPProblemContentHandler implements ContentHandlerInterface
     private $displayErrorDetails;
 
     /**
-     * @param ProblemRendererInterface $renderer
+     * @param ProblemRendererInterface|null $renderer
      * @param bool $displayErrorDetails
      */
-    public function __construct(ProblemRendererInterface $renderer = null, $displayErrorDetails = false)
+    public function __construct(?ProblemRendererInterface $renderer = null, bool $displayErrorDetails = false)
     {
         $this->renderer = $renderer ?: new JSONRenderer;
 
@@ -69,7 +69,7 @@ class HTTPProblemContentHandler implements ContentHandlerInterface
 
         $detail = "Allowed methods: " . implode(', ', $methods);
         $extensions = [
-            'allowed_methods' => $methods
+            'allowed_methods' => $methods,
         ];
 
         $problem = new HTTPProblem($status, $detail, $extensions);

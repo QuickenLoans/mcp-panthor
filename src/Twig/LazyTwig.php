@@ -60,7 +60,7 @@ class LazyTwig implements TemplateInterface
      * @param Context|null $context
      * @param string|null $template
      */
-    public function __construct(Environment $environment, Context $context = null, $template = null)
+    public function __construct(Environment $environment, ?Context $context = null, ?string $template = null)
     {
         $this->environment = $environment;
         $this->context = $context ?: new Context;

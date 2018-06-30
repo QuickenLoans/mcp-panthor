@@ -11,6 +11,12 @@ use Exception;
 use QL\MCP\Common\OpaqueProperty;
 use QL\MCP\Common\Utility\ByteString;
 use QL\Panthor\Exception\CryptoException;
+use function random_bytes;
+use function sodium_crypto_auth;
+use function sodium_crypto_auth_verify;
+use function sodium_crypto_secretbox;
+use function sodium_crypto_secretbox_open;
+use function sodium_hex2bin;
 
 /**
  * This uses libsodium encryption from Libsodium ~2.0
@@ -77,7 +83,7 @@ class LibsodiumSymmetricCrypto
     {
         $this->libsodiumVersion = self::getSodiumVersion();
 
-        if (1 !== preg_match(sprintf('#%s#', self::REGEX_FULL_SECRET), $secret)) {
+        if (preg_match(sprintf('#%s#', self::REGEX_FULL_SECRET), $secret) !== 1) {
             throw new CryptoException(self::ERR_INVALID_SECRET);
         }
 
@@ -99,7 +105,7 @@ class LibsodiumSymmetricCrypto
         }
 
         // Generate 24 byte nonce
-        $nonce = \random_bytes(self::NONCE_SIZE_BYTES);
+        $nonce = random_bytes(self::NONCE_SIZE_BYTES);
 
         // Encrypt payload
         try {
@@ -171,7 +177,7 @@ class LibsodiumSymmetricCrypto
     private function sodiumHex2bin($var)
     {
         if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return \sodium_hex2bin($var);
+            return sodium_hex2bin($var);
         }
 
         throw new CryptoException(self::ERR_NEED_MORE_SALT);
@@ -186,7 +192,7 @@ class LibsodiumSymmetricCrypto
     public function sodiumCryptoAuth($message, $key)
     {
         if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return \sodium_crypto_auth($message, $key);
+            return sodium_crypto_auth($message, $key);
         }
 
         throw new CryptoException(self::ERR_NEED_MORE_SALT);
@@ -214,7 +220,7 @@ class LibsodiumSymmetricCrypto
     public function sodiumCryptoAuthVerify($mac, $message, $key)
     {
         if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return \sodium_crypto_auth_verify($mac, $message, $key);
+            return sodium_crypto_auth_verify($mac, $message, $key);
         }
 
         throw new CryptoException(self::ERR_NEED_MORE_SALT);
@@ -230,7 +236,7 @@ class LibsodiumSymmetricCrypto
     public function sodiumSecretBox($message, $nonce, $key)
     {
         if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return \sodium_crypto_secretbox($message, $nonce, $key);
+            return sodium_crypto_secretbox($message, $nonce, $key);
         }
 
         throw new CryptoException(self::ERR_NEED_MORE_SALT);
@@ -246,7 +252,7 @@ class LibsodiumSymmetricCrypto
     public function sodiumSecretBoxOpen($message, $nonce, $key)
     {
         if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return \sodium_crypto_secretbox_open($message, $nonce, $key);
+            return sodium_crypto_secretbox_open($message, $nonce, $key);
         }
 
         throw new CryptoException(self::ERR_NEED_MORE_SALT);

@@ -59,7 +59,7 @@ class PlainTextContentHandler implements ContentHandlerInterface
 
         $text = [
             'Method not allowed.',
-            sprintf('Allowed methods: %s', implode(', ', $methods))
+            sprintf('Allowed methods: %s', implode(', ', $methods)),
         ];
 
         return $this
@@ -108,7 +108,7 @@ class PlainTextContentHandler implements ContentHandlerInterface
                 $throwable->getMessage(),
                 '',
                 'Error Details:',
-                $this->formatStacktraceForExceptions($throwables)
+                $this->formatStacktraceForExceptions($throwables),
             ];
         }
 

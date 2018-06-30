@@ -21,7 +21,7 @@ class JSONRenderer implements ProblemRendererInterface
     /**
      * @param JSON $json
      */
-    public function __construct(JSON $json = null)
+    public function __construct(?JSON $json = null)
     {
         $this->json = $json ?: new JSON;
     }
@@ -40,7 +40,7 @@ class JSONRenderer implements ProblemRendererInterface
     public function headers(HTTPProblem $problem)
     {
         return [
-            'Content-Type' => 'application/problem+json'
+            'Content-Type' => 'application/problem+json',
         ];
     }
 
@@ -50,7 +50,7 @@ class JSONRenderer implements ProblemRendererInterface
     public function body(HTTPProblem $problem)
     {
         $data = [
-            'status' => $problem->status()
+            'status' => $problem->status(),
         ];
 
         if ($problem->title()) {

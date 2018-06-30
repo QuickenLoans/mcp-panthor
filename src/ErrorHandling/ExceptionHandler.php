@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\ErrorHandling;
 
-use ErrorException;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

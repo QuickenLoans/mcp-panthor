@@ -12,6 +12,22 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Throwable;
+use const E_ALL;
+use const E_COMPILE_ERROR;
+use const E_COMPILE_WARNING;
+use const E_CORE_ERROR;
+use const E_CORE_WARNING;
+use const E_DEPRECATED;
+use const E_ERROR;
+use const E_NOTICE;
+use const E_PARSE;
+use const E_RECOVERABLE_ERROR;
+use const E_STRICT;
+use const E_USER_DEPRECATED;
+use const E_USER_ERROR;
+use const E_USER_NOTICE;
+use const E_USER_WARNING;
+use const E_WARNING;
 
 /**
  * This handler requires:
@@ -97,68 +113,68 @@ class ErrorHandler
      * @var array
      */
     private static $levels = array(
-        \E_DEPRECATED => 'E_DEPRECATED',
-        \E_USER_DEPRECATED => 'E_USER_DEPRECATED',
-        \E_NOTICE => 'E_NOTICE',
-        \E_USER_NOTICE => 'E_USER_NOTICE',
-        \E_STRICT => 'E_STRICT',
-        \E_WARNING => 'E_WARNING',
-        \E_USER_WARNING => 'E_USER_WARNING',
-        \E_USER_ERROR => 'E_USER_ERROR',
-        \E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+        E_DEPRECATED => 'E_DEPRECATED',
+        E_USER_DEPRECATED => 'E_USER_DEPRECATED',
+        E_NOTICE => 'E_NOTICE',
+        E_USER_NOTICE => 'E_USER_NOTICE',
+        E_STRICT => 'E_STRICT',
+        E_WARNING => 'E_WARNING',
+        E_USER_WARNING => 'E_USER_WARNING',
+        E_USER_ERROR => 'E_USER_ERROR',
+        E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
 
-        \E_PARSE => 'E_PARSE',
-        \E_ERROR => 'E_ERROR',
-        \E_COMPILE_ERROR => 'E_COMPILE_ERROR',
-        \E_COMPILE_WARNING => 'E_COMPILE_WARNING',
-        \E_CORE_ERROR => 'E_CORE_ERROR',
-        \E_CORE_WARNING => 'E_CORE_WARNING',
+        E_PARSE => 'E_PARSE',
+        E_ERROR => 'E_ERROR',
+        E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+        E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+        E_CORE_ERROR => 'E_CORE_ERROR',
+        E_CORE_WARNING => 'E_CORE_WARNING',
     );
 
     /**
      * @var array
      */
     private static $humanLevels = array(
-        \E_DEPRECATED => 'Deprecated',
-        \E_USER_DEPRECATED => 'User Deprecated',
-        \E_NOTICE => 'Notice',
-        \E_USER_NOTICE => 'User Notice',
-        \E_STRICT => 'Runtime Notice',
-        \E_WARNING => 'Warning',
-        \E_USER_WARNING => 'User Warning',
-        \E_USER_ERROR => 'User Error',
-        \E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
+        E_DEPRECATED => 'Deprecated',
+        E_USER_DEPRECATED => 'User Deprecated',
+        E_NOTICE => 'Notice',
+        E_USER_NOTICE => 'User Notice',
+        E_STRICT => 'Runtime Notice',
+        E_WARNING => 'Warning',
+        E_USER_WARNING => 'User Warning',
+        E_USER_ERROR => 'User Error',
+        E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
 
-        \E_PARSE => 'Parse Error',
-        \E_ERROR => 'Error',
-        \E_COMPILE_ERROR => 'Compile Error',
-        \E_COMPILE_WARNING => 'Compile Warning',
-        \E_CORE_ERROR => 'Core Error',
-        \E_CORE_WARNING => 'Core Warning',
+        E_PARSE => 'Parse Error',
+        E_ERROR => 'Error',
+        E_COMPILE_ERROR => 'Compile Error',
+        E_COMPILE_WARNING => 'Compile Warning',
+        E_CORE_ERROR => 'Core Error',
+        E_CORE_WARNING => 'Core Warning',
     );
 
     /**
      * @param ExceptionHandlerInterface $handler
      * @param LoggerInterface|null $logger
      */
-    public function __construct(ExceptionHandlerInterface $handler, LoggerInterface $logger = null)
+    public function __construct(ExceptionHandlerInterface $handler, ?LoggerInterface $logger = null)
     {
         $this->logger = $logger ?: new NullLogger;
         $this->handler = $handler;
 
-        $this->thrownErrors = \E_ALL & ~\E_DEPRECATED & ~\E_USER_DEPRECATED;
-        $this->loggedErrors = \E_ALL;
+        $this->thrownErrors = E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED;
+        $this->loggedErrors = E_ALL;
 
         $this->logLevels = [
-            \E_DEPRECATED => 'warning',
-            \E_USER_DEPRECATED => 'warning',
-            \E_NOTICE => 'warning',
-            \E_USER_NOTICE => 'warning',
-            \E_STRICT => 'warning',
-            \E_WARNING => 'error',
-            \E_USER_WARNING => 'error',
-            \E_USER_ERROR => 'error',
-            \E_RECOVERABLE_ERROR => 'error',
+            E_DEPRECATED => 'warning',
+            E_USER_DEPRECATED => 'warning',
+            E_NOTICE => 'warning',
+            E_USER_NOTICE => 'warning',
+            E_STRICT => 'warning',
+            E_WARNING => 'error',
+            E_USER_WARNING => 'error',
+            E_USER_ERROR => 'error',
+            E_RECOVERABLE_ERROR => 'error',
         ];
     }
 
@@ -235,7 +251,7 @@ class ErrorHandler
         if ($error && $error['type'] &= E_PARSE | E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR) {
             $msg = sprintf('%s: %s', self::getErrorDescription($error['type']), $error['message']);
 
-            if (0 === strpos($error['message'], 'Allowed memory') || 0 === strpos($error['message'], 'Out of memory')) {
+            if (strpos($error['message'], 'Allowed memory') === 0 || strpos($error['message'], 'Out of memory') === 0) {
                 $exception = new ErrorException($msg, 0, $error['type'], $error['file'], $error['line']);
             } else {
                 // @todo provide backtrace (through symfony/debug?)
@@ -261,12 +277,12 @@ class ErrorHandler
      *
      * @return self
      */
-    public function register($handledErrors = \E_ALL)
+    public function register($handledErrors = E_ALL)
     {
         $errHandler = [$this, 'handleError'];
         $exHandler = [$this, 'handleException'];
 
-        $handledErrors = is_int($handledErrors) ? $handledErrors : \E_ALL;
+        $handledErrors = is_int($handledErrors) ? $handledErrors : E_ALL;
 
         set_error_handler($errHandler, $handledErrors);
         set_exception_handler($exHandler);
@@ -281,7 +297,7 @@ class ErrorHandler
      */
     public function registerShutdown()
     {
-        if (null === self::$reservedMemory) {
+        if (self::$reservedMemory === null) {
             self::$reservedMemory = str_repeat('x', 10240);
             register_shutdown_function(__CLASS__ . '::handleFatalError');
         }
@@ -368,7 +384,7 @@ class ErrorHandler
 
         array_unshift($stacktrace, [
             'file' => $errfile,
-            'line' => $errline
+            'line' => $errline,
         ]);
 
         $this->logger->log($loggedLevel, $errstr, [
@@ -376,7 +392,7 @@ class ErrorHandler
             'errorType' => self::getErrorType($errno),
             'errorFile' => $errfile,
             'errorLine' => $errline,
-            'errorStacktrace' => $this->formatStacktrace($stacktrace)
+            'errorStacktrace' => $this->formatStacktrace($stacktrace),
         ]);
 
         return true;

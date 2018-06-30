@@ -7,8 +7,6 @@
 
 namespace QL\Panthor\Testing;
 
-use Mockery;
-
 class Spy
 {
     /**

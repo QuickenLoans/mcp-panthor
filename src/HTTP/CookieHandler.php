@@ -78,7 +78,7 @@ class CookieHandler
             'path' => $this->nullable($cookieSettings, 'path'),
             'domain' => $this->nullable($cookieSettings, 'domain'),
             'secure' => $this->nullable($cookieSettings, 'secure', false),
-            'httpOnly' => $this->nullable($cookieSettings, 'httpOnly', false)
+            'httpOnly' => $this->nullable($cookieSettings, 'httpOnly', false),
         ];
 
         if (!is_int($this->configuration['expires']) && !is_string($this->configuration['expires'])) {

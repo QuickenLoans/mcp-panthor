@@ -9,11 +9,11 @@ namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\ErrorHandling\ContentHandlerInterface;
 use QL\Panthor\ErrorHandling\ErrorHandler;
 use QL\Panthor\ErrorHandling\StacktraceFormatterTrait;
@@ -66,15 +66,15 @@ class LoggingContentHandler implements ContentHandlerInterface
         LogLevel::WARNING => 1,
         LogLevel::NOTICE => 1,
         LogLevel::INFO => 1,
-        LogLevel::DEBUG => 1
+        LogLevel::DEBUG => 1,
     ];
 
     /**
      * @param ContentHandlerInterface $handler
-     * @param LoggerInterface $logger
+     * @param LoggerInterface|null $logger
      * @param array $configuration
      */
-    public function __construct(ContentHandlerInterface $handler, LoggerInterface $logger = null, array $configuration = [])
+    public function __construct(ContentHandlerInterface $handler, ?LoggerInterface $logger = null, array $configuration = [])
     {
         $this->handler = $handler;
         $this->configuration = $configuration;
@@ -215,7 +215,7 @@ class LoggingContentHandler implements ContentHandlerInterface
             'errorCode' => $code,
             'errorType' => $type,
             'errorClass' => $class,
-            'errorStacktrace' => $this->formatStacktraceForExceptions($throwables)
+            'errorStacktrace' => $this->formatStacktraceForExceptions($throwables),
         ];
 
         $this->log($level, $throwable->getMessage(), $context);

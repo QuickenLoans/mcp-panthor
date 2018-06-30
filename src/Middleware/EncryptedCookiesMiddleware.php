@@ -8,7 +8,6 @@
 namespace QL\Panthor\Middleware;
 
 use Dflydev\FigCookies\Cookies;
-use Dflydev\FigCookies\SetCookies;
 use Dflydev\FigCookies\SetCookie;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -98,7 +97,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
-        list($reqCookies, $resCookies) = $this->decryptCookies(Cookies::fromRequest($request));
+        [$reqCookies, $resCookies] = $this->decryptCookies(Cookies::fromRequest($request));
 
         $request = $request->withAttribute($this->attributeName, $reqCookies);
 
