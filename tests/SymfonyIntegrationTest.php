@@ -10,11 +10,12 @@ namespace QL\Panthor;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\Config\FileLocator;
 
 class SymfonyIntegrationTest extends TestCase
 {
-    public function testContainerCompiles()
+    public function testContainerCompilesWithYAML()
     {
         $configRoot = __DIR__ . '/../configuration';
 
@@ -22,6 +23,18 @@ class SymfonyIntegrationTest extends TestCase
         $builder = new YamlFileLoader($container, new FileLocator($configRoot));
         $builder->load('panthor.yml');
         $builder->load('panthor-slim.yml');
+
+        $container->compile();
+    }
+
+    public function testContainerCompilesWithPHP()
+    {
+        $configRoot = __DIR__ . '/../configuration';
+
+        $container = new ContainerBuilder;
+        $builder = new PhpFileLoader($container, new FileLocator($configRoot));
+        $builder->load('panthor.php');
+        $builder->load('slim.php');
 
         $container->compile();
     }

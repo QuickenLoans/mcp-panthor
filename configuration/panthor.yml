@@ -38,10 +38,6 @@ services:
     _defaults:
         public: true
 
-    # Injected at runtime by the Bootstrap
-    # Note: This path has NO TRAILING SLASH
-    root:               { synthetic: true }
-
     ############################################################################
     # Public exported services
     #

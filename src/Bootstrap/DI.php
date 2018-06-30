@@ -7,14 +7,20 @@
 
 namespace QL\Panthor\Bootstrap;
 
+use ProxyManager\Configuration;
 use QL\Panthor\Bootstrap\DependencyInjection\PanthorCompilerPass;
 use RuntimeException;
+use Symfony\Bridge\ProxyManager\LazyProxy\Instantiator\RuntimeInstantiator;
 use Symfony\Bridge\ProxyManager\LazyProxy\PhpDumper\ProxyDumper;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
@@ -40,12 +46,17 @@ class DI
      *
      * @return ContainerBuilder
      */
-    public static function buildDI($root, $resolveEnvironment = false)
+    public static function buildDI($root, bool $resolveEnvironment = false)
     {
         $root = rtrim($root, '/');
 
         $container = new ContainerBuilder;
-        $loader = new YamlFileLoader($container, new FileLocator($root));
+
+        $loader = static::buildConfigLoader($container, [$root]);
+
+        if (class_exists(Configuration::class) && class_exists(RuntimeInstantiator::class)) {
+            $container->setProxyInstantiator(new RuntimeInstantiator);
+        }
 
         $extensions = static::addExtensions($container, static::DI_EXTENSIONS);
 
@@ -147,14 +158,6 @@ class DI
     }
 
     /**
-     * @return bool
-     */
-    private static function shouldBuildImmediately(): bool
-    {
-        return static::BUILD_AND_CACHE;
-    }
-
-    /**
      * @param ContainerBuilder $container
      * @param array $passes
      *
@@ -198,5 +201,33 @@ class DI
         }
 
         return $resolved;
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $paths
+     *
+     * @return LoaderInterface
+     */
+    private static function buildConfigLoader(ContainerBuilder $container, array $paths): LoaderInterface
+    {
+        $locator = new FileLocator($paths);
+
+        $loaders = [
+            new YamlFileLoader($container, $locator),
+            new PhpFileLoader($container, $locator),
+        ];
+
+        $resolver = new LoaderResolver($loaders);
+
+        return new DelegatingLoader($resolver);
+    }
+
+    /**
+     * @return bool
+     */
+    private static function shouldBuildImmediately(): bool
+    {
+        return static::BUILD_AND_CACHE;
     }
 }
