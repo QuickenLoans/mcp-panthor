@@ -44,20 +44,21 @@ return function (ContainerConfigurator $container) {
     $p = $container->parameters();
 
     $p
-        ('env(PANTHOR_APPROOT)',        __DIR__ . '/../../../..')
+        ('env(PANTHOR_APPROOT)', __DIR__ . '/../../../..')
 
-        ('env(PANTHOR_DEBUG)',          false)
-        ('env(PANTHOR_SYMFONY_DEBUG)',  true)
-        ('env(PANTHOR_TWIG_DEBUG)',     true)
+        ('env(PANTHOR_DEBUG)',                   false)
+        ('env(PANTHOR_SYMFONY_DEBUG)',           true)
+        ('env(PANTHOR_TWIG_DEBUG)',              true)
+        ('env(PANTHOR_ROUTES_DISABLE_CACHE_ON)', true)
 
-        ('env(PANTHOR_TIMEZONE)',       'America/Detroit')
-        ('env(PANTHOR_COOKIE_SECRET)',  '')
+        ('env(PANTHOR_TIMEZONE)',      'America/Detroit')
+        ('env(PANTHOR_COOKIE_SECRET)', '')
     ;
 
     $p
         ('routes',                      [])
         ('routes.cached',               '%env(PANTHOR_APPROOT)%/config/routes.cached.php')
-        ('routes.cache_disabled',       true)
+        ('routes.cache_disabled',       '%env(bool:PANTHOR_ROUTES_DISABLE_CACHE_ON)%')
 
         ('global_middleware',           [])
 

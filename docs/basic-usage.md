@@ -1,11 +1,4 @@
-## Usage
-
-- [Back to Documentation](README.md)
-- [Application Structure](APPLICATION_STRUCTURE.md)
-- How To Use
-- [Error Handling](ERRORS.md)
-- [Cookies](COOKIES.md)
-- [Web Server Configuration](SERVER.md)
+## Basic Usage
 
 ### Controllers and middleware
 
@@ -37,18 +30,16 @@ controllers may implement, but no type checks are performed.
 
 #### Dependency Injection Configuration
 
-It is recommended applications import the panthor `panthor-slim.yml` and `panthor.yml` configuration files in their
+It is recommended applications import the panthor `panthor.php` and `slim.php` configuration files in their
 application `config.yaml` file.
 
 Example `config.yaml`:
 ```yaml
 imports:
-    - resource: ../vendor/ql/mcp-panthor/configuration/panthor-slim.yml
-    - resource: ../vendor/ql/mcp-panthor/configuration/panthor.yml
-    - resource: di.yml
-    - resource: routes.yml
-    - resource: file.yml # more imports
-    - resource: file2.yml # more imports
+    - resource: ../vendor/ql/mcp-panthor/config/slim.php
+    - resource: ../vendor/ql/mcp-panthor/config/panthor.php
+    - resource: di.php
+    - resource: routes.yaml
 ```
 
 You may also copy these files to your application configuration and include that instead., as it may change

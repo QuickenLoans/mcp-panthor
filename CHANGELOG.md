@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.3.0] - 2018-07-??
+
+### Changed
+- Bumped minimum symfony versions to `~4.0` and minimum php version to `~7.1`
+- The Error handler now outputs a default 500 response if an error occurs before Slim has launched.
+    - Change this message with `$exceptionHandler->setFallbackError($body);`
+
+### Added
+- Add simpler way to bootstrap a panthor project: `composer create-project ql/mcp-panthor`.
+    - This deprecates [quickenloans-mcp/panthor-skeleton](https://github.com/quickenloans-mcp/panthor-skeleton) which will no longer be updated.
+    - See [starter-kit](starter-kit/) for example project layout.
+- Added `config/panthor.php` and `config/slim.php` to provide Symfony DI config in **Fluent PHP format**.
+
 ## [3.2.1] - 2017-12-22
 
 ### Changed

@@ -45,7 +45,7 @@ class ComposerInitializeProject
 
         static::write($io, "");
         static::write($io, "!!! Installation not yet finished !!!");
-        static::write($io, "Enter your project directory and run 'composer install'");
+        static::write($io, "Change to your project directory and run 'composer install'");
         static::write($io, "");
     }
 

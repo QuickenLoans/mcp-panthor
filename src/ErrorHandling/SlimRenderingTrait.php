@@ -31,17 +31,10 @@ trait SlimRenderingTrait
     </head>
 
     <body>
-        <header>
-            <h1>Panthor Error</h1>
-        </header>
-        <main>
-            <p>
-                Internal Server Error. The application failed to launch.
-            </p>
-        </main>
+        <h1>Panthor Error</h1>
+        <p>Internal Server Error. The application failed to launch.</p>
     </body>
 </html>
-
 ERROR_RESPONSE;
 
     /**
