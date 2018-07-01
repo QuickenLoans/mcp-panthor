@@ -46,5 +46,11 @@
 
     "suggest": {
         "ext-sodium": "~2.0 || ~7.2 Libsodium recommended for secure cookie encryption."
+    },
+
+    "scripts": {
+        "post-create-project-cmd": [
+            "QL\\Panthor\\Bootstrap\\ComposerInitializeProject::postCreateProject"
+        ]
     }
 }

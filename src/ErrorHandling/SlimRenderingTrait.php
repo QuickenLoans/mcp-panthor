@@ -21,6 +21,30 @@ trait SlimRenderingTrait
     private $slim;
 
     /**
+     * @var string
+     */
+    private $fallbackErrorResponse = <<<ERROR_RESPONSE
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Panthor Error</title>
+    </head>
+
+    <body>
+        <header>
+            <h1>Panthor Error</h1>
+        </header>
+        <main>
+            <p>
+                Internal Server Error. The application failed to launch.
+            </p>
+        </main>
+    </body>
+</html>
+
+ERROR_RESPONSE;
+
+    /**
      * @param App $slim
      *
      * @return void
@@ -31,6 +55,16 @@ trait SlimRenderingTrait
     }
 
     /**
+     * @param string $response
+     *
+     * @return void
+     */
+    public function setFallbackError(string $response = '')
+    {
+        $this->fallbackErrorResponse = $response;
+    }
+
+    /**
      * @param ResponseInterface $response
      */
     private function renderResponse(ResponseInterface $response)
@@ -38,7 +72,11 @@ trait SlimRenderingTrait
         if ($this->slim) {
             $this->slim->respond($response);
         } else {
-            // do something
+            if ($this->fallbackErrorResponse) {
+                echo $this->fallbackErrorResponse;
+            }
+
+            http_response_code(500);
         }
     }
 }

@@ -55,6 +55,16 @@ class GlobalMiddlewareLoader
     }
 
     /**
+     * @param App $slim
+     *
+     * @return App
+     */
+    public function __invoke(App $slim)
+    {
+        return $this->attach($slim);
+    }
+
+    /**
      * @param string $name
      *
      * @return callable|object
