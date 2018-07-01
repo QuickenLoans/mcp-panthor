@@ -1,5 +1,6 @@
 imports:
-    - resource: '../vendor/ql/mcp-panthor/config/*.php'
+    - resource: '../vendor/ql/mcp-panthor/config/slim.php'
+    - resource: '../vendor/ql/mcp-panthor/config/panthor.php'
     - resource: 'di.php'
     - resource: 'parameters.yaml'
     - resource: 'routes.yaml'

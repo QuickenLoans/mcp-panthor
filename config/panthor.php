@@ -47,7 +47,6 @@ return function (ContainerConfigurator $container) {
         ('env(PANTHOR_APPROOT)', __DIR__ . '/../../../..')
 
         ('env(PANTHOR_DEBUG)',                   false)
-        ('env(PANTHOR_SYMFONY_DEBUG)',           true)
         ('env(PANTHOR_TWIG_DEBUG)',              true)
         ('env(PANTHOR_ROUTES_DISABLE_CACHE_ON)', true)
 
@@ -63,7 +62,6 @@ return function (ContainerConfigurator $container) {
         ('global_middleware',           [])
 
         ('debug',                       '%env(bool:PANTHOR_DEBUG)%')
-        ('symfony.debug',               '%env(bool:PANTHOR_SYMFONY_DEBUG)%')
 
         ('date.timezone',               '%env(PANTHOR_TIMEZONE)%')
         ('panthor.internal.timezone',   'UTC')

@@ -6,8 +6,8 @@ namespace ExampleApplication\Bin;
 use QL\Panthor\Bootstrap\RouteLoader;
 
 $root = realpath(__DIR__ . '/..');
-putenv("PANTHOR_APPROOT=${root}");
-putenv("PANTHOR_ROUTES_DISABLE_CACHE_ON=false");
+$_ENV['PANTHOR_APPROOT'] = $root;
+$_ENV['PANTHOR_ROUTES_DISABLE_CACHE_ON'] = false;
 
 $container = require "${root}/config/bootstrap.php";
 

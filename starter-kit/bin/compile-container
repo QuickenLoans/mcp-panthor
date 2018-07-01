@@ -7,7 +7,7 @@ use ExampleApplication\CachedContainer;
 use QL\Panthor\Bootstrap\DI;
 
 $root = realpath(__DIR__ . '/..');
-putenv("PANTHOR_APPROOT=${root}");
+$_ENV['PANTHOR_APPROOT'] = $root;
 
 $file = $root . '/src/CachedContainer.php';
 $class = CachedContainer::class;

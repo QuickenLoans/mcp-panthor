@@ -8,7 +8,7 @@ use Symfony\Component\Finder\Finder;
 use Twig\Environment;
 
 $root = realpath(__DIR__ . '/..');
-putenv("PANTHOR_APPROOT=${root}");
+$_ENV['PANTHOR_APPROOT'] = $root;
 
 $container = require "${root}/config/bootstrap.php";
 

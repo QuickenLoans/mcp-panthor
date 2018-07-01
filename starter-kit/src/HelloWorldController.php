@@ -24,7 +24,10 @@ class HelloWorldController implements ControllerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     *
+     * @return ResponseInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {

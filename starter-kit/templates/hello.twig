@@ -1,50 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="viewport" content="width=device-width">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
+{% extends 'layout.twig' %}
+{% set page_title = 'Hello World' %}
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+{% block page %}
+    <form class="panel">
+        <h1 class="h3 mb-3 font-weight-normal">Awesome! You've got Panthor up and running.</h1>
 
-        <title>Error</title>
-        <style>
-            html, body {
-              height: 100%;
-            }
-
-            body {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background-color: #f5f5f5;
-            }
-
-            .panel {
-              width: 100%;
-              max-width: 40em;
-              padding: 2em;
-              margin: 0 auto;
-            }
-        </style>
-    </head>
-
-    <body>
-        <form class="panel">
-            <h1 class="h3 mb-3 font-weight-normal">Awesome! You've got Panthor up and running.</h1>
-
-            <div class="card">
-                <h5 class="card-header bg-primary">What's next?</h5>
-                <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="{{ uriFor('hello_world') }}" class="btn btn-secondary">Home</a>
-                </div>
+        <div class="card">
+            <h5 class="card-header bg-primary">What's next?</h5>
+            <div class="card-body pb-0">
+                <h5 class="card-title">Edit the example page</h5>
+                <p class="card-text">
+                    Open <code>src/HelloWorldController.php</code> and start coding!
+                    <br>Update <code>templates/hello.twig</code> to the edit the HTML.
+                </p>
             </div>
 
-            Current Time: <b>{{ now|timepoint('Y-m-d H:i:s') }}</b>
+            <div class="card-body">
+                <h5 class="card-title">Add new pages</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        Add a new PHP class such as <code>src/MyPageController.php</code>
+                    </li>
+                    <li class="list-group-item">
+                        Add DI configuration for the class in <code>config/di.php</code>.
+                        <pre class="p-1 bg-light text-secondary">{{ block('di_example') }}</pre>
+                    </li>
+                    <li class="list-group-item">
+                        Edit <code>config/routes.yaml</code> to add new route configuration.
+                        <pre class="p-1 bg-light text-secondary">{{ block('route_example') }}</pre>
+                    </li>
+                </ul>
+            </div>
 
-        </form>
-    </body>
-</html>
+            <div class="card-body pt-0">
+                <a href="{{ uriFor('hello_world') }}" class="btn btn-secondary">Home</a>
+            </div>
+        </div>
+
+        Current Time: <b>{{ now|timepoint('Y-m-d H:i:s') }}</b>
+
+    </form>
+{% endblock %}
+
+{% block di_example %}
+('example.page', MyPageController::class)
+    ->arg('$template', twig('example.twig'))
+{% endblock %}
+
+{% block route_example %}
+example:
+    route: '/example'
+    stack: ['example.page']
+{% endblock %}
