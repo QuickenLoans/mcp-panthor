@@ -38,7 +38,7 @@ class ComposerInitializeProject
         $fs->mirror($tempStarterDir, $targetDir, null, ['delete' => true]);
         $fs->remove($tempStarterDir);
 
-        static::write($io, 'Wrtiting config file in ./config/.env.default');
+        static::write($io, 'Writing config file to ./config/.env.default');
         self::writeConfig($targetDir);
 
         $fs->mkdir($targetDir . '/.twig');

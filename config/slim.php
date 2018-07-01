@@ -2,6 +2,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use QL\Panthor\Bootstrap\CacheableRouter;
 use QL\Panthor\Bootstrap\SlimEnvironmentFactory;
 use Slim\App;
 use Slim\CallableResolver;
@@ -15,7 +16,6 @@ use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Router;
 
 return function (ContainerConfigurator $container) {
     $s = $container->services();
@@ -69,7 +69,7 @@ return function (ContainerConfigurator $container) {
         ('response.default_headers', Headers::class)
             ->arg('$items', '%slim.default_request_headers%')
 
-        ('router', Router::class)
+        ('router', CacheableRouter::class)
         ('callableResolver', CallableResolver::class)
             ->arg('$container', ref('service_container'))
 

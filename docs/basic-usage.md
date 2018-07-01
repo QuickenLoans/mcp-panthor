@@ -46,7 +46,8 @@ You may also copy these files to your application configuration and include that
 between releases. While Panthor makes every opportunity to follow [semver](http://semver.org/), the configuration may
 not.
 
-This configuration provides many boilerplates services.
+This configuration provides many boilerplates services. Check out the files directly to learn more:
+[slim.php](../config/slim.php) and [panthor.php](../config/panthor.php).
 
 Service                  | Description
 ------------------------ | -----------

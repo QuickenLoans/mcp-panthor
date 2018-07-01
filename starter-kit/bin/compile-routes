@@ -3,7 +3,6 @@
 
 namespace ExampleApplication\Bin;
 
-use QL\Panthor\Bootstrap\CacheableRouter;
 use QL\Panthor\Bootstrap\RouteLoader;
 
 $root = realpath(__DIR__ . '/..');
@@ -15,5 +14,5 @@ $container = require "${root}/config/bootstrap.php";
 $app = $container->get('slim');
 $container->get(RouteLoader::class)($app);
 
-$router = $container->get(CacheableRouter::class);
+$router = $container->get('router');
 $router->initializeDispatcher();

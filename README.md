@@ -20,7 +20,7 @@ Dependency Injection and Slim. It can be used for html applications, APIs, or bo
 - [symfony/dependency-injection](https://github.com/symfony/dependency-injection) - A robust and flexible dependency injection container.
 - [symfony/dotenv](https://github.com/symfony/dotenv) - Use environment variables for configuration
 - [symfony/yaml](https://github.com/symfony/yaml) - Use YAML for configuration
-- [twig/twig](https://github.com/twig/twig) - The standard in PHP templating engines
+- [twig/twig](https://github.com/twigphp/Twig) - The standard in PHP templating engines
 
 Here's a few of the features Panthor provides:
 
@@ -39,32 +39,22 @@ Here's a few of the features Panthor provides:
 - [Installation](#installation)
     - [Quick Start](#quick-start)
 - [Documentation](#documentation)
-- [Dependencies](#dependencies)
-    - [Optional Dependencies](#optional-dependencies)
 
 ## Compatibility
 
-- **Panthor 1**
-    - Slim `~2.0`
-    - Symfony `~2.0`
-- **Panthor 2**
-    - Slim `~2.0`
-    - Symfony `~2.0`
-- **Panthor 3**
-    - Slim `~3.3`
-    - Symfony `~3.0 || ~4.0`
-    - PHP `~5.6 || ~7.0`
-- **Panthor 3.3**
-    - Slim `~3.10`
-    - Symfony `~4.0`
-    - PHP `~7.1`
+| Panthor | Slim    | Symfony        | PHP
+|---------|---------|----------------|----
+| `~1.0`  | `~2.0`  | `~2.0`         | `~5.5`
+| `~2.0`  | `~2.0`  | `~2.0`         | `~5.6`
+| `~3.0`  | `~3.3`  | `~3.0 || ~4.0` | `~5.6 || ~7.0`
+| `~3.3`  | `~3.10` | `~4.0`         | `~7.1`
 
 ## Installation
 
 The following command will clone this project and set up a simple skeleton. See the files used in the [starter-kit](starter-kit/).
 
 ```
-composer create-project ql/mcp-panthor --no-install --remove-vcs
+composer create-project ql/mcp-panthor my-project-dir --no-install --remove-vcs
 ```
 
 Never used Composer, Slim or Symfony before? Here are some resources:
@@ -77,10 +67,10 @@ Never used Composer, Slim or Symfony before? Here are some resources:
 The following will clone this project, bootstrap your application with the [starter-kit](starter-kit/). Afterwards,
 just install dependencies and start the app with the built-in PHP webserver.
 ```
-composer create-project ql/mcp-panthor hello-world --no-install --remove-vcs
+composer create-project ql/mcp-panthor my-project-dir --no-install --remove-vcs
 cd hello-world
 composer install
-php -s localhost:8888 -t public
+php -S localhost:8888 -t public
 ```
 
 Now just visit `localhost:8888` and Panthor should start right up!

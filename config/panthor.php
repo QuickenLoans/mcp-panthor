@@ -106,13 +106,13 @@ return function (ContainerConfigurator $container) {
 
     // Core services. Available for use by applications
     $s
-        (CacheableRouter::class)
+        ('router', CacheableRouter::class)
             ->call('setCaching', ['%routes.cached%', '%routes.cache_disabled%'])
         (RouteLoader::class)
             ->arg('$routes', '%routes%')
 
         (URI::class)
-            ->arg('$router', ref(CacheableRouter::class))
+            ->arg('$router', ref('router'))
         (JSON::class)
         (Clock::class)
             ->arg('$current', 'now')
@@ -180,16 +180,16 @@ return function (ContainerConfigurator $container) {
     $s
         ('notFoundHandler', Closure::class)
             ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args(['$service', ref('content_handler'), 'handleNotFound'])
+            ->args([ref('content_handler'), 'handleNotFound'])
         ('notAllowedHandler', Closure::class)
             ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args(['$service', ref('content_handler'), 'handleNotAllowed'])
+            ->args([ref('content_handler'), 'handleNotAllowed'])
         ('phpErrorHandler', Closure::class)
             ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args(['$service', ref('content_handler'), 'handleThrowable'])
-        ('phpErrorHandler', Closure::class)
+            ->args([ref('content_handler'), 'handleThrowable'])
+        ('errorHandler', Closure::class)
             ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args(['$service', ref('content_handler'), 'handleException'])
+            ->args([ref('content_handler'), 'handleException'])
     ;
 
     // Support classes. Users shouldn't need to interact with these
