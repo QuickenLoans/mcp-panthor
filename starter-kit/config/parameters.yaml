@@ -5,8 +5,3 @@ parameters:
 
     cookie.settings.lifetime: '+1 year'
     session.lifetime: '+1 day'
-
-    routes:
-        hello_world:
-            route: '/'
-            stack: ['hello.page']

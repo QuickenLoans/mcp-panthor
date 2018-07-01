@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+
+namespace ExampleApplication\Bin;
+
+use ExampleApplication\CachedContainer;
+use QL\Panthor\Bootstrap\DI;
+
+$root = realpath(__DIR__ . '/..');
+putenv("PANTHOR_APPROOT=${root}");
+
+$file = $root . '/src/CachedContainer.php';
+$class = CachedContainer::class;
+$options = [
+    'class' => $class,
+    'file' => $file
+];
+
+if (!$autoloader = @include "${root}/vendor/autoload.php") {
+    echo "An error occured while attempting to cache the DI Container.\n";
+    exit(1);
+}
+
+$container = DI::buildDI($root);
+if (!$cached = DI::cacheDI($container, $options)) {
+    echo "An error occured while attempting to cache the DI Container.\n";
+    exit(1);
+}
+
+file_put_contents($file, $cached);
+
+// Verify class was created
+require $file;
+if (!class_exists($class)) {
+    echo "An error occured while attempting to cache the DI Container.\n";
+    exit(1);
+}
+
+echo <<<OUTPUT
+Dumping DI Container cache:
+File: $file
+Class: $class
+
+OUTPUT;

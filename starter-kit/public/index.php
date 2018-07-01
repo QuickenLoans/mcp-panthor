@@ -2,10 +2,10 @@
 
 namespace ExampleApplication\Bootstrap;
 
+use QL\Panthor\Bootstrap\GlobalMiddlewareLoader;
 use QL\Panthor\Bootstrap\RouteLoader;
 use QL\Panthor\ErrorHandling\ErrorHandler;
 use QL\Panthor\ErrorHandling\ExceptionHandler;
-use QL\Panthor\Bootstrap\GlobalMiddlewareLoader;
 
 $root = realpath(__DIR__ . '/..');
 

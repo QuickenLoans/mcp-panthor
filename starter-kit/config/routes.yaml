@@ -1,0 +1,5 @@
+parameters:
+    routes:
+        hello_world:
+            route: '/'
+            stack: ['hello.page']

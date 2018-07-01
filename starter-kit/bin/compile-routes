@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+namespace ExampleApplication\Bin;
+
+use QL\Panthor\Bootstrap\CacheableRouter;
+use QL\Panthor\Bootstrap\RouteLoader;
+
+$root = realpath(__DIR__ . '/..');
+putenv("PANTHOR_APPROOT=${root}");
+putenv("PANTHOR_ROUTES_DISABLE_CACHE_ON=false");
+
+$container = require "${root}/config/bootstrap.php";
+
+$app = $container->get('slim');
+$container->get(RouteLoader::class)($app);
+
+$router = $container->get(CacheableRouter::class);
+$router->initializeDispatcher();
