@@ -11,8 +11,8 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use QL\MCP\Common\Clock;
 use QL\Panthor\Bootstrap\CacheableRouter;
+use QL\Panthor\Bootstrap\GlobalMiddlewareLoader;
 use QL\Panthor\Bootstrap\RouteLoader;
-use QL\Panthor\Bootstrap\Setup\GlobalMiddlewareLoader;
 use QL\Panthor\Encryption\LibsodiumSymmetricCrypto;
 use QL\Panthor\ErrorHandling\ContentHandler\HTMLTemplateContentHandler;
 use QL\Panthor\ErrorHandling\ContentHandler\HTTPProblemContentHandler;
@@ -59,7 +59,7 @@ return function (ContainerConfigurator $container) {
         ('routes.cached',               '%env(PANTHOR_APPROOT)%/config/routes.cached.php')
         ('routes.cache_disabled',       true)
 
-        ('global_middleware'            [])
+        ('global_middleware',           [])
 
         ('debug',                       '%env(bool:PANTHOR_DEBUG)%')
         ('symfony.debug',               '%env(bool:PANTHOR_SYMFONY_DEBUG)%')
@@ -147,15 +147,15 @@ return function (ContainerConfigurator $container) {
             ->arg('$cookieSettings', '%cookie.settings%')
 
         ('twig.template', LazyTwig::class)
-            ->arg('$environment', ref('twig.environment'))
-            ->arg('$context', ref('twig.context'))
-        ('twig.context', Context::class)
+            ->arg('$environment', ref(Environment::class))
+            ->arg('$context', ref(Context::class))
+        (Context::class)
         ('twig.loader', FilesystemLoader::class)
-            ->arg('$paths', '%twig.cache.dir%')
+            ->arg('$paths', '%twig.template.dir%')
             ->arg('$rootPath', '%env(PANTHOR_APPROOT)%')
-        ('twig.environment', Environment::class)
+        (Environment::class)
             ->arg('$loader', ref('twig.loader'))
-            ->configurator(ref('panthor.twig.configurator'), 'configure')
+            ->configurator([ref('panthor.twig.configurator'), 'configure'])
             ->call('addExtension', [ref('panthor.twig.extension')])
 
         (GlobalMiddlewareLoader::class)
@@ -228,9 +228,9 @@ return function (ContainerConfigurator $container) {
 
         ('panthor.handler.twig', TwigTemplate::class)
             ->arg('$twig', ref('panthor.handler.twig_environment'))
-            ->arg('$context', ref('twig.context'))
+            ->arg('$context', ref(Context::class))
         ('panthor.handler.twig_environment', Template::class)
-            ->factory([ref('twig.environment'), 'loadTemplate'])
+            ->factory([ref(Environment::class), 'loadTemplate'])
             ->arg('$name', '%error_handling.html_template%')
     ;
 };

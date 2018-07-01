@@ -1,0 +1,27 @@
+{
+    "name": "example/hello-world",
+    "description": "Starter Kit application for MCP Panthor",
+
+    "autoload": {
+        "psr-4": { "ExampleApplication\\": "src" }
+    },
+
+    "require": {
+        "php": "~7.1",
+        "ext-sodium": "~2.0 || ~7.2",
+
+        "ql/mcp-panthor": "dev-master",
+        "ql/mcp-common":  "~2.0",
+
+        "slim/slim":                    "~3.10",
+        "symfony/config":               "~4.0",
+        "symfony/dotenv":               "~4.0",
+        "symfony/dependency-injection": "~4.0",
+        "symfony/finder":               "~4.0",
+        "symfony/process":              "~4.0",
+        "symfony/proxy-manager-bridge": "~4.0",
+        "symfony/yaml":                 "~4.0",
+
+        "twig/twig": "~2.4"
+    }
+}

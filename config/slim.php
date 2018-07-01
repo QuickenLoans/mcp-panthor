@@ -55,7 +55,7 @@ return function (ContainerConfigurator $container) {
     $s
         ('settings', Collection::class)
             ->arg('$items', '%slim.settings%')
-        ('slim')
+        ('slim', App::class)
             ->arg('$container', ref('service_container'))
 
         ('environment', Environment::class)

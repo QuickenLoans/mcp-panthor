@@ -5,14 +5,14 @@ namespace ExampleApplication\Bootstrap;
 use QL\Panthor\Bootstrap\RouteLoader;
 use QL\Panthor\ErrorHandling\ErrorHandler;
 use QL\Panthor\ErrorHandling\ExceptionHandler;
-use QL\Panthor\Bootstrap\Setup\GlobalMiddlewareLoader;
+use QL\Panthor\Bootstrap\GlobalMiddlewareLoader;
 
 $root = realpath(__DIR__ . '/..');
 
 $container = require "${root}/config/bootstrap.php";
 
 // Error handling
-$handler = $container->get(ErrorHandler::class);
+$handler = $container->get(ErrorHandler::class)
     ->register()
     ->registerShutdown();
 

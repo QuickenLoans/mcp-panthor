@@ -6,17 +6,44 @@
         <meta name="viewport" content="width=device-width">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
         <title>Error</title>
+        <style>
+            html, body {
+              height: 100%;
+            }
+
+            body {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background-color: #f5f5f5;
+            }
+
+            .panel {
+              width: 100%;
+              max-width: 40em;
+              padding: 2em;
+              margin: 0 auto;
+            }
+        </style>
     </head>
 
     <body>
-        <header>
-            <h1>Error Page</h1>
-        </header>
-        <main>
-            <p>
-                lorem ipsum
-            </p>
-        </main>
+        <form class="panel">
+            <div class="card border-danger">
+                <h5 class="card-header bg-danger">Oh no! An error has occured.</h5>
+                <div class="card-body">
+                    <h5 class="card-title">{{ message }}</h5>
+                    {% if details %}
+                        <p class="card-text">
+                            <code>{{ details }}</code>
+                        </p>
+                    {%- endif %}
+                    <a href="/" class="btn btn-secondary">Go back</a>
+                </div>
+            </div>
+        </form>
     </body>
 </html>

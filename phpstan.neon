@@ -1,4 +1,5 @@
 parameters:
     ignoreErrors:
         - '#Instanceof between string|null and QL\\MCP\\Common\\OpaqueProperty will always evaluate to false#'
-
+    excludes_analyse:
+        - %rootDir%/../../../src/Bootstrap/ComposerInitializeProject.php
