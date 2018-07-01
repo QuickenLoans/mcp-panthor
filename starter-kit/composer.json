@@ -10,7 +10,7 @@
         "php": "~7.1",
         "ext-sodium": "~2.0 || ~7.2",
 
-        "ql/mcp-panthor": "dev-master",
+        "ql/mcp-panthor": "~3.3",
         "ql/mcp-common":  "~2.0",
 
         "slim/slim":                    "~3.10",
