@@ -1,0 +1,9 @@
+parameters:
+
+    #routes.cache_disabled: '%env(bool:PANTHOR_ROUTES_DISABLE_CACHE_ON)%'
+    global_middleware:
+        - 'QL\Panthor\Middleware\EncryptedCookiesMiddleware'
+        - 'QL\Panthor\Middleware\SessionMiddleware'
+
+    cookie.settings.lifetime: '+1 year'
+    session.lifetime: '+1 day'

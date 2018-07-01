@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+function getAutoloader() {
+    $autoloaders = [
+        __DIR__ . '/../../autoload.php',
+        __DIR__ . '/../vendor/autoload.php',
+        __DIR__ . '/vendor/autoload.php',
+    ];
+
+    foreach ($autoloaders as $file) {
+        if (file_exists($file)) return $file;
+    }
+
+    return null;
+}
+
+if (!$autoloader = getAutoloader()) {
+    fwrite(STDERR, "You need to set up the project dependencies using Composer.\n");
+    die(1);
+}
+
+require $autoloader;

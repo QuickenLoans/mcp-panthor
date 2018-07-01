@@ -1,0 +1,4 @@
+imports:
+    - resource: '../vendor/ql/mcp-panthor/config/*.php'
+    - resource: 'di.php'
+    - resource: 'parameters.yaml'

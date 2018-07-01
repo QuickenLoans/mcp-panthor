@@ -1,0 +1,12 @@
+# installed packages from package managers
+/node_modules/
+/vendor/
+
+# compiled configuration
+/config/.env
+/config/routes.cached.php
+/src/CachedContainer.php
+
+# deployment caches
+/.doctrine/
+/.twig/
