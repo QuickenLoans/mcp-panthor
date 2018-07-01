@@ -29,7 +29,7 @@ class SymfonyIntegrationTest extends TestCase
 
     public function testContainerCompilesWithPHP()
     {
-        $configRoot = __DIR__ . '/../configuration';
+        $configRoot = __DIR__ . '/../config';
 
         $container = new ContainerBuilder;
         $builder = new PhpFileLoader($container, new FileLocator($configRoot));

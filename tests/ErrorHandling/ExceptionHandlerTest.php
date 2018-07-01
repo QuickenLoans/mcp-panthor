@@ -60,8 +60,22 @@ class ExceptionHandlerTest extends TestCase
         $this->assertSame(false, $handled);
     }
 
-    public function testHandlerDoesNotRenderIfSlimNotAttached()
+    public function testHandlerOutputsDefaultMessageIfSlimNotAttached()
     {
+        $expected = <<<HTML_OUTPUT
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Panthor Error</title>
+    </head>
+
+    <body>
+        <h1>Panthor Error</h1>
+        <p>Internal Server Error. The application failed to launch.</p>
+    </body>
+</html>
+HTML_OUTPUT;
+
         $ex = new ErrorException('exception message');
 
         $this->contentHandler
@@ -70,7 +84,7 @@ class ExceptionHandlerTest extends TestCase
             ->andReturn($this->response)
             ->once();
 
-
+        $this->expectOutputString($expected);
         $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
         $handled = $handler->handle($ex);
 
