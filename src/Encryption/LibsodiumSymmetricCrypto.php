@@ -259,19 +259,20 @@ class LibsodiumSymmetricCrypto
     }
 
     /**
+     * @throws CryptoException
+     *
      * @return string
      */
     public static function getSodiumVersion()
     {
-        $php71orLower = phpversion('libsodium');
-        $php7orGreater = phpversion('sodium');
-
-        if ($php7orGreater !== false) {
-            return substr($php7orGreater, 0, 1);
+        // Sometimes the phpversion function will return the PHP version
+        // instead of the extension version, even when it is installed.
+        if (class_exists('\\Sodium\\crypto_secretbox_open')) {
+            return '1';
         }
 
-        if ($php71orLower !== false) {
-            return substr($php71orLower, 0, 1);
+        if (function_exists('\\sodium_crypto_secretbox_open')) {
+            return '2';
         }
 
         // uh oh not installed!
