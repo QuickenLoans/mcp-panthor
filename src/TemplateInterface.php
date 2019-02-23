@@ -12,7 +12,7 @@ interface TemplateInterface
     /**
      * Render the template with context data.
      *
-     * @return null
+     * @return string
      */
     public function render(array $context = []);
 }
