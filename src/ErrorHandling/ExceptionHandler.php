@@ -47,7 +47,7 @@ class ExceptionHandler implements ExceptionHandlerInterface
     /**
      * Handle a throwable, and return whether it was handled and the remaining stack should be aborted.
      *
-     * @param Exception|Throwable $throwable
+     * @param Exception|Throwable|mixed $throwable
      *
      * @return bool
      */
