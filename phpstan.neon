@@ -1,5 +1,6 @@
 parameters:
     ignoreErrors:
         - '#Instanceof between string|null and QL\\MCP\\Common\\OpaqueProperty will always evaluate to false#'
+        - '#Else branch is unreachable because previous condition is always true.#'
     excludes_analyse:
         - %rootDir%/../../../src/Bootstrap/ComposerInitializeProject.php
