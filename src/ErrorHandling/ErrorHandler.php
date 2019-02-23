@@ -273,7 +273,7 @@ class ErrorHandler
     /**
      * Register this handler as the exception and error handler.
      *
-     * @param int $handledErrors
+     * @param int|null $handledErrors
      *
      * @return self
      */
