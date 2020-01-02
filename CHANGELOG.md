@@ -2,7 +2,15 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
-## [3.3.0] - 2018-07-??
+## [3.4.0] - 2020-01-02
+
+### Changed
+- Twig v3.0 is now allowed (Twig v2.0 is still supported).
+    - This affects classes:
+        - `TwigTemplate`
+        - `LazyTwig`
+
+## [3.3.0] - 2018-07-01
 
 ### Changed
 - Bumped minimum symfony versions to `~4.0` and minimum php version to `~7.1`

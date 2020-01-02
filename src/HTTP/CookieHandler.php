@@ -58,7 +58,8 @@ class CookieHandler
 {
     const RESPONSE_COOKIE_NAME = 'Set-Cookie';
 
-    const ERR_BAD_EXPIRES = 'Invalid cookie parameter "expires" specified. "expires" must be a unix timestamp or a string passed to strtotime such as "+30 days".';
+    const ERR_BAD_EXPIRES = 'Invalid cookie parameter "expires" specified. '.
+        '"expires" must be a unix timestamp or a string passed to strtotime such as "+30 days".';
     const ERR_BAD_SECURE = 'Invalid cookie parameter "secure" specified. Expected a boolean.';
     const ERR_BAD_HTTP = 'Invalid cookie parameter "httpOnly" specified. Expected a boolean.';
 

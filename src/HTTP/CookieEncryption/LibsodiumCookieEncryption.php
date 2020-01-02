@@ -32,7 +32,9 @@ class LibsodiumCookieEncryption implements CookieEncryptionInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $unencrypted
+     *
+     * @return string|null
      */
     public function encrypt($unencrypted)
     {
@@ -46,7 +48,9 @@ class LibsodiumCookieEncryption implements CookieEncryptionInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $encrypted
+     *
+     * @return string|null
      */
     public function decrypt($encrypted)
     {
@@ -67,7 +71,7 @@ class LibsodiumCookieEncryption implements CookieEncryptionInterface
     /**
      * @param string $message
      *
-     * @return string|null
+     * @return string
      */
     private function uriSafeEncode($message)
     {

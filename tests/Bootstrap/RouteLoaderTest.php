@@ -122,7 +122,7 @@ OUTPUT;
         $route2 = array_shift($routes);
 
         $this->assertSame('test2', $route1->getName());
-        $this->assertSame(['GET'], $route1->getMethods());
+        $this->assertSame(['GET', 'HEAD'], $route1->getMethods());
         $this->assertInstanceOf(RouteGroup::class, $route1->getGroups()[0]);
 
         $this->assertSame('test', $route2->getName());

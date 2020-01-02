@@ -1,135 +1,180 @@
-version: 2
+version: 2.1
 
-php71_defaults: &php71_defaults
+executors:
+  php71:
     working_directory: '~/project'
     docker:
-        - image: 'circleci/php:7.1'
+      - image: 'circleci/php:7.1'
 
-php72_defaults: &php72_defaults
+  php72:
     working_directory: '~/project'
     docker:
-        - image: 'circleci/php:7.2'
+      - image: 'circleci/php:7.2'
 
-attach_workspace: &attach_workspace
-    attach_workspace:
-        at: '.'
+  php73:
+    working_directory: '~/project'
+    docker:
+      - image: 'circleci/php:7.3'
 
-persist_workspace: &persist_workspace
-    persist_to_workspace:
-        root: '.'
-        paths: [ '.' ]
+  php74:
+    working_directory: '~/project'
+    docker:
+      - image: 'circleci/php:7.4'
 
-install_libsodium: &install_libsodium
-    run:
-      name: 'Install PECL Libsodium (PHP 7.1 only)'
-      command: |
-        php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-        if [ "${php_version}" == "7.1" ] ; then
-          sudo apt-get install libsodium-dev
-          sudo pecl install libsodium
-          sudo docker-php-ext-enable sodium
-        fi
+commands:
+    php--install-libsodium:
+        steps:
+            - run:
+                  name: 'Install PECL Libsodium (PHP 7.1 only)'
+                  command: |
+                    php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+                    echo "PHP Version: ${php_version}"
 
-run_tests_steps: &run_tests_steps
-    steps:
-        - *attach_workspace
-        - *install_libsodium
-        - run:
-            name: 'Run unit tests'
-            command: 'phpdbg -qrr vendor/bin/phpunit'
-        - store_test_results:
-            path: '.phpunit/report'
-        - run:
-            name: 'Upload test coverage to Codacy (PHP 7.1 only)'
-            command: |
-                php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-                if [ "${php_version}" == "7.1" ] ; then
-                    ./vendor/bin/codacycoverage clover .phpunit/clover.xml
-                fi
+                    if [ "${php_version}" == "7.1" ] ; then
+                      sudo apt-get update  -y
+                      sudo apt-get install libsodium-dev -y
+                      sudo pecl install libsodium
+                      sudo docker-php-ext-enable sodium
+                    else
+                        echo "Skipping ext-sodium installation. Already installed."
+                    fi
+    php--run-unit-tests:
+        steps:
+            - run:
+                name: 'Run unit tests'
+                command: 'phpdbg -qrr vendor/bin/phpunit'
+
+            - store_test_results:
+                path: '.phpunit/report'
+            - run:
+                name: 'Upload test coverage to Codacy (PHP 7.1 only)'
+                command: |
+                    php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+                    if [ "${php_version}" == "7.1" ] ; then
+                        ./vendor/bin/codacycoverage clover .phpunit/clover.xml
+                    fi
+
+    php--run-static-analysis:
+        steps:
+            - run:
+                name: 'Run syntax check'
+                command: 'composer lint'
+            - run:
+                name: 'Run code formatting check'
+                command: 'composer sniff'
+            - run:
+                name: 'Run static analysis'
+                command: 'composer analyze'
 
 workflows:
 
-  version: 2
+    version: 2
 
-  pipeline:
-    jobs:
-      - fetch_code
-      - install_php_dependencies:
-          requires: [ fetch_code ]
+    pipeline:
+        jobs:
+            - fetch_code
 
-      - linting:
-          requires: [ install_php_dependencies ]
-      - static_analysis:
-          requires: [ install_php_dependencies ]
+            - php--install-dependencies:
+                name: 'php71_install'
+                executor_version: 'php71'
+                requires: [ fetch_code ]
+            - php--testing:
+                name: 'php71_testing'
+                executor_version: 'php71'
+                requires: [ php71_install ]
 
-      - unit_tests_71:
-          requires: [ linting ]
+            - php--install-dependencies:
+                name: 'php72_install'
+                executor_version: 'php72'
+                requires: [ fetch_code ]
+            - php--testing:
+                name: 'php72_testing'
+                executor_version: 'php72'
+                requires: [ php72_install ]
 
-      - unit_tests_72:
-          requires: [ linting ]
+            - php--install-dependencies:
+                name: 'php73_install'
+                executor_version: 'php73'
+                requires: [ fetch_code ]
+            - php--testing:
+                name: 'php73_testing'
+                executor_version: 'php73'
+                requires: [ php73_install ]
+
+            - php--install-dependencies:
+                name: 'php74_install'
+                executor_version: 'php74'
+                requires: [ fetch_code ]
+            - php--testing:
+                name: 'php74_testing'
+                executor_version: 'php74'
+                requires: [ php74_install ]
+
+            - fan_in:
+                requires:
+                    - 'php71_testing'
+                    - 'php72_testing'
+                    - 'php73_testing'
+                    - 'php74_testing'
 
 jobs:
 
-    fetch_code:
-        <<: *php71_defaults
-        steps:
-            - checkout
-            - *persist_workspace
+    php--install-dependencies:
+        parameters:
+            executor_version:
+                type: string
 
-    install_php_dependencies:
-        <<: *php71_defaults
+        executor: '<< parameters.executor_version >>'
         steps:
-            - *attach_workspace
-            - *install_libsodium
+            - attach_workspace:
+                at: '.'
 
             - restore_cache:
-                keys: [ 'v2-php-deps-{{ checksum "composer.json" }}', 'v2-php-deps' ]
+                keys:
+                    - 'v2-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
+                    - 'v2-<< parameters.executor_version >>-deps'
 
+            - php--install-libsodium
             - run:
                 name: 'Install PHP dependencies'
                 command: |
-                    composer --no-interaction --no-progress install
+                    composer \
+                        --no-interaction \
+                        --no-progress install
+
                     composer show
+
             - save_cache:
-                key: 'v2-php-deps-{{ checksum "composer.json" }}'
+                key: 'v2-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
                 paths: [ 'vendor' ]
 
-            - *persist_workspace
+            - persist_to_workspace:
+                root: '.'
+                paths: [ '.' ]
 
-    static_analysis:
-        <<: *php71_defaults
+    php--testing:
+        parameters:
+            executor_version:
+                type: string
+
+        executor: '<< parameters.executor_version >>'
+
         steps:
-            - *attach_workspace
-            - *install_libsodium
-            - run:
-                name: 'Run static analysis'
-                command: |
-                    vendor/bin/phpstan analyse \
-                    -l 4 \
-                    --configuration=phpstan.neon \
-                    --memory-limit=1G \
-                    src
-    linting:
-        <<: *php71_defaults
+            - attach_workspace:
+                at: '.'
+
+            - php--install-libsodium
+            - php--run-static-analysis
+            - php--run-unit-tests
+
+    fan_in:
+        executor: 'php71'
+        steps: [ { run: 'whoami' } ]
+
+    fetch_code:
+        executor: 'php71'
         steps:
-            - *attach_workspace
-
-            - run:
-                name: 'Run syntax check'
-                command: 'vendor/bin/phplint --no-cache --ansi src'
-
-            - run:
-                name: 'Run code formatting check'
-                command: |
-                    vendor/bin/phpcs \
-                    --colors \
-                    --runtime-set ignore_warnings_on_exit true \
-                    src
-
-    unit_tests_71:
-        <<: *php71_defaults
-        <<: *run_tests_steps
-
-    unit_tests_72:
-        <<: *php72_defaults
-        <<: *run_tests_steps
+            - checkout
+            - persist_to_workspace:
+                root: '.'
+                paths: [ '.' ]

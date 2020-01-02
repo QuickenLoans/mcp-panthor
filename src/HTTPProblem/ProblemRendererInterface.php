@@ -15,7 +15,7 @@ interface ProblemRendererInterface
     /**
      * @param HTTPProblem $problem
      *
-     * @return string
+     * @return int
      */
     public function status(HTTPProblem $problem);
 

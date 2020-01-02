@@ -27,7 +27,9 @@ class JSONRenderer implements ProblemRendererInterface
     }
 
     /**
-     * @inheritDoc
+     * @param HTTPProblem $problem
+     *
+     * @return int
      */
     public function status(HTTPProblem $problem)
     {
@@ -35,7 +37,9 @@ class JSONRenderer implements ProblemRendererInterface
     }
 
     /**
-     * @inheritDoc
+     * @param HTTPProblem $problem
+     *
+     * @return array
      */
     public function headers(HTTPProblem $problem)
     {
@@ -45,7 +49,9 @@ class JSONRenderer implements ProblemRendererInterface
     }
 
     /**
-     * @inheritDoc
+     * @param HTTPProblem $problem
+     *
+     * @return string
      */
     public function body(HTTPProblem $problem)
     {

@@ -37,7 +37,7 @@ use QL\Panthor\Utility\URI;
 use Twig\Cache\FilesystemCache;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Twig\Template;
+use Twig\TemplateWrapper;
 
 return function (ContainerConfigurator $container) {
     $s = $container->services();
@@ -228,8 +228,8 @@ return function (ContainerConfigurator $container) {
         ('panthor.handler.twig', TwigTemplate::class)
             ->arg('$twig', ref('panthor.handler.twig_environment'))
             ->arg('$context', ref(Context::class))
-        ('panthor.handler.twig_environment', Template::class)
-            ->factory([ref(Environment::class), 'loadTemplate'])
+        ('panthor.handler.twig_environment', TemplateWrapper::class)
+            ->factory([ref(Environment::class), 'load'])
             ->arg('$name', '%error_handling.html_template%')
     ;
 };

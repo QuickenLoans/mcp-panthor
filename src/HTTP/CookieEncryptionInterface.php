@@ -12,7 +12,7 @@ interface CookieEncryptionInterface
     /**
      * @param string $unencrypted
      *
-     * @return string
+     * @return string|null
      */
     public function encrypt($unencrypted);
 
