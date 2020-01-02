@@ -31,7 +31,8 @@ commands:
                     echo "PHP Version: ${php_version}"
 
                     if [ "${php_version}" == "7.1" ] ; then
-                      sudo apt-get install libsodium-dev
+                      sudo apt-get update  -y
+                      sudo apt-get install libsodium-dev -y
                       sudo pecl install libsodium
                       sudo docker-php-ext-enable sodium
                     else
@@ -79,31 +80,31 @@ workflows:
             - fetch_code
 
             - php--install-dependencies:
-                name: 'php71_install_dependencies'
+                name: 'php71_install'
                 executor_version: 'php71'
                 requires: [ fetch_code ]
             - php--testing:
                 name: 'php71_testing'
                 executor_version: 'php71'
-                requires: [ php71_install_dependencies ]
+                requires: [ php71_install ]
 
             - php--install-dependencies:
-                name: 'php72_install_dependencies'
+                name: 'php72_install'
                 executor_version: 'php72'
                 requires: [ fetch_code ]
             - php--testing:
                 name: 'php72_testing'
                 executor_version: 'php72'
-                requires: [ php72_install_dependencies ]
+                requires: [ php72_install ]
 
             - php--install-dependencies:
-                name: 'php73_install_dependencies'
+                name: 'php73_install'
                 executor_version: 'php73'
                 requires: [ fetch_code ]
             - php--testing:
                 name: 'php73_testing'
                 executor_version: 'php73'
-                requires: [ php73_install_dependencies ]
+                requires: [ php73_install ]
 
             - fan_in:
                 requires:
@@ -125,17 +126,13 @@ jobs:
 
             - restore_cache:
                 keys:
-                    - 'v1-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
-                    - 'v1-<< parameters.executor_version >>-deps'
+                    - 'v2-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
+                    - 'v2-<< parameters.executor_version >>-deps'
 
             - php--install-libsodium
             - run:
                 name: 'Install PHP dependencies'
                 command: |
-                    if [ "<< parameters.executor_version >>" == "php71" ] ; then
-                        composer config --global platform.ext-sodium "7.1.0"
-                    fi
-
                     composer \
                         --no-interaction \
                         --no-progress install
@@ -143,7 +140,7 @@ jobs:
                     composer show
 
             - save_cache:
-                key: 'v1-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
+                key: 'v2-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
                 paths: [ 'vendor' ]
 
             - persist_to_workspace:
