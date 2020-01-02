@@ -41,11 +41,15 @@
         "symfony/dependency-injection": "~4.0",
         "symfony/yaml":                 "~4.0",
         "symfony/proxy-manager-bridge": "~4.0",
-        "twig/twig":                    "~2.4"
+        "twig/twig":                    "~2.12 || ~3.0"
     },
 
-    "suggest": {
-        "ext-sodium": "~2.0 || ~7.2 Libsodium recommended for secure cookie encryption."
+    "scripts": {
+        "analyze": "phpstan analyse -l 4 --configuration=phpstan.neon --memory-limit=2G src",
+        "lint": "phplint --no-cache --ansi src",
+        "sniff": "phpcs --runtime-set ignore_warnings_on_exit true",
+        "sniff-nowarn": "phpcs -n",
+        "test": "phpunit"
     },
 
     "scripts": {
