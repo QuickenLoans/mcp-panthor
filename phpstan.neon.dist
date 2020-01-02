@@ -1,4 +1,9 @@
 parameters:
+    level: 4
+
+    paths:
+        - src
+
     ignoreErrors:
         - '#Instanceof between string|null and QL\\MCP\\Common\\OpaqueProperty will always evaluate to false#'
         - '#Else branch is unreachable because previous condition is always true.#'
