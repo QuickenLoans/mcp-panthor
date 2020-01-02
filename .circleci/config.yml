@@ -40,9 +40,6 @@ commands:
                     fi
     php--run-unit-tests:
         steps:
-            - attach_workspace:
-                at: '.'
-
             - run:
                 name: 'Run unit tests'
                 command: 'phpdbg -qrr vendor/bin/phpunit'
@@ -59,8 +56,6 @@ commands:
 
     php--run-static-analysis:
         steps:
-            - attach_workspace:
-                at: '.'
             - run:
                 name: 'Run syntax check'
                 command: 'composer lint'
@@ -106,11 +101,21 @@ workflows:
                 executor_version: 'php73'
                 requires: [ php73_install ]
 
+            - php--install-dependencies:
+                name: 'php74_install'
+                executor_version: 'php74'
+                requires: [ fetch_code ]
+            - php--testing:
+                name: 'php74_testing'
+                executor_version: 'php74'
+                requires: [ php74_install ]
+
             - fan_in:
                 requires:
                     - 'php71_testing'
                     - 'php72_testing'
                     - 'php73_testing'
+                    - 'php74_testing'
 
 jobs:
 
@@ -155,6 +160,9 @@ jobs:
         executor: '<< parameters.executor_version >>'
 
         steps:
+            - attach_workspace:
+                at: '.'
+
             - php--install-libsodium
             - php--run-static-analysis
             - php--run-unit-tests

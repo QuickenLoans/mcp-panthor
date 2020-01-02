@@ -5,7 +5,7 @@ See [keepachangelog.com](http://keepachangelog.com) for reference.
 ## [3.4.0] - 2020-01-02
 
 ### Changed
-- Twig v3.0 is now allowed.
+- Twig v3.0 is now allowed (Twig v2.0 is still supported).
     - This affects classes:
         - `TwigTemplate`
         - `LazyTwig`
