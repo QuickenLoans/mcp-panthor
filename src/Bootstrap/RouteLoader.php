@@ -69,7 +69,7 @@ class RouteLoader
      *
      * @param App $slim
      *
-     * @return null
+     * @return void
      */
     public function __invoke(App $slim)
     {
@@ -82,7 +82,7 @@ class RouteLoader
      * @param App $slim
      * @param array $routes
      *
-     * @return null
+     * @return void
      */
     public function loadRoutes(App $slim, array $routes)
     {

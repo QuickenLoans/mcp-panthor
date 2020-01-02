@@ -2,10 +2,22 @@ parameters:
     level: 4
 
     paths:
-        - src
+        - src/Bootstrap
+        - src/Encryption
+        - src/ErrorHandling
+        - src/Exception
+        - src/HTTP
+        - src/HTTPProblem
+        #- src/Middleware
+        - src/Session
+        - src/Templating
+        - src/Testing
+        - src/Twig
+        - src/Utility
 
     ignoreErrors:
         - '#Instanceof between string|null and QL\\MCP\\Common\\OpaqueProperty will always evaluate to false#'
         - '#Else branch is unreachable because previous condition is always true.#'
+        - '#Result of \&\& is always false.#'
     excludes_analyse:
         - %rootDir%/../../../src/Bootstrap/ComposerInitializeProject.php
