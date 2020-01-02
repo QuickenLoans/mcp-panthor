@@ -43,7 +43,15 @@ class RouteLoader
     {
         $this->routes = $routes;
 
-        $this->defaultMethods = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT'];
+        $this->defaultMethods = [
+            'DELETE',
+            'GET',
+            'HEAD',
+            'OPTIONS',
+            'PATCH',
+            'POST',
+            'PUT',
+        ];
     }
 
     /**
@@ -78,12 +86,14 @@ class RouteLoader
      */
     public function loadRoutes(App $slim, array $routes)
     {
-        foreach ($routes as $name => $details) {
-            if ($children = $this->nullable('routes', $details)) {
-                $middlewares = $this->nullable('stack', $details) ?: [];
-                $prefix = $this->nullable('route', $details) ?: '';
+        // capture as a callable because slim will re-bind $this
+        $loader = [$this, 'loadRoutes'];
 
-                $loader = [$this, 'loadRoutes'];
+        foreach ($routes as $name => $details) {
+            if ($children = $details['routes'] ?? []) {
+                $middlewares = $details['stack'] ?? [];
+                $prefix = $details['route'] ?? '';
+
                 $groupLoader = function () use ($slim, $children, $loader) {
                     $loader($slim, $children);
                 };
@@ -111,8 +121,8 @@ class RouteLoader
     private function loadRoute(App $slim, $name, array $details)
     {
         $methods = $this->methods($details);
-        $pattern = $this->nullable('route', $details);
-        $stack = $this->nullable('stack', $details) ?: [];
+        $pattern = $details['route'] ?? '';
+        $stack = $details['stack'] ?? [];
 
         $controller = array_pop($stack);
 
@@ -133,8 +143,8 @@ class RouteLoader
      */
     private function methods(array $routeDetails)
     {
-        // If not defined, use default methods
-        if (!$methods = $this->nullable('method', $routeDetails)) {
+        // No method matches ANY method
+        if (!$methods = $routeDetails['method'] ?? []) {
             return $this->defaultMethods;
         }
 
@@ -142,21 +152,10 @@ class RouteLoader
             $methods = [$methods];
         }
 
-        return $methods;
-    }
-
-    /**
-     * @param string $key
-     * @param array $data
-     *
-     * @return mixed|null
-     */
-    private function nullable($key, array $data)
-    {
-        if (isset($data[$key])) {
-            return $data[$key];
+        if ($methods === ['GET']) {
+            array_push($methods, 'HEAD');
         }
 
-        return null;
+        return $methods;
     }
 }
