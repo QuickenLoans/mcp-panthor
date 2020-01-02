@@ -7,9 +7,11 @@
 
 namespace QL\Panthor\Templating;
 
+use InvalidArgumentException;
 use QL\Panthor\TemplateInterface;
 use QL\Panthor\Twig\Context;
 use Twig\Template;
+use Twig\TemplateWrapper;
 
 /**
  * Twig Template implementation.
@@ -20,8 +22,10 @@ use Twig\Template;
  */
 class TwigTemplate implements TemplateInterface
 {
+    const INVALID_TEMPLATE = 'Invalid template provided. First argument must be an instance of Twig\Template or Twig\TemplateWrapper.';
+
     /**
-     * @var Template
+     * @var Template|TemplateWrapper
      */
     private $twig;
 
@@ -31,11 +35,15 @@ class TwigTemplate implements TemplateInterface
     private $context;
 
     /**
-     * @param Template $twig
+     * @param Template|TemplateWrapper $twig
      * @param Context|null $context
      */
-    public function __construct(Template $twig, ?Context $context = null)
+    public function __construct($twig, ?Context $context = null)
     {
+        if (!$twig instanceof Template && !$twig instanceof TemplateWrapper) {
+            throw new InvalidArgumentException(self::INVALID_TEMPLATE);
+        }
+
         $this->twig = $twig;
         $this->context = $context ?: new Context;
     }

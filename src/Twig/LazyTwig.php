@@ -11,6 +11,7 @@ use InvalidArgumentException;
 use QL\Panthor\TemplateInterface;
 use Twig\Environment;
 use Twig\Template;
+use Twig\TemplateWrapper;
 
 /**
  * A simple proxy for twig to lazy load templates and allow incremental context loading.
@@ -42,7 +43,7 @@ class LazyTwig implements TemplateInterface
     private $context;
 
     /**
-     * @var Template|null
+     * @var Template|TemplateWrapper|null
      */
     private $twig;
 
@@ -121,7 +122,7 @@ class LazyTwig implements TemplateInterface
     /**
      * @throws InvalidArgumentException
      *
-     * @return Template
+     * @return Template|TemplateWrapper
      */
     private function lazy()
     {
@@ -130,7 +131,7 @@ class LazyTwig implements TemplateInterface
                 throw new InvalidArgumentException('The template file must be specified.');
             }
 
-            $this->twig = $this->environment->loadTemplate($this->template);
+            $this->twig = $this->environment->load($this->template);
         }
 
         return $this->twig;
