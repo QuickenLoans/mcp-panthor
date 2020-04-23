@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [3.4.1] - 2020-04-23
+
+- `ErrorHandler` will now ignore errors when users silence errors with the "@" symbol.
+    - This is used by several popular libraries such `predis`, `doctrine`, and `phpseclib` to ignore system errors
+      while they manually convert them to exceptions.
+
 ## [3.4.0] - 2020-01-02
 
 ### Changed

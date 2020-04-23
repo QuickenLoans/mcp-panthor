@@ -220,11 +220,20 @@ class ErrorHandler
     {
         $msg = sprintf('%s: %s', self::getErrorDescription($errno), $errstr);
 
-        if ($errno & $this->thrownErrors) {
+        // Level is the current error reporting level to manage silent error.
+        // When silenced with the "@" symbol, this will be zero.
+        $currentReportingLevel = error_reporting();
+        $isSilenced = ($currentReportingLevel & $errno) === 0;
+
+        $shouldLogError = ($errno & $this->loggedErrors);
+        $shouldThrowError = ($errno & $this->thrownErrors);
+
+        if ($shouldThrowError) {
             throw new ErrorException($msg, 0, $errno, $errfile, $errline);
         }
 
-        if ($this->logError($errno, $msg, $errfile, $errline)) {
+        if ($shouldLogError) {
+            $this->logError($errno, $msg, $errfile, $errline);
             return true;
         }
 
@@ -369,14 +378,10 @@ class ErrorHandler
      * @param string $errfile
      * @param string $errline
      *
-     * @return bool
+     * @return void
      */
     private function logError($errno, $errstr, $errfile, $errline)
     {
-        if (!($errno & $this->loggedErrors)) {
-            return false;
-        }
-
         $loggedLevel = isset($this->logLevels[$errno]) ? $this->logLevels[$errno] : 'error';
 
         $stacktrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
@@ -394,7 +399,5 @@ class ErrorHandler
             'errorLine' => $errline,
             'errorStacktrace' => $this->formatStacktrace($stacktrace),
         ]);
-
-        return true;
     }
 }
