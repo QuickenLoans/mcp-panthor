@@ -228,6 +228,10 @@ class ErrorHandler
         $shouldLogError = ($errno & $this->loggedErrors);
         $shouldThrowError = ($errno & $this->thrownErrors);
 
+        if ($isSilenced) {
+            return true;
+        }
+
         if ($shouldThrowError) {
             throw new ErrorException($msg, 0, $errno, $errfile, $errline);
         }
