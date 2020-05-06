@@ -39,6 +39,11 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TemplateWrapper;
 
+use Slim\Interfaces\RouteParserInterface;
+use Slim\Middleware\BodyParsingMiddleware;
+use Slim\Middleware\ErrorMiddleware;
+use Slim\Middleware\RoutingMiddleware;
+
 return function (ContainerConfigurator $container) {
     $s = $container->services();
     $p = $container->parameters();
@@ -46,35 +51,35 @@ return function (ContainerConfigurator $container) {
     $p
         ('env(PANTHOR_APPROOT)', __DIR__ . '/../../../..')
 
-        ('env(PANTHOR_DEBUG)',                   false)
-        ('env(PANTHOR_TWIG_DEBUG)',              true)
-        ('env(PANTHOR_ROUTES_DISABLE_CACHE_ON)', true)
+        ('env(PANTHOR_DEBUG)',                   '0')
+        ('env(PANTHOR_TWIG_DEBUG)',              '1')
 
         ('env(PANTHOR_TIMEZONE)',      'America/Detroit')
         ('env(PANTHOR_COOKIE_SECRET)', '')
     ;
 
     $p
-        ('routes',                      [])
-        ('routes.cached',               '%env(PANTHOR_APPROOT)%/config/routes.cached.php')
-        ('routes.cache_disabled',       '%env(bool:PANTHOR_ROUTES_DISABLE_CACHE_ON)%')
-
-        ('global_middleware',           [])
+        ('routes',            [])
+        ('global_middleware', [
+            ErrorMiddleware::class,
+            BodyParsingMiddleware::class,
+            RoutingMiddleware::class,
+        ])
 
         ('debug',                       '%env(bool:PANTHOR_DEBUG)%')
 
-        ('date.timezone',               '%env(PANTHOR_TIMEZONE)%')
+        ('date.timezone',               '%env(string:PANTHOR_TIMEZONE)%')
         ('panthor.internal.timezone',   'UTC')
 
         ('twig.debug',                  '%env(bool:PANTHOR_TWIG_DEBUG)%')
-        ('twig.template.dir',           '%env(PANTHOR_APPROOT)%/templates')
-        ('twig.cache.dir',              '%env(PANTHOR_APPROOT)%/.twig')
+        ('twig.template.dir',           '%env(string:PANTHOR_APPROOT)%/templates')
+        ('twig.cache.dir',              '%env(string:PANTHOR_APPROOT)%/.twig')
 
         ('cookie.settings.lifetime',    '+1 year')
         ('cookie.settings.secure',      false)
         ('cookie.settings.http_only',   true)
         ('session.lifetime',            '+1 week')
-        ('cookie.encryption.secret',    '%env(PANTHOR_COOKIE_SECRET)%')
+        ('cookie.encryption.secret',    '%env(string:PANTHOR_COOKIE_SECRET)%')
 
         ('cookie.unencrypted',          [])
         ('cookie.delete_invalid',       true)
@@ -104,13 +109,11 @@ return function (ContainerConfigurator $container) {
 
     // Core services. Available for use by applications
     $s
-        ('router', CacheableRouter::class)
-            ->call('setCaching', ['%routes.cached%', '%routes.cache_disabled%'])
         (RouteLoader::class)
             ->arg('$routes', '%routes%')
 
         (URI::class)
-            ->arg('$router', ref('router'))
+            ->arg('$router', ref(RouteParserInterface::class))
         (JSON::class)
         (Clock::class)
             ->arg('$current', 'now')
@@ -126,8 +129,8 @@ return function (ContainerConfigurator $container) {
 
         (ExceptionHandler::class)
             ->arg('$handler', ref('content_handler'))
-            ->arg('$request', ref('request'))
-            ->arg('$response', ref('response'))
+            // ->arg('$request', ref('request'))
+            // ->arg('$response', ref('response'))
         ('problem.renderer', JSONRenderer::class)
             ->arg('$json', ref('panthor.problem.json'))
 
@@ -175,20 +178,20 @@ return function (ContainerConfigurator $container) {
     ;
 
     // Overrides. Change built-in Slim handlers to Panthor handlers
-    $s
-        ('notFoundHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleNotFound'])
-        ('notAllowedHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleNotAllowed'])
-        ('phpErrorHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleThrowable'])
-        ('errorHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleException'])
-    ;
+    // $s
+    //     ('notFoundHandler', Closure::class)
+    //         ->factory([ClosureFactory::class, 'buildClosure'])
+    //         ->args([ref('content_handler'), 'handleNotFound'])
+    //     ('notAllowedHandler', Closure::class)
+    //         ->factory([ClosureFactory::class, 'buildClosure'])
+    //         ->args([ref('content_handler'), 'handleNotAllowed'])
+    //     ('phpErrorHandler', Closure::class)
+    //         ->factory([ClosureFactory::class, 'buildClosure'])
+    //         ->args([ref('content_handler'), 'handleThrowable'])
+    //     ('errorHandler', Closure::class)
+    //         ->factory([ClosureFactory::class, 'buildClosure'])
+    //         ->args([ref('content_handler'), 'handleException'])
+    // ;
 
     // Support classes. Users shouldn't need to interact with these
     $s
