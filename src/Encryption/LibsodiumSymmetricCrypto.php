@@ -17,6 +17,7 @@ use function sodium_crypto_auth_verify;
 use function sodium_crypto_secretbox;
 use function sodium_crypto_secretbox_open;
 use function sodium_hex2bin;
+use const SODIUM_CRYPTO_AUTH_BYTES;
 
 /**
  * This uses libsodium encryption from Libsodium ~2.0
@@ -87,8 +88,8 @@ class LibsodiumSymmetricCrypto
             throw new CryptoException(self::ERR_INVALID_SECRET);
         }
 
-        $this->cryptoSecret = new OpaqueProperty($this->sodiumHex2bin(ByteString::substr($secret, 0, 64)));
-        $this->authSecret = new OpaqueProperty($this->sodiumHex2bin(ByteString::substr($secret, 64)));
+        $this->cryptoSecret = new OpaqueProperty(sodium_hex2bin(ByteString::substr($secret, 0, 64)));
+        $this->authSecret = new OpaqueProperty(sodium_hex2bin(ByteString::substr($secret, 64)));
     }
 
     /**
@@ -109,14 +110,14 @@ class LibsodiumSymmetricCrypto
 
         // Encrypt payload
         try {
-            $encrypted = $this->sodiumSecretBox($unencrypted, $nonce, $this->cryptoSecret->getValue());
+            $encrypted = sodium_crypto_secretbox($unencrypted, $nonce, $this->cryptoSecret->getValue());
         } catch (Exception $ex) {
             throw new CryptoException(sprintf(self::ERR_ENCRYPT, $ex->getMessage()), $ex->getCode(), $ex);
         }
 
         // Calculate MAC
         try {
-            $mac = $this->sodiumCryptoAuth($nonce . $encrypted, $this->authSecret->getValue());
+            $mac = sodium_crypto_auth($nonce . $encrypted, $this->authSecret->getValue());
         } catch (Exception $ex) {
             throw new CryptoException(sprintf(self::ERR_ENCODE, $ex->getMessage()), $ex->getCode(), $ex);
         }
@@ -139,18 +140,18 @@ class LibsodiumSymmetricCrypto
         }
 
         // Sanity check size of payload is larger than MAC + NONCE
-        if (ByteString::strlen($encrypted) < self::NONCE_SIZE_BYTES + $this->sodiumCryptoBytes()) {
+        if (ByteString::strlen($encrypted) < self::NONCE_SIZE_BYTES + SODIUM_CRYPTO_AUTH_BYTES) {
             throw new CryptoException(self::ERR_SIZE);
         }
 
         // Split into nonce, mac, and encrypted payload
         $nonce = ByteString::substr($encrypted, 0, self::NONCE_SIZE_BYTES);
-        $mac = ByteString::substr($encrypted, self::NONCE_SIZE_BYTES, $this->sodiumCryptoBytes());
-        $encrypted = ByteString::substr($encrypted, self::NONCE_SIZE_BYTES + $this->sodiumCryptoBytes());
+        $mac = ByteString::substr($encrypted, self::NONCE_SIZE_BYTES, SODIUM_CRYPTO_AUTH_BYTES);
+        $encrypted = ByteString::substr($encrypted, self::NONCE_SIZE_BYTES + SODIUM_CRYPTO_AUTH_BYTES);
 
         // Verify MAC
         try {
-            $isVerified = $this->sodiumCryptoAuthVerify($mac, $nonce . $encrypted, $this->authSecret->getValue());
+            $isVerified = sodium_crypto_auth_verify($mac, $nonce . $encrypted, $this->authSecret->getValue());
         } catch (Exception $ex) {
             throw new CryptoException(sprintf(self::ERR_DECODE_UNEXPECTED, $ex->getMessage()), $ex->getCode(), $ex);
         }
@@ -161,7 +162,7 @@ class LibsodiumSymmetricCrypto
 
         // Decrypt authenticated payload
         try {
-            $unencrypted = $this->sodiumSecretBoxOpen($encrypted, $nonce, $this->cryptoSecret->getValue());
+            $unencrypted = sodium_crypto_secretbox_open($encrypted, $nonce, $this->cryptoSecret->getValue());
         } catch (Exception $ex) {
             throw new CryptoException(sprintf(self::ERR_DECRYPT, $ex->getMessage()), $ex->getCode(), $ex);
         }
@@ -170,108 +171,14 @@ class LibsodiumSymmetricCrypto
     }
 
     /**
-     * @param string $var
-     *
-     * @return string
-     */
-    private function sodiumHex2bin($var)
-    {
-        if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return sodium_hex2bin($var);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
-     * @param string $message
-     * @param string $key
-     *
-     * @return string
-     */
-    public function sodiumCryptoAuth($message, $key)
-    {
-        if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return sodium_crypto_auth($message, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
-     * @return int
-     */
-    public function sodiumCryptoBytes()
-    {
-        if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return SODIUM_CRYPTO_AUTH_BYTES;
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
-     * @param string $mac
-     * @param string $message
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function sodiumCryptoAuthVerify($mac, $message, $key)
-    {
-        if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return sodium_crypto_auth_verify($mac, $message, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
-     * @param string $message
-     * @param string $nonce
-     * @param string $key
-     *
-     * @return string
-     */
-    public function sodiumSecretBox($message, $nonce, $key)
-    {
-        if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return sodium_crypto_secretbox($message, $nonce, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
-     * @param string $message
-     * @param string $nonce
-     * @param string $key
-     *
-     * @return string
-     */
-    public function sodiumSecretBoxOpen($message, $nonce, $key)
-    {
-        if (in_array($this->libsodiumVersion, ['2', '7'], true)) {
-            return sodium_crypto_secretbox_open($message, $nonce, $key);
-        }
-
-        throw new CryptoException(self::ERR_NEED_MORE_SALT);
-    }
-
-    /**
      * @return string
      */
     public static function getSodiumVersion()
     {
-        $php71orLower = phpversion('libsodium');
         $php7orGreater = phpversion('sodium');
 
         if ($php7orGreater !== false) {
             return substr($php7orGreater, 0, 1);
-        }
-
-        if ($php71orLower !== false) {
-            return substr($php71orLower, 0, 1);
         }
 
         // uh oh not installed!

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -8,6 +8,7 @@
 namespace QL\Panthor\Encryption;
 
 use PHPUnit\Framework\TestCase;
+use QL\Panthor\Exception\CryptoException;
 use stdClass;
 
 class LibsodiumSymmetricCryptoTest extends TestCase
@@ -19,55 +20,50 @@ class LibsodiumSymmetricCryptoTest extends TestCase
         $this->secret = 'e1d4ca14194e027629e4446e7c534eb24b8953c3b7cf62cbb7b95977f0ab965cd8d2e8ac0dc1d9174ff401e86bf500112987eea4e552f9e201f3afe759b1a7dc';
     }
 
-    /**
-     * @expectedException QL\Panthor\Exception\CryptoException
-     * @expectedExceptionMessage Invalid encryption secret. Secret must be 128 hexadecimal characters.
-     */
     public function testInvalidSecretThrowsException()
     {
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage('Invalid encryption secret. Secret must be 128 hexadecimal characters.');
+
         $secret = 'derp';
         new LibsodiumSymmetricCrypto($secret);
     }
 
-    /**
-     * @expectedException QL\Panthor\Exception\CryptoException
-     * @expectedExceptionMessage Invalid type "object" given. Only scalars can be encrypted.
-     */
     public function testNonScalarThrowsCryptoException()
     {
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage('Invalid type "object" given. Only scalars can be encrypted.');
+
         $crypto = new LibsodiumSymmetricCrypto($this->secret);
 
         $crypto->encrypt(new stdClass);
     }
 
-    /**
-     * @expectedException QL\Panthor\Exception\CryptoException
-     * @expectedExceptionMessage Invalid type "string" given. Only strings can be decrypted.
-     */
     public function testEmptyStringThrowsDecryptionException()
     {
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage('Invalid type "string" given. Only strings can be decrypted.');
+
         $crypto = new LibsodiumSymmetricCrypto($this->secret);
 
         $crypto->decrypt('');
     }
 
-    /**
-     * @expectedException QL\Panthor\Exception\CryptoException
-     * @expectedExceptionMessage Invalid type "integer" given. Only strings can be decrypted.
-     */
     public function testInvalidTypeThrowsDecryptionException()
     {
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage('Invalid type "integer" given. Only strings can be decrypted.');
+
         $crypto = new LibsodiumSymmetricCrypto($this->secret);
 
         $crypto->decrypt(1234);
     }
 
-    /**
-     * @expectedException QL\Panthor\Exception\CryptoException
-     * @expectedExceptionMessage Invalid encrypted payload provided.
-     */
     public function testShortStringThrowsDecryptionException()
     {
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage('Invalid encrypted payload provided.');
+
         $crypto = new LibsodiumSymmetricCrypto($this->secret);
 
         $crypto->decrypt('small-string');
