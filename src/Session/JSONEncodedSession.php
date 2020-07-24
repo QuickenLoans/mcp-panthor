@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2017 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -32,7 +32,7 @@ class JSONEncodedSession implements SessionInterface
      *
      * @return SessionInterface|null
      */
-    public static function fromSerialized($data)
+    public static function fromSerialized(string $data): ?SessionInterface
     {
         if (!$data || !is_string($data)) {
             return null;
@@ -52,23 +52,33 @@ class JSONEncodedSession implements SessionInterface
      *
      * @return string
      */
-    public static function toSerialized(SessionInterface $session)
+    public static function toSerialized(SessionInterface $session): string
     {
         return json_encode($session, JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
     }
 
     /**
-     * @inheritDoc
+     * Stores a given value in the session.
+     *
+     * @param string                      $key
+     * @param int|bool|string|float|array $value
+     *
+     * @return void
      */
-    public function set($key, $value)
+    public function set(string $key, $value): void
     {
         $this->data[$key] = self::convertValueToScalar($value);
     }
 
     /**
-     * @inheritDoc
+     * Retrieves a value from the session.
+     *
+     * @param string $key
+     * @param int|bool|string|float|array $default
+     *
+     * @return int|bool|string|float|array
      */
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
         if (!$this->has($key)) {
             return self::convertValueToScalar($default);
@@ -78,39 +88,49 @@ class JSONEncodedSession implements SessionInterface
     }
 
     /**
-     * @inheritDoc
+     * Removes an item from the session.
+     *
+     * @param string $key
+     *
+     * @return void
      */
-    public function remove($key)
+    public function remove(string $key): void
     {
         unset($this->data[$key]);
     }
 
     /**
-     * @inheritDoc
+     * Clears the entire session.
+     *
+     * @return void
      */
-    public function clear()
+    public function clear(): void
     {
         $this->data = [];
     }
 
     /**
-     * @inheritDoc
+     * @param string $key
+     *
+     * @return bool
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         return array_key_exists($key, $this->data);
     }
 
     /**
-     * @inheritDoc
+     * Checks whether the session has changed its contents.
+     *
+     * @return bool
      */
-    public function hasChanged()
+    public function hasChanged(): bool
     {
         return $this->data !== $this->original;
     }
 
     /**
-     * @inheritDoc
+     * @return mixed
      */
     public function jsonSerialize()
     {
