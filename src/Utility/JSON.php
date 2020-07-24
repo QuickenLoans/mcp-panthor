@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -11,6 +11,8 @@ use JsonSerializable;
 
 class JSON
 {
+    use JSONTrait;
+
     /**
      * @var int
      */
@@ -32,7 +34,7 @@ class JSON
     {
         $decoded = $this->decode($json);
         if ($decoded === null || !is_array($decoded)) {
-            return sprintf('Invalid json (%s)', json_last_error_msg());
+            return sprintf('Invalid json (%s)', $this->lastJSONError());
         }
 
         return $decoded;
@@ -43,7 +45,7 @@ class JSON
      */
     public function lastJsonErrorMessage()
     {
-        return json_last_error_msg();
+        return $this->lastJSONError();
     }
 
     /**
@@ -53,9 +55,9 @@ class JSON
      */
     public function decode($json)
     {
-        $decoded = json_decode($json, true);
+        $decoded = $this->decodeJSON($json, $this->encodingOptions);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if ($this->lastJSONError()) {
             return null;
         }
 
@@ -69,7 +71,7 @@ class JSON
      */
     public function encode($data)
     {
-        return json_encode($data, $this->encodingOptions);
+        return $this->encodeJSON($data, $this->encodingOptions);
     }
 
     /**
@@ -83,6 +85,7 @@ class JSON
     {
         $this->encodingOptions = $encodingOptions;
     }
+
     /**
      * @see http://php.net/manual/en/json.constants.php
      *
