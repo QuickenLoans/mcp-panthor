@@ -75,9 +75,10 @@ return function (ContainerConfigurator $container) {
         ('twig.template.dir',           '%env(string:PANTHOR_APPROOT)%/templates')
         ('twig.cache.dir',              '%env(string:PANTHOR_APPROOT)%/.twig')
 
-        ('cookie.settings.lifetime',    '+1 year')
+        ('cookie.settings.lifetime',    0)
         ('cookie.settings.secure',      false)
         ('cookie.settings.http_only',   true)
+        ('cookie.settings.same_site',   'lax')
         ('session.lifetime',            '+1 week')
         ('cookie.encryption.secret',    '%env(string:PANTHOR_COOKIE_SECRET)%')
 
@@ -89,6 +90,7 @@ return function (ContainerConfigurator $container) {
             'domain'    => '',
             'secure'    => '%cookie.settings.secure%',
             'httpOnly'  => '%cookie.settings.http_only%',
+            'sameSite'  => '%cookie.settings.same_site%',
         ])
 
         ('error_handling.levels',           E_ALL)
@@ -146,7 +148,9 @@ return function (ContainerConfigurator $container) {
         ('cookie.encryption', LibsodiumCookieEncryption::class)
             ->arg('$crypto', ref('panthor.libsodium.encryption'))
         (CookieHandler::class)
+            ->arg('$encryption', ref('cookie.encryption'))
             ->arg('$cookieSettings', '%cookie.settings%')
+            ->arg('$unencryptedCookies', '%cookie.unencrypted%')
 
         ('twig.template', LazyTwig::class)
             ->arg('$environment', ref(Environment::class))
