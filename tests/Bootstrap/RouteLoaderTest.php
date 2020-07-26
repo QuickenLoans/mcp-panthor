@@ -1,23 +1,27 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\Bootstrap;
 
 use PHPUnit\Framework\TestCase;
 use Slim\App;
-use Slim\RouteGroup;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Routing\RouteGroup;
+use Symfony\Component\DependencyInjection\Container;
 
 class RouteLoaderTest extends TestCase
 {
+    public $request;
     public $slim;
 
     public function setUp()
     {
-        $this->slim = new App;
+        $this->request = (new RequestFactory)->createRequest('GET', '/test');
+
+        $this->slim = new App(
+            new ResponseFactory,
+            new Container
+        );
     }
 
     public function testRoutesAttached()
@@ -36,7 +40,7 @@ class RouteLoaderTest extends TestCase
         $loader = new RouteLoader($routes);
         $loader($this->slim);
 
-        $routes = $this->slim->getContainer()->get('router')->getRoutes();
+        $routes = $this->slim->getRouteCollector()->getRoutes();
 
         $this->assertCount(2, $routes);
     }
@@ -44,12 +48,13 @@ class RouteLoaderTest extends TestCase
     public function testMultipleMiddlewareAreOrderedCorrectlyInReverse()
     {
         $di = $this->slim->getContainer();
-        $di['m.one'] = new TestCallable('one');
-        $di['m.two'] = new TestCallable('two');
-        $di['m.three'] = new TestCallable('three');
-        $di['gm.one'] = new TestCallable('gm.one');
-        $di['gm.two'] = new TestCallable('gm.two');
-        $di['page'] = new TestCallable('controller');
+
+        $di->set('m.one', new TestCallable('one'));
+        $di->set('m.two', new TestCallable('two'));
+        $di->set('m.three', new TestCallable('three'));
+        $di->set('gm.one', new TestCallable('gm.one'));
+        $di->set('gm.two', new TestCallable('gm.two'));
+        $di->set('page', new TestCallable('controller'));
 
         $routes = [
             'group1' => [
@@ -67,26 +72,26 @@ class RouteLoaderTest extends TestCase
         $loader = new RouteLoader($routes);
         $loader($this->slim);
 
-        $routes = $di->get('router')->getRoutes();
+        $routes = $this->slim->getRouteCollector()->getRoutes();
 
         $route = array_shift($routes);
-        $route->finalize();
-        $route->run($di->get('request'), $di->get('response'));
+        $response = $route->run($this->request);
 
-        $expected = <<<OUTPUT
-before-gm.one
-before-gm.two
-before-one
-before-two
-before-three
-controller
-after-three
-after-two
-after-one
-after-gm.two
-after-gm.one
+        $expected = <<<EOT
+        before-gm.one
+        before-gm.two
+        before-one
+        before-two
+        before-three
+        controller
+        after-three
+        after-two
+        after-one
+        after-gm.two
+        after-gm.one
 
-OUTPUT;
+        EOT;
+
         $this->assertSame($expected, TestCallable::$output);
     }
 
@@ -114,7 +119,7 @@ OUTPUT;
         $loader = new RouteLoader($routes);
         $loader($this->slim);
 
-        $routes = $this->slim->getContainer()->get('router')->getRoutes();
+        $routes = $this->slim->getRouteCollector()->getRoutes();
 
         $this->assertCount(2, $routes);
 
@@ -166,7 +171,7 @@ OUTPUT;
         $loader->addRoutes($routes2);
         $loader($this->slim);
 
-        $routes = $this->slim->getContainer()->get('router')->getRoutes();
+        $routes = $this->slim->getRouteCollector()->getRoutes();
 
         $this->assertCount(2, $routes);
 
@@ -189,16 +194,17 @@ class TestCallable
         $this->name = $name;
     }
 
-    public function mw($req, $res, $next)
+    public function mw($req, $handler)
     {
         self::$output .= sprintf("before-%s\n", $this->name);
-        $r = $next($req, $res);
+        $res = $handler->handle($req);
         self::$output .= sprintf("after-%s\n", $this->name);
-        return $r;
+        return $res;
     }
 
     public function controller($req, $res)
     {
         self::$output .= sprintf("%s\n", $this->name);
+        return $res;
     }
 }

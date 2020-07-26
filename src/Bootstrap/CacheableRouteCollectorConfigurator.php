@@ -30,8 +30,6 @@ class CacheableRouteCollectorConfigurator
     /**
      * @param string $cacheFile
      * @param bool $isCacheDisabled
-     *
-     * @return void
      */
     public function __construct(string $cacheFile, bool $isCacheDisabled)
     {
@@ -44,10 +42,10 @@ class CacheableRouteCollectorConfigurator
      *
      * @return void
      */
-    public function __invoke(RouteCollector $collector)
+    public function __invoke(RouteCollector $collector): void
     {
         if (!$this->isCacheDisabled) {
-            $this->setCacheFile($this->cacheFile);
+            $collector->setCacheFile($this->cacheFile);
         }
     }
 }

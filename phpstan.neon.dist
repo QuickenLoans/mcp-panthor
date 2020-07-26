@@ -8,7 +8,7 @@ parameters:
         - src/Exception
         - src/HTTP
         - src/HTTPProblem
-        #- src/Middleware
+        - src/Middleware
         - src/Session
         - src/Templating
         - src/Testing
@@ -16,7 +16,6 @@ parameters:
         - src/Utility
 
     ignoreErrors:
-        - '#Instanceof between string|null and QL\\MCP\\Common\\OpaqueProperty will always evaluate to false#'
         - '#Else branch is unreachable because previous condition is always true.#'
         - '#Result of \&\& is always false.#'
     excludes_analyse:
