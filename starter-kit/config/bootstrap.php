@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2017 YourNameHere
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace ExampleApplication\Bootstrap;
 
@@ -17,14 +12,7 @@ require_once "${root}/vendor/autoload.php";
 
 if (class_exists(Dotenv::class)) {
     $dotenv = new Dotenv;
-
-    if (file_exists("${root}/config/.env.default")) {
-        $dotenv->load("${root}/config/.env.default");
-    }
-
-    if (file_exists("${root}/config/.env")) {
-        $dotenv->load("${root}/config/.env");
-    }
+    $dotenv->loadEnv("${root}/config/.env", 'APP_ENV', 'dev', ['xxxxxx']);
 }
 
 $file = "${root}/src/CachedContainer.php";
@@ -34,4 +22,7 @@ $options = [
     'file' => $file
 ];
 
-return DI::getDI($root, $options);
+$di = DI::getDI($root, $options);
+
+unset($root, $dotenv, $file, $class, $options); # Ensure cleanup so no variables leak from includes
+return $di;

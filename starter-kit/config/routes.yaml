@@ -3,3 +3,9 @@ parameters:
         hello_world:
             route: '/'
             stack: ['hello.page']
+        test_session:
+            route: '/session'
+            stack: ['session.page']
+        test_cookie:
+            route: '/cookie'
+            stack: ['cookie.page']

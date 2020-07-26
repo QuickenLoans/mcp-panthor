@@ -1,7 +1,13 @@
 parameters:
     global_middleware:
-        - 'QL\Panthor\Middleware\EncryptedCookiesMiddleware'
-        - 'QL\Panthor\Middleware\SessionMiddleware'
+        - 'Slim\Middleware\BodyParsingMiddleware'
+        - 'Slim\Middleware\ErrorMiddleware'
+        - 'Slim\Middleware\RoutingMiddleware'
+        # Make sure to do one of the following before enabling below:
+        # - If using symfony/dotenv: Set Environment Variable `PANTHOR_COOKIE_SECRET`
+        # - Or set `cookie.encryption.secret` in parameters.yaml.
+        # - 'QL\Panthor\Middleware\EncryptedCookiesMiddleware'
+        # - 'QL\Panthor\Middleware\SessionMiddleware'
 
-    cookie.settings.lifetime: '+1 year'
+    cookie.settings.lifetime: '+7 days'
     session.lifetime: '+1 day'

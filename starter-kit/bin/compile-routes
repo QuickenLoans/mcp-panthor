@@ -4,6 +4,7 @@
 namespace ExampleApplication\Bin;
 
 use QL\Panthor\Bootstrap\RouteLoader;
+use Slim\Routing\Dispatcher;
 
 $root = realpath(__DIR__ . '/..');
 $_ENV['PANTHOR_APPROOT'] = $root;
@@ -14,5 +15,7 @@ $container = require "${root}/config/bootstrap.php";
 $app = $container->get('slim');
 $container->get(RouteLoader::class)($app);
 
-$router = $container->get('router');
-$router->initializeDispatcher();
+$collector = $slim->getRouteCollector();
+
+$dispatcher = new Dispatcher($collector);
+$dispatcher->dispatch('GET', '/');
