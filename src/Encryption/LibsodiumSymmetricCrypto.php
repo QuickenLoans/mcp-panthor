@@ -65,11 +65,6 @@ class LibsodiumSymmetricCrypto
     private $authSecret;
 
     /**
-     * @var string
-     */
-    private $libsodiumVersion;
-
-    /**
      * $secret should each be a 128-character hexademical value.
      *
      * This will be broken into 2 64-character parts: crypto secret and auth secret.
@@ -80,9 +75,9 @@ class LibsodiumSymmetricCrypto
      *
      * @throws CryptoException
      */
-    public function __construct($secret)
+    public function __construct(string $secret)
     {
-        $this->libsodiumVersion = self::getSodiumVersion();
+        self::verifySodiumVersion();
 
         if (preg_match(sprintf('#%s#', self::REGEX_FULL_SECRET), $secret) !== 1) {
             throw new CryptoException(self::ERR_INVALID_SECRET);
@@ -171,14 +166,14 @@ class LibsodiumSymmetricCrypto
     }
 
     /**
-     * @return string
+     * @return void
      */
-    public static function getSodiumVersion()
+    public static function verifySodiumVersion()
     {
         $php7orGreater = phpversion('sodium');
 
         if ($php7orGreater !== false) {
-            return substr($php7orGreater, 0, 1);
+            return;
         }
 
         // uh oh not installed!

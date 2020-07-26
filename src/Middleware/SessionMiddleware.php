@@ -9,6 +9,7 @@ namespace QL\Panthor\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use QL\Panthor\HTTP\CookieHandler;
 use QL\Panthor\MiddlewareInterface;
 use QL\Panthor\Session\JSONEncodedSession;
@@ -54,9 +55,12 @@ class SessionMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @inheritDoc
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     *
+     * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // build session
         $session = $this->buildSession($request);
@@ -64,7 +68,7 @@ class SessionMiddleware implements MiddlewareInterface
         // attach to request
         $request = $request->withAttribute($this->options['request_attribute'], $session);
 
-        $response = $next($request, $response);
+        $response = $handler->handle($request);
 
         // render session
         return $this->serializeSession($response, $session);
@@ -77,11 +81,14 @@ class SessionMiddleware implements MiddlewareInterface
      */
     private function buildSession(ServerRequestInterface $request)
     {
-        $data = $this->handler->getCookie($request, $this->options['cookie_name']);
+        $sessionClass = $this->options['session_class'];
+        $cookieName = $this->options['cookie_name'];
 
-        $session = call_user_func([$this->options['session_class'], 'fromSerialized'], $data);
+        $data = $this->handler->getCookie($request, $cookieName);
+
+        $session = $sessionClass::fromSerialized($data ?? '');
         if (!$session) {
-            $session = new $this->options['session_class'];
+            $session = new $sessionClass;
         }
 
         return $session;
@@ -95,15 +102,13 @@ class SessionMiddleware implements MiddlewareInterface
      */
     private function serializeSession(ResponseInterface $response, SessionInterface $session)
     {
-        if ($session->hasChanged()) {
-            $serialized = call_user_func([$this->options['session_class'], 'toSerialized'], $session);
+        $sessionClass = $this->options['session_class'];
+        $cookieName = $this->options['cookie_name'];
+        $lifeTime = $this->options['lifetime'];
 
-            $response = $this->handler->withCookie(
-                $response,
-                $this->options['cookie_name'],
-                $serialized,
-                $this->options['lifetime']
-            );
+        if ($session->hasChanged()) {
+            $serialized = $sessionClass::toSerialized($session);
+            $response = $this->handler->withCookie($response, $cookieName, $serialized, $lifeTime);
         }
 
         return $response;

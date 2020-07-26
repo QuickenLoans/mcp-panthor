@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\Middleware;
 
@@ -12,39 +7,46 @@ use Dflydev\FigCookies\SetCookie;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use QL\MCP\Common\OpaqueProperty;
 use QL\Panthor\HTTP\CookieEncryptionInterface;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
 use QL\Panthor\Testing\MockeryAssistantTrait;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class EncryptedCookiesMiddlewareTest extends TestCase
 {
     use MockeryAssistantTrait;
     use MockeryPHPUnitIntegration;
 
-    private $encryption;
-
-    private $request;
-    private $reponse;
-
-    private $capturedRequest;
+    public $encryption;
+    public $request;
+    public $reqHandler;
+    public $capturedRequest;
 
     public function setUp()
     {
         $this->encryption = Mockery::mock(CookieEncryptionInterface::class);
 
-        $this->request = Request::createFromEnvironment(Environment::mock());
-        $this->response = new Response;
+        $this->request = (new RequestFactory)->createRequest('GET', '/path');
 
         $this->capturedRequest = null;
-    }
 
-    public function nextMiddleware($req, $res)
-    {
-        $this->capturedRequest = $req;
-        return $res;
+        $this->reqHandler = new class($this) implements RequestHandlerInterface {
+            private $test;
+            public function __construct($test)
+            {
+                $this->test = $test;
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                $this->test->capturedRequest = $request;
+                return (new ResponseFactory)->createResponse();
+            }
+        };
     }
 
     public function testCookiesDecryptedAndSetAsAttribute()
@@ -62,18 +64,15 @@ class EncryptedCookiesMiddlewareTest extends TestCase
             ->andReturn('decrypted_12345');
 
         $mw = new EncryptedCookiesMiddleware($this->encryption, [], true);
-        $response = $mw($request, $this->response, [$this, 'nextMiddleware']);
+        $response = $mw->process($request, $this->reqHandler);
 
-        $this->assertInstanceof(Request::class, $this->capturedRequest);
+        $this->assertInstanceof(ServerRequestInterface::class, $this->capturedRequest);
 
         $reqCookies = $this->capturedRequest->getAttribute('request_cookies');
-        $this->assertInstanceof(Cookies::class, $reqCookies);
+        $this->assertSame(['cookietest1', 'cookietest2'], array_keys($reqCookies));
 
-        $cookie1 = $reqCookies->get('cookietest1');
-        $this->assertSame('decrypted_abcde', $cookie1->getValue()->getValue());
-
-        $cookie2 = $reqCookies->get('cookietest2');
-        $this->assertSame('decrypted_12345', $cookie2->getValue()->getValue());
+        $this->assertSame('decrypted_abcde', $reqCookies['cookietest1']->getValue());
+        $this->assertSame('decrypted_12345', $reqCookies['cookietest2']->getValue());
     }
 
     public function testInvalidCookieDeleted()
@@ -93,18 +92,14 @@ class EncryptedCookiesMiddlewareTest extends TestCase
             ->shouldReceive(['encrypt' => null]);
 
         $mw = new EncryptedCookiesMiddleware($this->encryption, [], true);
-        $response = $mw($request, $this->response, [$this, 'nextMiddleware']);
+        $response = $mw->process($request, $this->reqHandler);
 
-        $this->assertInstanceof(Request::class, $this->capturedRequest);
+        $this->assertInstanceof(ServerRequestInterface::class, $this->capturedRequest);
 
         $reqCookies = $this->capturedRequest->getAttribute('request_cookies');
-        $this->assertInstanceof(Cookies::class, $reqCookies);
+        $this->assertSame(['cookietest1'], array_keys($reqCookies));
 
-        $cookie1 = $reqCookies->get('cookietest1');
-        $this->assertSame('decrypted_abcde', $cookie1->getValue()->getValue());
-
-        $cookie2 = $reqCookies->get('cookietest2');
-        $this->assertSame(null, $cookie2);
+        $this->assertSame('decrypted_abcde', $reqCookies['cookietest1']->getValue());
 
         $resCookie = $response->getHeaderLine('Set-Cookie');
         $this->assertStringStartsWith('cookietest2=;', $resCookie);
@@ -128,18 +123,14 @@ class EncryptedCookiesMiddlewareTest extends TestCase
             ->never();
 
         $mw = new EncryptedCookiesMiddleware($this->encryption, [], false);
-        $response = $mw($request, $this->response, [$this, 'nextMiddleware']);
+        $response = $mw->process($request, $this->reqHandler);
 
-        $this->assertInstanceof(Request::class, $this->capturedRequest);
+        $this->assertInstanceof(ServerRequestInterface::class, $this->capturedRequest);
 
         $reqCookies = $this->capturedRequest->getAttribute('request_cookies');
-        $this->assertInstanceof(Cookies::class, $reqCookies);
+        $this->assertSame(['cookietest1'], array_keys($reqCookies));
 
-        $cookie1 = $reqCookies->get('cookietest1');
-        $this->assertSame('decrypted_abcde', $cookie1->getValue()->getValue());
-
-        $cookie2 = $reqCookies->get('cookietest2');
-        $this->assertSame(null, $cookie2);
+        $this->assertSame('decrypted_abcde', $reqCookies['cookietest1']->getValue());
 
         $resCookie = $response->getHeaderLine('Set-Cookie');
         $this->assertSame('', $resCookie);
@@ -159,46 +150,36 @@ class EncryptedCookiesMiddlewareTest extends TestCase
             ->never();
 
         $mw = new EncryptedCookiesMiddleware($this->encryption, ['cookietest1'], false);
-        $response = $mw($request, $this->response, [$this, 'nextMiddleware']);
+        $response = $mw->process($request, $this->reqHandler);
 
-        $this->assertInstanceof(Request::class, $this->capturedRequest);
+        $this->assertInstanceof(ServerRequestInterface::class, $this->capturedRequest);
 
         $reqCookies = $this->capturedRequest->getAttribute('request_cookies');
-        $this->assertInstanceof(Cookies::class, $reqCookies);
+        $this->assertSame(['cookietest1'], array_keys($reqCookies));
 
-        $cookie1 = $reqCookies->get('cookietest1');
-        $this->assertSame('abcde', $cookie1->getValue());
-
-        $cookie2 = $reqCookies->get('cookietest2');
-        $this->assertSame(null, $cookie2);
+        $this->assertSame('abcde', $reqCookies['cookietest1']);
 
         $resCookie = $response->getHeaderLine('Set-Cookie');
         $this->assertSame('', $resCookie);
     }
 
-    public function testCookiesSetInApplication()
+    public function testCookiesSetInApplicationAreNotEncryptedByMiddleware()
     {
-        $this->encryption
-            ->shouldReceive('encrypt')
-            ->with('12345')
-            ->andReturn('12345_encrypted');
-        $this->encryption
-            ->shouldReceive('encrypt')
-            ->with('vwxyz')
-            ->andReturn('vwxyz_encrypted');
+        $appMiddleware = new class implements RequestHandlerInterface {
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                $res = (new ResponseFactory)->createResponse();
 
-        $appMiddleware = function($req, $res) {
-           return $res
-                ->withAddedHeader('Set-Cookie', 'cookietest1=abcde')
-                ->withAddedHeader('Set-Cookie', SetCookie::create('cookietest2', '12345'))
-                ->withAddedHeader('Set-Cookie', new \stdClass)
-                ->withAddedHeader('Set-Cookie', SetCookie::create('cookietest4', new OpaqueProperty('vwxyz')));
+               return $res
+                    ->withAddedHeader('Set-Cookie', 'cookietest1=abcde')
+                    ->withAddedHeader('Set-Cookie', (string) SetCookie::create('cookietest2', '12345'));
+            }
         };
 
         $mw = new EncryptedCookiesMiddleware($this->encryption, ['cookietest1'], false);
-        $response = $mw($this->request, $this->response, $appMiddleware);
+        $response = $mw->process($this->request, $appMiddleware);
 
         $resCookie = $response->getHeaderLine('Set-Cookie');
-        $this->assertSame('cookietest1=abcde,cookietest2=12345_encrypted,cookietest4=vwxyz_encrypted', $resCookie);
+        $this->assertSame('cookietest1=abcde,cookietest2=12345', $resCookie);
     }
 }

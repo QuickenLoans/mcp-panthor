@@ -7,7 +7,6 @@
 
 namespace QL\Panthor\HTTP;
 
-use Dflydev\FigCookies\Cookies;
 use Dflydev\FigCookies\Modifier\SameSite;
 use Dflydev\FigCookies\SetCookie;
 use Psr\Http\Message\ResponseInterface;

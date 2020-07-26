@@ -8,6 +8,7 @@
 namespace QL\Panthor\Utility;
 
 use JsonException;
+use JsonSerializable;
 use const JSON_THROW_ON_ERROR;
 
 /**
