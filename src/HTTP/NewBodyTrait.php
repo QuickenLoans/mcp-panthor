@@ -18,7 +18,7 @@ trait NewBodyTrait
      *
      * @return ResponseInterface
      */
-    private function withNewBody(ResponseInterface $response, $contents)
+    private function withNewBody(ResponseInterface $response, $contents): ResponseInterface
     {
         $body = new Stream(fopen('php://temp', 'r+'));
         $body->write($contents);

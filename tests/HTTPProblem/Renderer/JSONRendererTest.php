@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\HTTPProblem\Renderer;
 
@@ -20,9 +15,9 @@ class JSONRendererTest extends TestCase
             'Content-Type' => 'application/problem+json'
         ];
 
-        $expectedBody = <<<JSON
-{"status":500,"title":"Internal Server Error","detail":"Error ahoy!"}
-JSON;
+        $expectedBody = <<<EOT
+        {"status":500,"title":"Internal Server Error","detail":"Error ahoy!"}
+        EOT;
 
         $problem = new HTTPProblem(500, 'Error ahoy!');
 
@@ -38,18 +33,18 @@ JSON;
 
     public function testRenderingFullProblem()
     {
-        $expectedBody = <<<JSON
-{
-    "status": 500,
-    "title": "Application error code 5021",
-    "type": "http://example/problem1.html",
-    "detail": "Major Tom, are you receiving me?",
-    "instance": "http://example/issue/12345.html",
-    "ext1": "data1",
-    "ext2": "data2",
-    "ext3": "data3"
-}
-JSON;
+        $expectedBody = <<<EOT
+        {
+            "status": 500,
+            "title": "Application error code 5021",
+            "type": "http://example/problem1.html",
+            "detail": "Major Tom, are you receiving me?",
+            "instance": "http://example/issue/12345.html",
+            "ext1": "data1",
+            "ext2": "data2",
+            "ext3": "data3"
+        }
+        EOT;
 
         $problem = new HTTPProblem(500, 'Major Tom, are you receiving me?', [
             'ext1' => 'data1',

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -14,12 +14,12 @@ interface CookieEncryptionInterface
      *
      * @return string|null
      */
-    public function encrypt($unencrypted);
+    public function encrypt($unencrypted): ?string;
 
     /**
      * @param string $encrypted
      *
      * @return string|null
      */
-    public function decrypt($encrypted);
+    public function decrypt($encrypted): ?string;
 }

@@ -19,7 +19,6 @@ class NewBodyTraitTest extends TestCase
                 withNewBody as public;
             }
         };
-
     }
 
     public function testSettingNewResponseBody()

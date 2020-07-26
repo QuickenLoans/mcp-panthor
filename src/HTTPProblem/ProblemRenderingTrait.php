@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -24,8 +24,11 @@ trait ProblemRenderingTrait
      *
      * @return ResponseInterface
      */
-    private function renderProblem(ResponseInterface $response, ProblemRendererInterface $renderer, HTTPProblem $problem)
-    {
+    private function renderProblem(
+        ResponseInterface $response,
+        ProblemRendererInterface $renderer,
+        HTTPProblem $problem
+    ): ResponseInterface {
         $status = $renderer->status($problem);
         $headers = $renderer->headers($problem);
         $body = $renderer->body($problem);
