@@ -1,5 +1,5 @@
-{% extends 'layout.twig' %}
-{% set page_title = 'Hello World' %}
+{%- extends 'layout.twig' -%}
+{%- set page_title = 'Hello World' -%}
 
 {% block page %}
     <form class="panel">
@@ -33,11 +33,59 @@
             </div>
 
             <div class="card-body pt-0">
-                <a href="{{ uriFor('hello_world') }}" class="btn btn-secondary">Home</a>
+                <a href="{{ uriFor('hello_world') }}" class="btn btn-primary">Home</a>
+
+                {% if is_session_enabled %}
+                    <a href="{{ uriFor('test_session') }}" class="btn btn-outline-secondary">Session</a>
+                {% else %}
+                    <button class="btn btn-outline-secondary" disabled>Session</button>
+                {% endif %}
+
+                {% if is_cookie_enabled %}
+                    <a href="{{ uriFor('test_cookie') }}" class="btn btn-outline-secondary">Cookie</a>
+                {% else %}
+                    <button class="btn btn-outline-secondary" disabled>Cookie</button>
+                {% endif %}
+
+                {% if route == 'test_session' and random %}
+                    <a href="{{ uriFor('test_session', {}, {'random': random}) }}" class="btn btn-secondary">Test Session</a>
+                {% elseif route == 'test_cookie' and random %}
+                    <a href="{{ uriFor('test_cookie', {}, {'random': random}) }}" class="btn btn-secondary">Test Cookie</a>
+                {% endif %}
+            </div>
+
+            <div class="card-body pt-0">
+                {% if not is_session_enabled %}
+                    <span class="d-block">Enable session middleware to use "Session".</span>
+                {% endif %}
+                {% if not is_cookie_enabled %}
+                    <span class="d-block">Enable encrypted cookie middleware to use "Cookie".</span>
+                {% endif %}
             </div>
         </div>
 
-        Current Time: <b>{{ now|timepoint('Y-m-d H:i:s') }}</b>
+        {%- if now -%}
+            Current Time: <b>{{ now|timepoint('Y-m-d H:i:s') }}</b>
+        {%- endif -%}
+
+        {%- if random -%}
+            {%- if route == 'test_session' -%}
+                Click <b>Test Session</b> to save <code>{{ random }}</code> to session data.
+            {%- elseif route == 'test_cookie' -%}
+                Click <b>Test Cookie</b> to save <code>{{ random }}</code> to cookie data.
+            {%- endif -%}
+
+            <br>
+
+            Currently Set Value:
+            {% if random_from_session -%}
+                <code>{{ random_from_session }}</code>
+            {%- elseif random_from_cookie -%}
+                <code>{{ random_from_cookie }}</code>
+            {%- else -%}
+                <b>Not set.</b>
+            {%- endif -%}
+        {%- endif -%}
 
     </form>
 {% endblock %}
