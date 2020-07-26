@@ -1,27 +1,30 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\HTTP;
 
 use PHPUnit\Framework\TestCase;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class NewBodyTraitTest extends TestCase
 {
+    public $dummy;
     public $response;
 
     public function setUp()
     {
-        $this->response = new Response;
+        $this->response = (new ResponseFactory)->createResponse();
+
+        $this->dummy = new class {
+            use NewBodyTrait {
+                withNewBody as public;
+            }
+        };
+
     }
 
     public function testSettingNewResponseBody()
     {
-        $newBody = new NewBodyTraitStub;
+        $newBody = $this->dummy;
         $output = $newBody->withNewBody($this->response, "data data\nmore data");
 
         $expectedHTTPVersion = '1.1';
@@ -33,10 +36,11 @@ class NewBodyTraitTest extends TestCase
         $expectedReasonPhrase = 'OK';
         $actualReasonPhrase = $output->getReasonPhrase();
 
-        $expectedBody = <<<'HTTP'
-data data
-more data
-HTTP;
+        $expectedBody = <<<EOT
+        data data
+        more data
+        EOT;
+
         $actualBody = $output->getBody();
         $actualBody->rewind();
 
@@ -44,12 +48,5 @@ HTTP;
         $this->assertSame($expectedStatusCode, $actualStatusCode);
         $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
         $this->assertSame($expectedBody, $actualBody->getContents());
-    }
-}
-
-class NewBodyTraitStub
-{
-    use NewBodyTrait {
-        withNewBody as public;
     }
 }
