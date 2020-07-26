@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -10,12 +10,11 @@ namespace QL\Panthor\ErrorHandling;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\ResponseEmitter;
 use Throwable;
 
 class ExceptionHandler implements ExceptionHandlerInterface
 {
-    use SlimRenderingTrait;
-
     /**
      * @var ContentHandlerInterface
      */
@@ -67,5 +66,16 @@ class ExceptionHandler implements ExceptionHandlerInterface
         } else {
             return false;
         }
+    }
+
+    /**
+     * @param ResponseInterface $response
+     *
+     * @return void
+     */
+    protected function renderResponse(ResponseInterface $response): void
+    {
+        $responseEmitter = new ResponseEmitter;
+        $responseEmitter->emit($response);
     }
 }

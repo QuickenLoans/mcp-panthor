@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\ErrorHandling;
 
@@ -12,10 +7,9 @@ use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
-use Slim\App;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\StreamFactory;
 use QL\Panthor\Testing\MockeryAssistantTrait;
 
 class ExceptionHandlerTest extends TestCase
@@ -29,8 +23,8 @@ class ExceptionHandlerTest extends TestCase
 
     public function setUp()
     {
-        $this->request = Request::createFromEnvironment(Environment::mock());
-        $this->response = new Response;
+        $this->request = (new RequestFactory)->createRequest('GET', '/path');
+        $this->response = (new ResponseFactory)->createResponse();
 
         $this->contentHandler = Mockery::mock(ContentHandlerInterface::class);
     }
@@ -51,7 +45,7 @@ class ExceptionHandlerTest extends TestCase
             ->shouldReceive('handleException')
             ->with($this->request, $this->response, $ex)
             ->andReturn('badresponse')
-            ->once();
+            ->times(1);
 
 
         $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
@@ -60,57 +54,28 @@ class ExceptionHandlerTest extends TestCase
         $this->assertSame(false, $handled);
     }
 
-    public function testHandlerOutputsDefaultMessageIfSlimNotAttached()
+    public function testHandlerRenders()
     {
-        $expected = <<<HTML_OUTPUT
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Panthor Error</title>
-    </head>
-
-    <body>
-        <h1>Panthor Error</h1>
-        <p>Internal Server Error. The application failed to launch.</p>
-    </body>
-</html>
-HTML_OUTPUT;
-
         $ex = new ErrorException('exception message');
+
+        $response = $this->response
+            ->withBody(
+                (new StreamFactory)->createStream('sample response')
+            );
 
         $this->contentHandler
             ->shouldReceive('handleException')
             ->with($this->request, $this->response, $ex)
-            ->andReturn($this->response)
-            ->once();
-
-        $this->expectOutputString($expected);
-        $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
-        $handled = $handler->handle($ex);
-
-        $this->assertSame(true, $handled);
-    }
-
-    public function testHandlerRendersThroughSlim()
-    {
-        $ex = new ErrorException('exception message');
-
-        $this->contentHandler
-            ->shouldReceive('handleException')
-            ->with($this->request, $this->response, $ex)
-            ->andReturn($this->response)
-            ->once();
-
-        $slim = Mockery::mock(App::class);
-        $slim
-            ->shouldReceive('respond')
-            ->with($this->response)
-            ->once();
+            ->andReturn($response)
+            ->times(1);
 
         $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
-        $handler->attachSlim($slim);
+
+        ob_start();
         $handled = $handler->handle($ex);
+        $output = ob_get_clean();
 
         $this->assertSame(true, $handled);
+        $this->assertSame('sample response', $output);
     }
 }

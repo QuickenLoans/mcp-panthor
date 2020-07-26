@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\ErrorHandling;
 
@@ -14,7 +9,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use QL\Panthor\Exception\Exception;
 use QL\Panthor\Testing\MockeryAssistantTrait;
-use Slim\App;
 
 class ErrorHandlerTest extends TestCase
 {
