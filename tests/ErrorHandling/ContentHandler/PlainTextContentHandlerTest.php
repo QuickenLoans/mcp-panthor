@@ -1,17 +1,11 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\ErrorHandling\ContentHandler;
 
 use ErrorException;
 use PHPUnit\Framework\TestCase;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class PlainTextContentHandlerTest extends TestCase
 {
@@ -20,8 +14,8 @@ class PlainTextContentHandlerTest extends TestCase
 
     public function setUp()
     {
-        $this->request = Request::createFromEnvironment(Environment::mock());
-        $this->response = new Response;
+        $this->request = (new RequestFactory)->createRequest('GET', '/path');
+        $this->response = (new ResponseFactory)->createResponse();
     }
 
     public function testNotFound()
@@ -198,7 +192,7 @@ HTML;
         $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
         $this->assertSame($expectedHeaders, $actualHeaders);
         $this->assertContains($expectedBody, $rendered);
-        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:167', $rendered);
+        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:161', $rendered);
         $this->assertContains('Error Details:', $rendered);
     }
 }

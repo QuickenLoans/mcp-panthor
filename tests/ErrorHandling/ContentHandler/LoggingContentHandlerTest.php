@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\ErrorHandling\ContentHandler;
 
@@ -11,10 +6,8 @@ use ErrorException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
-use QL\MCP\Logger\MemoryLogger;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class LoggingContentHandlerTest extends TestCase
 {
@@ -25,11 +18,10 @@ class LoggingContentHandlerTest extends TestCase
 
     public function setUp()
     {
-        $this->request = Request::createFromEnvironment(Environment::mock());
-        $this->response = new Response;
+        $this->request = (new RequestFactory)->createRequest('GET', '/path');
+        $this->response = (new ResponseFactory)->createResponse();
 
-        //Because I can
-        $this->logger = new class() implements LoggerInterface {
+        $this->logger = new class implements LoggerInterface {
             use LoggerTrait;
 
             public $messages = [];
@@ -59,7 +51,7 @@ class LoggingContentHandlerTest extends TestCase
         $m = $this->logger->messages;
         $this->assertCount(1, $m);
         $this->assertSame('info', $m[0]['level']);
-        $this->assertSame('Page Not Found: /', $m[0]['message']);
+        $this->assertSame('Page Not Found: /path', $m[0]['message']);
         $this->assertSame([], $m[0]['context']);
     }
 
@@ -71,7 +63,7 @@ class LoggingContentHandlerTest extends TestCase
         $m = $this->logger->messages;
         $this->assertCount(1, $m);
         $this->assertSame('info', $m[0]['level']);
-        $this->assertSame('Method Not Allowed: GET on /', $m[0]['message']);
+        $this->assertSame('Method Not Allowed: GET on /path', $m[0]['message']);
         $this->assertSame([], $m[0]['context']);
     }
 

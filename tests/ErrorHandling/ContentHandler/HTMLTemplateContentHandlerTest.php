@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\ErrorHandling\ContentHandler;
 
@@ -13,9 +8,8 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\TemplateInterface;
 use QL\Panthor\Testing\MockeryAssistantTrait;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class HTMLTemplateContentHandlerTest extends TestCase
 {
@@ -28,8 +22,8 @@ class HTMLTemplateContentHandlerTest extends TestCase
 
     public function setUp()
     {
-        $this->request = Request::createFromEnvironment(Environment::mock());
-        $this->response = new Response;
+        $this->request = (new RequestFactory)->createRequest('GET', '/path');
+        $this->response = (new ResponseFactory)->createResponse();
 
         $this->template = Mockery::mock(TemplateInterface::class);
     }
@@ -246,6 +240,6 @@ class HTMLTemplateContentHandlerTest extends TestCase
         $this->assertSame(500, $captured['status']);
         $this->assertSame('E_ERROR', $captured['severity']);
         $this->assertSame($ex, $captured['throwable']);
-        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:208', $captured['details']);
+        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:202', $captured['details']);
     }
 }
