@@ -1,6 +1,7 @@
 parameters:
     routes:
         hello_world:
+            method: ['GET']
             route: '/'
             stack: ['hello.page']
         test_session:
