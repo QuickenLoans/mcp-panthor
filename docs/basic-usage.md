@@ -12,17 +12,11 @@ $response = $controller($request, $response);
 
 Slim middleware **MUST** return a Response and will be called with the following signature:
 ```php
-$response = $controller($request, $response, $nextMiddleware);
+$response = $middleware->process($request, $requestHandler);
 ```
 
-Each middleware is responsible for modifying the request and/or response, *and calling the next middleware in the stack*.
-
-This would be a valid middleware:
-```php
-$middleware = function($request, $response, callable $next) {
-    return $next($request, $response);
-};
-```
+Each middleware is responsible for modifying the request and/or response, *and calling the next middleware in the stack*
+through the request handler.
 
 The interfaces [QL\Panthor\ControllerInterface](../src/ControllerInterface.php) and
 [QL\Panthor\MiddlewareInterface](../src/MiddlewareInterface.php) are provided for convenience that middleware and

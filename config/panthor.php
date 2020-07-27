@@ -76,7 +76,7 @@ return function (ContainerConfigurator $container) {
         ('twig.template.dir',           '%env(string:PANTHOR_APPROOT)%/templates')
         ('twig.cache.dir',              '%env(string:PANTHOR_APPROOT)%/.twig')
 
-        ('cookie.settings.lifetime',    0)
+        ('cookie.settings.lifetime',    '+1 year')
         ('cookie.settings.secure',      false)
         ('cookie.settings.http_only',   true)
         ('cookie.settings.same_site',   'lax')

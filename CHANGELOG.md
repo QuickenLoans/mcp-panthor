@@ -22,6 +22,8 @@ See [keepachangelog.com](http://keepachangelog.com) for reference.
   > Now, CookieHandler encrypts response cookies, and EncryptedCookieMiddleware handles decryption of request cookies.
 - Removed `ExceptionHandler->attachSlim($slim)` and replaced with `ExceptionHandler->attachRequest($request)`
     - Slim itself is no longer needed to render errors, but the request is. Ensure you attach the request in your `index.php`.
+- Environment variable `PANTHOR_ROUTES_DISABLE_CACHE_ON` has changed to `SLIM_ROUTING_IS_CACHE_DISABLED`.
+- The DI parameter `routes.cached` is now `slim.routing.cache_file` (Set by `SLIM_ROUTING_CACHE_FILE` environment variable.
 
 ### Removed
 - The included YAML files for symfony DI were removed.

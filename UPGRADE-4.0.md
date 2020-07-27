@@ -65,41 +65,52 @@ In addition, here are the following changes to the configuration:
 
 Changed parameters:
 - `slim.default_request_headers` removed.
-<!-- - Added `slim.settings.http_version` (1.1)
-- Added `slim.settings.chunk_size` (4096)
-- Added `slim.settings.buffering` (append)
-- Added `slim.settings.determine_route_before_mw` (false)
-- Added `slim.settings.display_errors` (true)
-- Added `slim.default_request_headers` (`text/html`)
-- Added `slim.default_status_code` (200)
-- Added `routes.cached` (`configuration/routes.cached.php`)
-    - Relative file path to cached routes
-- Added `routes.cache_disabled` (true)
-- Added `symfony.debug` (true)
-    - The DI utility now uses its own config parameter to determine whether to use cached container
-- Added `cookie.delete_invalid` (true)
-    - Should invalid cookies be deleted when they cannot be decrypted?
-- Added `cookie.settings` (default cookie settings) -->
+- `slim.settings` removed.
+- `slim.settings.http_version` removed.
+- `slim.settings.chunk_size` removed.
+- `slim.settings.buffering` removed.
+- `slim.settings.determine_route_before_mw` removed.
 
 Changed Services:
-- `@slim.configurator` removed
-- `@slim.halt` removed
-- `@slim.not.found` removed
-- `@slim.cookies` removed
-- `@slim.route` removed
-- `@slim.environment` changed to `@environment`
-- `@slim.request` changed to `@request` (Default request, do not inject into service constructors!)
-- `@slim.response` changed to `@response` (Default response, do not inject into service constructors!)
-- `@slim.router` changed to `@router`
-- `@url` changed to `@uri`
-- `@slim.hook.routes` changed to `@router.loader`
+- `@router` is now `@Slim\Interfaces\RouteParserInterface`
+- `@environment` removed
+- `@request` removed
+- `@response` removed
+- `@notFoundHandler` removed (No longer needed)
+- `@notAllowedHandler` removed (No longer needed)
+- `@phpErrorHandler` removed (No longer needed)
+- `@errorHandler` removed (No longer needed)
 
 ### Routing
 
 Slim 4 has some changes to routing. The route definitions are not changed at all, but how routes can be cached
 may need to be updated.
 
-TBD
+In your script that you use to cache routes before deployment, update the following:
+
+Before:
+```
+$_ENV['PANTHOR_ROUTES_DISABLE_CACHE_ON'] = false;
+
+// << unchanged code here >>
+
+$router = $container->get('router');
+$router->initializeDispatcher();
+```
+
+After:
+```
+$_ENV['SLIM_ROUTING_IS_CACHE_DISABLED'] = false;
+
+// << unchanged code here >>
+
+$collector = $app->getRouteCollector();
+
+$dispatcher = new Dispatcher($collector);
+$dispatcher->dispatch('GET', '/');
+```
+
+See `bin/compile-routes` in the starter-kit for a full example.
 
 ### PSR-15 middleware
 
@@ -166,33 +177,45 @@ class TestMiddleware implements MiddlewareInterface
 
 ### Error Handling
 
-TBD
+Error handling has changed slightly, as Slim includes a dedicated middleware for catching errors, that was previously
+handled in the main Slim\App class. Remember to set the shutdown handler, as this middleware will not catch fatal errors
+such as out-of-memory (If you use the following example, panthor will).
+
+`index.php`:
 
 ```php
-// Error handling
-$handler = $container->get('error.handler');
-$handler->register();
-$handler->registerShutdown();
+$root = realpath(__DIR__ . '/..');
+
+$container = require "${root}/config/bootstrap.php";
+
 ini_set('display_errors', 0);
+
+// Initialize the HTTP request
+$request = $container->get(ServerRequestCreatorInterface::class)
+    ->createServerRequestFromGlobals();
+
+// Error handling
+$exceptionHandler = $container->get(ExceptionHandler::class)
+    ->attachRequest($request);
+
+$container->get(ErrorMiddleware::class)
+    ->setDefaultErrorHandler($exceptionHandler);
+
+$container->get(ErrorHandler::class)
+    ->register()
+    ->registerShutdown();
 
 // Application
 $app = $container->get('slim');
 
-// Attach Slim to exception handler for error rendering
-$container
-    ->get('exception.handler')
-    ->attachSlim($app);
+// Load routes onto Slim
+$container->get(RouteLoader::class)($app);
+
+// Add global middleware to Slim
+$container->get(GlobalMiddlewareLoader::class)($app);
 
 // Run Slim
-$app->run();
+$app->run($request);
 ```
-In addition, Slim must now be attached to the **Exception Handler**, not the error handler.
 
-Under the hood, the error handler would delegate to `ExceptionHandlers` for specially handling certain types of exceptions.
-
-- `HTTPProblemHandler` (render **HTTP Problem**)
-- `NotFoundHandler` (`NotFoundException`)
-- `GenericHandler` (customizable)
-- `RequestExceptionHandler` (RequestException from **RequestBodyMiddleware**)
-- `BaseHandler` (`\Exception`, handler of last resort)
-
+See `public/index.php` in the starter-kit for a full example.
