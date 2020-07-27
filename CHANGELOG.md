@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
-## [4.0.0] - 2020-07-XX
+## [4.0.0] - 2020-07-26
 
 ### Added
 - The Starter Kit now includes a few new controllers for experimenting with session and cookie setting.
