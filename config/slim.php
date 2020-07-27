@@ -6,8 +6,6 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use QL\Panthor\Bootstrap\CacheableRouteCollectorConfigurator;
-use QL\Panthor\Bootstrap\CacheableRouter;
-use QL\Panthor\Bootstrap\SlimEnvironmentFactory;
 use Slim\App;
 use Slim\CallableResolver;
 use Slim\Factory\AppFactory;
@@ -17,10 +15,10 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Interfaces\RouteResolverInterface;
+use Slim\Interfaces\ServerRequestCreatorInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
-use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Routing\RouteCollector;
 use Slim\Routing\RouteResolver;
 
@@ -46,10 +44,6 @@ return function (ContainerConfigurator $container) {
 
         ('slim.routing.cache_file',        '%env(string:SLIM_ROUTING_CACHE_FILE)%')
         ('slim.routing.is_cache_disabled', '%env(bool:SLIM_ROUTING_IS_CACHE_DISABLED)%')
-
-        // ('slim.default_request_headers', [
-        //     'Content-Type' => 'text/html; charset=UTF-8'
-        // ])
     ;
 
     $s
@@ -62,6 +56,8 @@ return function (ContainerConfigurator $container) {
             ->factory([AppFactory::class, 'createFromContainer'])
             ->arg('$container', ref('service_container'))
 
+        (ServerRequestCreatorInterface::class)
+            ->factory([SlimPsr17Factory::class, 'getServerRequestCreator'])
         (ResponseFactoryInterface::class)
             ->factory([SlimPsr17Factory::class, 'getResponseFactory'])
 
@@ -106,23 +102,5 @@ return function (ContainerConfigurator $container) {
         ('slim.invocation_strategy', RequestResponse::class)
 
         (LoggerInterface::class, NullLogger::class)
-
-        // ('request', Request::class)
-        //     ->factory([ServerRequestFactory::class, 'createFromGlobals'])
-        // ('response', Response::class)
-        //     ->arg('$status', '%slim.default_status_code%')
-        //     ->arg('$headers', ref('response.default_headers'))
-        // ('response.default_headers', Headers::class)
-        //     ->arg('$items', '%slim.default_request_headers%')
-
-        // ('router', CacheableRouter::class)
-
-        // ('notFoundHandler', NotFound::class)
-        // ('notAllowedHandler', NotAllowed::class)
-
-        // ('phpErrorHandler', PhpError::class)
-        //     ->arg('$displayErrorDetails', '%slim.settings.display_errors%')
-        // ('errorHandler', Error::class)
-        //     ->arg('$displayErrorDetails', '%slim.settings.display_errors%')
     ;
 };

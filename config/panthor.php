@@ -2,11 +2,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use const E_ALL;
-use const E_DEPRECATED;
-use const E_USER_DEPRECATED;
-use const JSON_UNESCAPED_SLASHES;
 use Closure;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use QL\MCP\Common\Clock;
@@ -34,15 +31,19 @@ use QL\Panthor\Twig\TwigExtension;
 use QL\Panthor\Utility\ClosureFactory;
 use QL\Panthor\Utility\JSON;
 use QL\Panthor\Utility\URI;
-use Twig\Cache\FilesystemCache;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
-use Twig\TemplateWrapper;
-
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
+use Slim\Psr7\Factory\ServerRequestFactory;
+use Twig\Cache\FilesystemCache;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TemplateWrapper;
+use const E_ALL;
+use const E_DEPRECATED;
+use const E_USER_DEPRECATED;
+use const JSON_UNESCAPED_SLASHES;
 
 return function (ContainerConfigurator $container) {
     $s = $container->services();
@@ -51,8 +52,8 @@ return function (ContainerConfigurator $container) {
     $p
         ('env(PANTHOR_APPROOT)', __DIR__ . '/../../../..')
 
-        ('env(PANTHOR_DEBUG)',                   '0')
-        ('env(PANTHOR_TWIG_DEBUG)',              '1')
+        ('env(PANTHOR_DEBUG)',         '0')
+        ('env(PANTHOR_TWIG_DEBUG)',    '1')
 
         ('env(PANTHOR_TIMEZONE)',      'America/Detroit')
         ('env(PANTHOR_COOKIE_SECRET)', '')
@@ -131,8 +132,7 @@ return function (ContainerConfigurator $container) {
 
         (ExceptionHandler::class)
             ->arg('$handler', ref('content_handler'))
-            // ->arg('$request', ref('request'))
-            // ->arg('$response', ref('response'))
+            ->arg('$responseFactory', ref(ResponseFactoryInterface::class))
         ('problem.renderer', JSONRenderer::class)
             ->arg('$json', ref('panthor.problem.json'))
 
@@ -180,22 +180,6 @@ return function (ContainerConfigurator $container) {
             ->arg('$handler', ref(CookieHandler::class))
             ->arg('$options', '%middleware.session_options%')
     ;
-
-    // Overrides. Change built-in Slim handlers to Panthor handlers
-    // $s
-    //     ('notFoundHandler', Closure::class)
-    //         ->factory([ClosureFactory::class, 'buildClosure'])
-    //         ->args([ref('content_handler'), 'handleNotFound'])
-    //     ('notAllowedHandler', Closure::class)
-    //         ->factory([ClosureFactory::class, 'buildClosure'])
-    //         ->args([ref('content_handler'), 'handleNotAllowed'])
-    //     ('phpErrorHandler', Closure::class)
-    //         ->factory([ClosureFactory::class, 'buildClosure'])
-    //         ->args([ref('content_handler'), 'handleThrowable'])
-    //     ('errorHandler', Closure::class)
-    //         ->factory([ClosureFactory::class, 'buildClosure'])
-    //         ->args([ref('content_handler'), 'handleException'])
-    // ;
 
     // Support classes. Users shouldn't need to interact with these
     $s
