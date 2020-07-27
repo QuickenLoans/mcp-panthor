@@ -7,10 +7,10 @@
     },
 
     "require": {
-        "php": "~7.3",
+        "php": ">=7.3",
         "ext-sodium": "*",
 
-        "ql/mcp-panthor": "~3.3",
+        "ql/mcp-panthor": "~4.0",
         "ql/mcp-common":  "~2.0",
 
         "slim/slim":                    "~4.5",

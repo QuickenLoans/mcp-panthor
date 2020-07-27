@@ -38,10 +38,10 @@ class ComposerInitializeProject
         $fs->mirror($tempStarterDir, $targetDir, null, ['delete' => true]);
         $fs->remove($tempStarterDir);
 
-        static::write($io, 'Writing config file to ./config/.env.default');
+        static::write($io, 'Writing config file to ./config/.env.dist');
         self::writeConfig($targetDir);
 
-        $fs->mkdir($targetDir . '/.twig');
+        $fs->mkdir("${targetDir}/.twig");
 
         static::write($io, "");
         static::write($io, "!!! Installation not yet finished !!!");
@@ -57,8 +57,8 @@ class ComposerInitializeProject
      */
     private static function validateProject(IOInterface $io, string $projectRoot)
     {
-        $jsonFile = $projectRoot . '/composer.json';
-        $lockFile = $projectRoot . '/composer.lock';
+        $jsonFile = "${projectRoot}/composer.json";
+        $lockFile = "${projectRoot}/composer.lock";
 
         if (file_exists($lockFile)) {
             $io->writeError('Detected composer.lock. Aborting initialization of MCP Panthor.');
@@ -83,7 +83,8 @@ class ComposerInitializeProject
      */
     private static function writeConfig(string $projectRoot)
     {
-        $envFile = $projectRoot . '/config/.env.default';
+        $envFile = "${projectRoot}/config/.env.dist";
+
         $contents = file_get_contents($envFile);
 
         $cookieSecret = bin2hex(random_bytes(64));
@@ -101,7 +102,7 @@ class ComposerInitializeProject
     private static function write(IOInterface $io, string $message)
     {
         $msg = [
-            '[Panthor]: ' . $message,
+            "[Panthor]: ${message}",
         ];
 
         $io->write($msg);
