@@ -6,6 +6,9 @@ See [keepachangelog.com](http://keepachangelog.com) for reference.
 
 ### Added
 - The Starter Kit now includes a few new controllers for experimenting with session and cookie setting.
+- Added DI parameter `error_handling.stacktrace_limit` - Limit the number of entries rendered in stacktrace logs.
+  > PSR-15 middleware can cause excessive stacktraces. Use this to limit the number of entries in each stacktrace when logged.
+  > Set to 0, which disables this feature by default.
 
 ### Changed
 - PHP 7.3 or higher is now required.

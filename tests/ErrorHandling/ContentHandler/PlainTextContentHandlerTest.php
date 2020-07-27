@@ -71,10 +71,10 @@ class PlainTextContentHandlerTest extends TestCase
         ];
         $actualHeaders = $response->getHeaders();
 
-        $expectedBody = <<<HTML
-Method not allowed.
-Allowed methods: PATCH, STEVE
-HTML;
+        $expectedBody = <<<EOT
+        Method not allowed.
+        Allowed methods: PATCH, STEVE
+        EOT;
         $actualBody = $response->getBody();
         $actualBody->rewind();
 
@@ -108,10 +108,10 @@ HTML;
         ];
         $actualHeaders = $response->getHeaders();
 
-        $expectedBody = <<<HTML
-Method not allowed.
-Allowed methods: PATCH, STEVE
-HTML;
+        $expectedBody = <<<EOT
+        Method not allowed.
+        Allowed methods: PATCH, STEVE
+        EOT;
         $actualBody = $response->getBody();
         $actualBody->rewind();
 
@@ -179,10 +179,10 @@ HTML;
         ];
         $actualHeaders = $response->getHeaders();
 
-        $expectedBody = <<<HTML
-Application Error
-exception message
-HTML;
+        $expectedBody = <<<EOT
+        Application Error
+        exception message
+        EOT;
         $actualBody = $response->getBody();
         $actualBody->rewind();
         $rendered = $actualBody->getContents();

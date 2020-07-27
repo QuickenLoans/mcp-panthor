@@ -75,10 +75,10 @@ class NegotiatingContentHandlerTest extends TestCase
         ];
         $actualHeaders = $response->getHeaders();
 
-        $expectedBody = <<<HTML
-Method not allowed.
-Allowed methods: PATCH, STEVE
-HTML;
+        $expectedBody = <<<EOT
+        Method not allowed.
+        Allowed methods: PATCH, STEVE
+        EOT;
         $actualBody = $response->getBody();
         $actualBody->rewind();
 

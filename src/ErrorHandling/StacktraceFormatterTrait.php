@@ -23,13 +23,20 @@ trait StacktraceFormatterTrait
     private $logStacktraces = false;
 
     /**
+     * @var int
+     */
+    private $logStacktracesEntryLimit = 0;
+
+    /**
      * @param bool $enableLogging
+     * @param int $stacktraceLimit
      *
      * @return void
      */
-    public function setStacktraceLogging(bool $enableLogging)
+    public function setStacktraceLogging(bool $enableLogging, int $stacktraceLimit = 0)
     {
         $this->logStacktraces = $enableLogging;
+        $this->logStacktracesEntryLimit = $stacktraceLimit;
     }
 
     /**
@@ -123,6 +130,10 @@ trait StacktraceFormatterTrait
         }
 
         foreach ($exception->getTrace() as $index => $entry) {
+            if ($this->logStacktracesEntryLimit && $this->logStacktracesEntryLimit > $index) {
+                break;
+            }
+
             $trace .= $this->formatStacktraceEntry(sprintf('#%d', $index), $entry);
         }
 
