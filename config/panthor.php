@@ -35,7 +35,6 @@ use Slim\Interfaces\RouteParserInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
-use Slim\Psr7\Factory\ServerRequestFactory;
 use Twig\Cache\FilesystemCache;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;

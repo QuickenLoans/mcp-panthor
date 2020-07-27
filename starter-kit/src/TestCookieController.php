@@ -4,7 +4,6 @@ namespace ExampleApplication;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use QL\MCP\Common\Clock;
 use QL\Panthor\ControllerInterface;
 use QL\Panthor\HTTP\CookieHandler;
 use QL\Panthor\TemplateInterface;

@@ -5,9 +5,9 @@ namespace ExampleApplication;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use QL\Panthor\HTTP\NewBodyTrait;
+use QL\Panthor\TemplateInterface;
 use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
-use QL\Panthor\TemplateInterface;
 
 trait ControllerTrait
 {
@@ -38,7 +38,7 @@ trait ControllerTrait
      */
     private function withTemplate(ResponseInterface $response, TemplateInterface $template, array $context = [])
     {
-        $rendered = $this->template->render($context);
+        $rendered = $template->render($context);
         return $this->withNewBody($response, $rendered);
     }
 }

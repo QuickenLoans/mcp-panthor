@@ -61,6 +61,17 @@ imports:
 
 ```
 
+Add the following new `Slim\Middleware\XXX` middleware to your `global_middleware` parameter:
+```yaml
+
+parameters:
+    global_middleware:
+        - 'Slim\Middleware\BodyParsingMiddleware'
+        - 'Slim\Middleware\ErrorMiddleware'
+        - 'Slim\Middleware\RoutingMiddleware'
+        # Other middleware here
+```
+
 In addition, here are the following changes to the configuration:
 
 Changed parameters:
