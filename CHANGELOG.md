@@ -2,8 +2,39 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [4.0.0] - 2020-07-XX
+
+### Added
+- The Starter Kit now includes a few new controllers for experimenting with session and cookie setting.
+
+### Changed
+- PHP 7.3 or higher is now required.
+- Slim 4.X is now required.
+    - Please see the [4.0 Upgrade guide](./UPGRADE-4.0.md) for detailed instructions on required changes to your application.
+- Symfony 5.X is now recommended.
+- Added scalar typehints to various interfaces and classes.
+- Updated possible cookie configuration for `CookieHandler`
+    - Removed `expires` (Use `maxAge` instead).
+    - Added `sameSite` (Defaults to `lax` when using included config files).
+- Updated `CookieHandler`.
+  > This class is now more PSR-7 compliant by only setting string values as headers.
+  > Previously, it would set a Cookie class that would be further encoded by `EncryptedCookieMiddleware`.
+  > Now, CookieHandler encrypts response cookies, and EncryptedCookieMiddleware handles decryption of request cookies.
+- Removed `ExceptionHandler->attachSlim($slim)` and replaced with `ExceptionHandler->attachRequest($request)`
+    - Slim itself is no longer needed to render errors, but the request is. Ensure you attach the request in your `index.php`.
+
+### Removed
+- The included YAML files for symfony DI were removed.
+    - `configuration/panthor.yml`
+    - `configuration/panthor-slim.yml`
+    - Use the PHP files at `config/panthor.php` and `config/slim.php` instead.
+- `QL\Panthor\Bootstrap\CacheableRouter` was removed, and replaced with `CacheableRouteCollectorConfigurator`.
+- Removed `QL\Panthor\Utility\ClosureFactory`.
+- Removed `QL\Panthor\Utility\Stringify`.
+
 ## [3.4.1] - 2020-04-23
 
+### Fixed
 - `ErrorHandler` will now ignore errors when users silence errors with the "@" symbol.
     - This is used by several popular libraries such `predis`, `doctrine`, and `phpseclib` to ignore system errors
       while they manually convert them to exceptions.

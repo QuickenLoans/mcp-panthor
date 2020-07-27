@@ -8,14 +8,14 @@ use Slim\Routing\Dispatcher;
 
 $root = realpath(__DIR__ . '/..');
 $_ENV['PANTHOR_APPROOT'] = $root;
-$_ENV['PANTHOR_ROUTES_DISABLE_CACHE_ON'] = false;
+$_ENV['SLIM_ROUTING_IS_CACHE_DISABLED'] = false;
 
 $container = require "${root}/config/bootstrap.php";
 
 $app = $container->get('slim');
 $container->get(RouteLoader::class)($app);
 
-$collector = $slim->getRouteCollector();
+$collector = $app->getRouteCollector();
 
 $dispatcher = new Dispatcher($collector);
 $dispatcher->dispatch('GET', '/');
