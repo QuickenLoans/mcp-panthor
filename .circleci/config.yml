@@ -1,43 +1,17 @@
 version: 2.1
 
 executors:
-  php71:
-    working_directory: '~/project'
-    docker:
-      - image: 'circleci/php:7.1'
+    php73:
+        working_directory: '~/project'
+        docker:
+          - image: 'circleci/php:7.3'
 
-  php72:
-    working_directory: '~/project'
-    docker:
-      - image: 'circleci/php:7.2'
-
-  php73:
-    working_directory: '~/project'
-    docker:
-      - image: 'circleci/php:7.3'
-
-  php74:
-    working_directory: '~/project'
-    docker:
-      - image: 'circleci/php:7.4'
+    php74:
+        working_directory: '~/project'
+        docker:
+          - image: 'circleci/php:7.4'
 
 commands:
-    php--install-libsodium:
-        steps:
-            - run:
-                  name: 'Install PECL Libsodium (PHP 7.1 only)'
-                  command: |
-                    php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-                    echo "PHP Version: ${php_version}"
-
-                    if [ "${php_version}" == "7.1" ] ; then
-                      sudo apt-get update  -y
-                      sudo apt-get install libsodium-dev -y
-                      sudo pecl install libsodium
-                      sudo docker-php-ext-enable sodium
-                    else
-                        echo "Skipping ext-sodium installation. Already installed."
-                    fi
     php--run-unit-tests:
         steps:
             - run:
@@ -47,10 +21,10 @@ commands:
             - store_test_results:
                 path: '.phpunit/report'
             - run:
-                name: 'Upload test coverage to Codacy (PHP 7.1 only)'
+                name: 'Upload test coverage to Codacy (PHP 7.3 only)'
                 command: |
                     php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-                    if [ "${php_version}" == "7.1" ] ; then
+                    if [ "${php_version}" == "7.3" ] ; then
                         ./vendor/bin/codacycoverage clover .phpunit/clover.xml
                     fi
 
@@ -67,30 +41,11 @@ commands:
                 command: 'composer analyze'
 
 workflows:
-
     version: 2
 
     pipeline:
         jobs:
             - fetch_code
-
-            - php--install-dependencies:
-                name: 'php71_install'
-                executor_version: 'php71'
-                requires: [ fetch_code ]
-            - php--testing:
-                name: 'php71_testing'
-                executor_version: 'php71'
-                requires: [ php71_install ]
-
-            - php--install-dependencies:
-                name: 'php72_install'
-                executor_version: 'php72'
-                requires: [ fetch_code ]
-            - php--testing:
-                name: 'php72_testing'
-                executor_version: 'php72'
-                requires: [ php72_install ]
 
             - php--install-dependencies:
                 name: 'php73_install'
@@ -112,8 +67,6 @@ workflows:
 
             - fan_in:
                 requires:
-                    - 'php71_testing'
-                    - 'php72_testing'
                     - 'php73_testing'
                     - 'php74_testing'
 
@@ -126,15 +79,13 @@ jobs:
 
         executor: '<< parameters.executor_version >>'
         steps:
-            - attach_workspace:
-                at: '.'
+            - attach_workspace: { at: '.' }
 
             - restore_cache:
                 keys:
                     - 'v2-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
                     - 'v2-<< parameters.executor_version >>-deps'
 
-            - php--install-libsodium
             - run:
                 name: 'Install PHP dependencies'
                 command: |
@@ -148,9 +99,7 @@ jobs:
                 key: 'v2-<< parameters.executor_version >>-deps-{{ checksum "composer.json" }}'
                 paths: [ 'vendor' ]
 
-            - persist_to_workspace:
-                root: '.'
-                paths: [ '.' ]
+            - persist_to_workspace: { root: '.', paths: [ '.' ] }
 
     php--testing:
         parameters:
@@ -160,21 +109,17 @@ jobs:
         executor: '<< parameters.executor_version >>'
 
         steps:
-            - attach_workspace:
-                at: '.'
+            - attach_workspace: { at: '.' }
 
-            - php--install-libsodium
             - php--run-static-analysis
             - php--run-unit-tests
 
     fan_in:
-        executor: 'php71'
+        executor: 'php73'
         steps: [ { run: 'whoami' } ]
 
     fetch_code:
-        executor: 'php71'
+        executor: 'php73'
         steps:
             - checkout
-            - persist_to_workspace:
-                root: '.'
-                paths: [ '.' ]
+            - persist_to_workspace: { root: '.', paths: [ '.' ] }

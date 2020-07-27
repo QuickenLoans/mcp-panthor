@@ -56,22 +56,30 @@ Example `index.php`:
 ```php
 // Code to get di container as $container
 
-// Enable error handler first
-$handler = $container->get('error.handler');
-$handler->register();
-$handler->registerShutdown();
 ini_set('display_errors', 0);
+
+// Initialize the HTTP request
+$request = $container->get(ServerRequestCreatorInterface::class)
+    ->createServerRequestFromGlobals();
+
+// Error handling
+$exceptionHandler = $container->get(ExceptionHandler::class)
+    ->attachRequest($request);
+
+$container->get(ErrorMiddleware::class)
+    ->setDefaultErrorHandler($exceptionHandler);
+
+$container->get(ErrorHandler::class)
+    ->register()
+    ->registerShutdown();
 
 // Fetch slim
 $app = $container->get('slim');
 
-// Attach exception handler to Slim
-$container
-    ->get('exception.handler')
-    ->attachSlim($app);
+// Code to attach routes and global middleware
 
 // Start app
-$app->run();
+$app->run($request);
 ```
 
 ### Error Logging

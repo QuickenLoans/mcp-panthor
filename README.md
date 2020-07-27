@@ -48,6 +48,7 @@ Here's a few of the features Panthor provides:
 | `~2.0`  | `~2.0`  | `~2.0`          | `~5.6`
 | `~3.0`  | `~3.3`  | `~3.0 \|\| ~4.0`| `~5.6 \|\| ~7.0`
 | `~3.3`  | `~3.10` | `~4.0`          | `~7.1`
+| `~4.0`  | `~4.5`  | `~5.0`          | `>=7.3`
 
 ## Installation
 
@@ -60,7 +61,7 @@ composer create-project ql/mcp-panthor my-project-dir --no-install --remove-vcs
 Never used Composer, Slim or Symfony before? Here are some resources:
 - [Composer - Getting Started](https://getcomposer.org/doc/00-intro.md)
 - [Symfony Book - Service Container](http://symfony.com/doc/current/book/service_container.html)
-- [Slim Framework v3 documentation](http://www.slimframework.com/docs)
+- [Slim Framework v4 documentation](http://www.slimframework.com/docs/v4/)
 
 ### Quick Start
 

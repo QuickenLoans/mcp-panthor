@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -11,6 +11,7 @@ use Dflydev\FigCookies\Cookies;
 use Dflydev\FigCookies\SetCookie;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use QL\MCP\Common\OpaqueProperty;
 use QL\Panthor\HTTP\CookieEncryptionInterface;
 use QL\Panthor\MiddlewareInterface;
@@ -68,7 +69,7 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     private $attributeName;
 
     /**
-     * @var string[]
+     * @var array<string>
      */
     private $unencryptedCookies;
 
@@ -79,11 +80,14 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
 
     /**
      * @param CookieEncryptionInterface $encryption
-     * @param string[] $unencryptedCookies
+     * @param array<string> $unencryptedCookies
      * @param bool $deleteInvalid
      */
-    public function __construct(CookieEncryptionInterface $encryption, array $unencryptedCookies = [], bool $deleteInvalid = true)
-    {
+    public function __construct(
+        CookieEncryptionInterface $encryption,
+        array $unencryptedCookies = [],
+        bool $deleteInvalid = true
+    ) {
         $this->encryption = $encryption;
         $this->unencryptedCookies = $unencryptedCookies;
         $this->deleteInvalid = $deleteInvalid;
@@ -93,49 +97,54 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @inheritDoc
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     *
+     * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        [$reqCookies, $resCookies] = $this->decryptCookies(Cookies::fromRequest($request));
-
+        [$reqCookies, $cookiesToExpire] = $this->decryptCookies(Cookies::fromRequest($request));
         $request = $request->withAttribute($this->attributeName, $reqCookies);
 
-        // Append invalid cookies to expire in the response
-        foreach ($resCookies as $cookie) {
-            $response = $response->withAddedHeader($this->cookieName, $cookie);
-        }
-
-        $response = $next($request, $response);
+        $response = $handler->handle($request);
 
         // Render and normalize cookies into response
-        $rendered = $this->encryptAndRenderCookies($response->getHeader($this->cookieName));
-        $response = $response->withHeader($this->cookieName, $rendered);
+        $resCookies = $response->getHeader($this->cookieName);
+        $renderedCookies = $this->renderCookies($cookiesToExpire, $resCookies);
+
+        if ($renderedCookies) {
+            $response = $response
+                ->withoutHeader($this->cookieName)
+                ->withAddedHeader($this->cookieName, $renderedCookies);
+        }
 
         return $response;
     }
 
     /**
-     * @param Cookies $reqCookies
+     * @param Cookies $cookiesFromRequest
      *
      * @return array
      */
-    private function decryptCookies(Cookies $reqCookies)
+    private function decryptCookies(Cookies $cookiesFromRequest)
     {
+        $reqCookies = [];
         $resCookies = [];
 
-        foreach ($reqCookies->getAll() as $cookie) {
+        foreach ($cookiesFromRequest->getAll() as $cookie) {
             $name = $cookie->getName();
 
             if (in_array($name, $this->unencryptedCookies)) {
+                $reqCookies[$name] = $cookie->getValue();
                 continue;
             }
 
             $decrypted = $this->encryption->decrypt($cookie->getValue());
             if (is_string($decrypted)) {
-                $reqCookies = $reqCookies->with($cookie->withValue(new OpaqueProperty($decrypted)));
+                $reqCookies[$name] = new OpaqueProperty($decrypted);
+
             } else {
-                $reqCookies = $reqCookies->without($name);
                 if ($this->deleteInvalid) {
                     $resCookies[] = SetCookie::createExpired($name);
                 }
@@ -150,36 +159,30 @@ class EncryptedCookiesMiddleware implements MiddlewareInterface
      *
      * - If string - leave alone (this is expected to be a fully rendered cookie string with expiry, etc)
      * - If instance of "SetCookie" - stringify
-     * - If instance of "SetCookie" and OpaqueProperty - stringify
-     *
-     * Cookies that are "SetCookie" will be encrypted if possible, or not if configured to not encrypt.
      *
      * Cookies will be automatically deduped.
      *
-     * @param SetCookie[]|string[] $resCookies
+     * @param array<SetCookie> $expireCookies
+     * @param array<string> $resCookies
      *
-     * @return string[]
+     * @return array<string>
      */
-    private function encryptAndRenderCookies($resCookies)
+    private function renderCookies(array $expireCookies, array $resCookies)
     {
         $renderable = [];
 
+        $resCookies = array_merge($expireCookies, $resCookies);
+
         foreach ($resCookies as $cookie) {
+            // These are cookies set manually directly on the response.
             if (is_string($cookie)) {
                 $cookie = SetCookie::fromSetCookieString($cookie);
             }
 
+            // These are set through CookieHandler
             if ($cookie instanceof SetCookie) {
-                $val = $cookie->getValue();
-                if ($val instanceof OpaqueProperty) {
-                    $val = $val->getValue();
-                }
-
-                if (!in_array($cookie->getName(), $this->unencryptedCookies)) {
-                    $val = $this->encryption->encrypt($val);
-                }
-
-                $renderable[$cookie->getName()] = (string) $cookie->withValue($val);
+                $cookieName = $cookie->getName();
+                $renderable[$cookieName] = (string) $cookie;
             }
         }
 

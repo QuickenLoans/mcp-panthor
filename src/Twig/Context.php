@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -39,7 +39,7 @@ class Context implements Countable, IteratorAggregate
      */
     public function addContext(array $context)
     {
-        $this->context = array_replace_recursive($this->context, $context);
+        $this->context = array_replace($this->context, $context);
     }
 
     /**

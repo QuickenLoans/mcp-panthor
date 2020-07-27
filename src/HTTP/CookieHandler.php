@@ -1,13 +1,13 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
 
 namespace QL\Panthor\HTTP;
 
-use Dflydev\FigCookies\Cookies;
+use Dflydev\FigCookies\Modifier\SameSite;
 use Dflydev\FigCookies\SetCookie;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,11 +57,22 @@ use QL\Panthor\Exception\Exception;
 class CookieHandler
 {
     const RESPONSE_COOKIE_NAME = 'Set-Cookie';
+    const REQUEST_COOKIE_ATTRIBUTE = 'request_cookies';
 
-    const ERR_BAD_EXPIRES = 'Invalid cookie parameter "expires" specified. '.
-        '"expires" must be a unix timestamp or a string passed to strtotime such as "+30 days".';
+    const ERR_BAD_MAX_AGE = 'Invalid cookie parameter "maxAge" specified. ' .
+        '"maxAge" must be number of seconds or a string passed to strtotime such as "+30 days".';
     const ERR_BAD_SECURE = 'Invalid cookie parameter "secure" specified. Expected a boolean.';
     const ERR_BAD_HTTP = 'Invalid cookie parameter "httpOnly" specified. Expected a boolean.';
+
+    /**
+     * @var CookieEncryptionInterface
+     */
+    private $encryption;
+
+    /**
+     * @var array<string>
+     */
+    private $unencryptedCookies;
 
     /**
      * @var array
@@ -69,21 +80,29 @@ class CookieHandler
     private $configuration;
 
     /**
+     * @param CookieEncryptionInterface $encryption
+     * @param array $unencryptedCookies
      * @param array $cookieSettings
      */
-    public function __construct(array $cookieSettings = [])
-    {
+    public function __construct(
+        CookieEncryptionInterface $encryption,
+        array $unencryptedCookies = [],
+        array $cookieSettings = []
+    ) {
+        $this->encryption = $encryption;
+        $this->unencryptedCookies = $unencryptedCookies;
+
         $this->configuration = [
-            'expires' => $this->nullable($cookieSettings, 'expires', 0),
-            'maxAge' => $this->nullable($cookieSettings, 'maxAge', 0),
-            'path' => $this->nullable($cookieSettings, 'path'),
-            'domain' => $this->nullable($cookieSettings, 'domain'),
-            'secure' => $this->nullable($cookieSettings, 'secure', false),
-            'httpOnly' => $this->nullable($cookieSettings, 'httpOnly', false),
+            'maxAge' => $cookieSettings['maxAge'] ?? 0,
+            'path' => $cookieSettings['path'] ?? null,
+            'domain' => $cookieSettings['domain'] ?? null,
+            'secure' => $cookieSettings['secure'] ?? false,
+            'httpOnly' => $cookieSettings['httpOnly'] ?? false,
+            'sameSite' => $cookieSettings['sameSite'] ?? '',
         ];
 
-        if (!is_int($this->configuration['expires']) && !is_string($this->configuration['expires'])) {
-            throw new Exception(self::ERR_BAD_EXPIRES);
+        if (!is_int($this->configuration['maxAge']) && !is_string($this->configuration['maxAge'])) {
+            throw new Exception(self::ERR_BAD_MAX_AGE);
         }
 
         if (!is_bool($this->configuration['secure'])) {
@@ -101,20 +120,18 @@ class CookieHandler
      *
      * @return string|null
      */
-    public function getCookie(ServerRequestInterface $request, $name)
+    public function getCookie(ServerRequestInterface $request, $name): ?string
     {
-        $reqCookies = $request->getAttribute('request_cookies');
-        if (!$reqCookies instanceof Cookies) {
+        $reqCookies = $request->getAttribute(self::REQUEST_COOKIE_ATTRIBUTE);
+        if (!is_array($reqCookies)) {
             return null;
         }
 
-        if (!$cookie = $reqCookies->get($name)) {
+        if (!$cookie = $reqCookies[$name] ?? null) {
             return null;
         }
 
-        $val = $cookie->getValue();
-
-        return ($val instanceof OpaqueProperty) ? $val->getValue() : $val;
+        return ($cookie instanceof OpaqueProperty) ? $cookie->getValue() : $cookie;
     }
 
     /**
@@ -126,21 +143,31 @@ class CookieHandler
      * @param ResponseInterface $response
      * @param string $name
      * @param string $value
-     * @param int|string $expires Unix timestamp or string date format supported by strototime.
+     * @param int|string|null $expires Unix timestamp or string date format supported by strototime.
      *
      * @return ResponseInterface
      */
-    public function withCookie(ResponseInterface $response, $name, $value, $expires = 0)
+    public function withCookie(ResponseInterface $response, string $name, string $value, $expires = null)
     {
-        $cookie = SetCookie::create($name, new OpaqueProperty($value))
-            ->withExpires($this->configuration['expires'] ?: $expires)
-            ->withMaxAge($this->configuration['maxAge'])
+        if (!in_array($name, $this->unencryptedCookies)) {
+            $value = $this->encryption->encrypt($value);
+        }
+
+        // If user specifies an expiry here, use it instead of default value from config
+        $maxAge = ($expires !== null) ? $expires : $this->configuration['maxAge'];
+
+        $cookie = SetCookie::create($name, $value)
+            ->withMaxAge($this->resolveMaxAge($maxAge))
             ->withPath($this->configuration['path'])
             ->withDomain($this->configuration['domain'])
             ->withSecure($this->configuration['secure'])
             ->withHttpOnly($this->configuration['httpOnly']);
 
-        return $response->withAddedHeader(static::RESPONSE_COOKIE_NAME, $cookie);
+        if ($sameSite = $this->resolveSameSite()) {
+            $cookie = $cookie->withSameSite($sameSite);
+        }
+
+        return $response->withAddedHeader(static::RESPONSE_COOKIE_NAME, (string) $cookie);
     }
 
     /**
@@ -154,31 +181,54 @@ class CookieHandler
      *
      * @return ResponseInterface
      */
-    public function expireCookie(ResponseInterface $response, $name)
+    public function expireCookie(ResponseInterface $response, string $name)
     {
         $cookie = SetCookie::createExpired($name)
-            ->withMaxAge($this->configuration['maxAge'])
             ->withPath($this->configuration['path'])
             ->withDomain($this->configuration['domain'])
             ->withSecure($this->configuration['secure'])
             ->withHttpOnly($this->configuration['httpOnly']);
 
-        return $response->withAddedHeader(static::RESPONSE_COOKIE_NAME, $cookie);
+        if ($sameSite = $this->resolveSameSite()) {
+            $cookie = $cookie->withSameSite($sameSite);
+        }
+
+        return $response->withAddedHeader(static::RESPONSE_COOKIE_NAME, (string) $cookie);
     }
 
     /**
-     * @param array $data
-     * @param string $name
-     * @param mixed $default
+     * This allows "Max-Age" (which should be # of seconds til expiration) to take the same
+     * type of parameters as "Expires".
+     *
+     * @param mixed $maxAge
      *
      * @return mixed
      */
-    private function nullable(array $data, $name, $default = null)
+    private function resolveMaxAge($maxAge)
     {
-        if (array_key_exists($name, $data)) {
-            return $data[$name];
+        if (is_null($maxAge)) {
+            return null;
         }
 
-        return $default;
+        if (is_numeric($maxAge)) {
+            return $maxAge;
+        }
+
+        $now = time();
+
+        return strtotime($maxAge, $now) - $now;
+    }
+
+    /**
+     * @return SameSite|null
+     */
+    private function resolveSameSite()
+    {
+        $sameSite = $this->configuration['sameSite'];
+        if (!$sameSite) {
+            return null;
+        }
+
+        return SameSite::fromString($sameSite);
     }
 }

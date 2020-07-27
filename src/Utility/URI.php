@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -8,19 +8,19 @@
 namespace QL\Panthor\Utility;
 
 use Psr\Http\Message\UriInterface;
-use Slim\Router;
+use Slim\Interfaces\RouteParserInterface;
 
 class URI
 {
     /**
-     * @var Router
+     * @var RouteParserInterface
      */
     private $router;
 
     /**
-     * @param Router $router
+     * @param RouteParserInterface $router
      */
-    public function __construct(Router $router)
+    public function __construct(RouteParserInterface $router)
     {
         $this->router = $router;
     }
@@ -33,7 +33,7 @@ class URI
      *
      * @return string|array|null
      */
-    public function getQueryParam(UriInterface $uri, $param)
+    public function getQueryParam(UriInterface $uri, string $param)
     {
         if (!$query = $uri->getQuery()) {
             return null;
@@ -56,13 +56,13 @@ class URI
      *
      * @return string
      */
-    public function uriFor($route, array $params = [], array $query = [])
+    public function uriFor(string $route, array $params = [], array $query = [])
     {
         if (!$route) {
             return '';
         }
 
-        return $this->router->relativePathFor($route, $params, $query);
+        return $this->router->relativeUrlFor($route, $params, $query);
     }
 
     /**
@@ -76,7 +76,7 @@ class URI
      *
      * @return string
      */
-    public function absoluteURIFor(UriInterface $uri, $route, array $params = [], array $query = [])
+    public function absoluteURIFor(UriInterface $uri, string $route, array $params = [], array $query = [])
     {
         $path = $this->uriFor($route, $params);
 

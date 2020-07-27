@@ -1,25 +1,27 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\HTTPProblem;
 
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\HTTPProblem\Renderer\JSONRenderer;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class ProblemRendereringTraitTest extends TestCase
 {
+    public $dummy;
     public $response;
     public $renderer;
 
     public function setUp()
     {
-        $this->response = new Response;
+        $this->response = (new ResponseFactory)->createResponse();
         $this->renderer = new JSONRenderer;
+
+        $this->dummy = new class {
+            use ProblemRenderingTrait {
+                renderProblem as public;
+            }
+        };
     }
 
     public function testRenderingProblem()
@@ -29,7 +31,7 @@ class ProblemRendereringTraitTest extends TestCase
             'test_extension' => 'data2'
         ]);
 
-        $rendering = new ProblemRenderingTraitStub;
+        $rendering = $this->dummy;
         $output = $rendering->renderProblem($this->response, $this->renderer, $problem);
 
         $expectedHTTPVersion = '1.1';
@@ -57,12 +59,5 @@ class ProblemRendereringTraitTest extends TestCase
         $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
         $this->assertSame($expectedHeaders, $actualHeaders);
         $this->assertSame($expectedBody, $actualBody->getContents());
-    }
-}
-
-class ProblemRenderingTraitStub
-{
-    use ProblemRenderingTrait {
-        renderProblem as public;
     }
 }

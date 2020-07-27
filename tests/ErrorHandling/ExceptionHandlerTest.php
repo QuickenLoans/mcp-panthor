@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\ErrorHandling;
 
@@ -12,35 +7,55 @@ use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use QL\Panthor\Exception\Exception;
-use Slim\App;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
 use QL\Panthor\Testing\MockeryAssistantTrait;
+use Slim\Exception\HttpMethodNotAllowedException;
+use Slim\Exception\HttpNotFoundException;
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\StreamFactory;
 
 class ExceptionHandlerTest extends TestCase
 {
     use MockeryAssistantTrait;
     use MockeryPHPUnitIntegration;
 
+    private $contentHandler;
+    private $responseFactory;
+
     private $request;
     private $response;
-    private $contentHandler;
 
     public function setUp()
     {
-        $this->request = Request::createFromEnvironment(Environment::mock());
-        $this->response = new Response;
+        $this->request = (new RequestFactory)->createRequest('GET', '/path');
+        $this->response = (new ResponseFactory)->createResponse();
 
         $this->contentHandler = Mockery::mock(ContentHandlerInterface::class);
+
+        $this->responseFactory = Mockery::mock(ResponseFactory::class, [
+            'createResponse' => $this->response,
+        ]);
     }
 
     public function testBadParamDoesNotHandle()
     {
-        $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
+        $handler = new ExceptionHandler($this->contentHandler, $this->responseFactory);
+        $handler->attachRequest($this->request);
         $handled = $handler->handle('derp');
 
         $this->assertSame(false, $handled);
+    }
+
+    public function testNoRequestRendersDefaultResponse()
+    {
+        $handler = new ExceptionHandler($this->contentHandler, $this->responseFactory);
+
+        ob_start();
+        $handled = $handler->handle('derp');
+        $output = ob_get_clean();
+
+        $this->assertSame(true, $handled);
+        $this->assertContains('Internal Server Error. The application failed to launch.', $output);
     }
 
     public function testHandlerReturnsBadResponse()
@@ -51,66 +66,84 @@ class ExceptionHandlerTest extends TestCase
             ->shouldReceive('handleException')
             ->with($this->request, $this->response, $ex)
             ->andReturn('badresponse')
-            ->once();
+            ->times(1);
 
 
-        $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
+        $handler = new ExceptionHandler($this->contentHandler, $this->responseFactory);
+        $handler->attachRequest($this->request);
         $handled = $handler->handle($ex);
 
         $this->assertSame(false, $handled);
     }
 
-    public function testHandlerOutputsDefaultMessageIfSlimNotAttached()
+    public function testHandlerRenders()
     {
-        $expected = <<<HTML_OUTPUT
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Panthor Error</title>
-    </head>
-
-    <body>
-        <h1>Panthor Error</h1>
-        <p>Internal Server Error. The application failed to launch.</p>
-    </body>
-</html>
-HTML_OUTPUT;
-
         $ex = new ErrorException('exception message');
+
+        $response = $this->response
+            ->withBody(
+                (new StreamFactory)->createStream('sample response')
+            );
 
         $this->contentHandler
             ->shouldReceive('handleException')
             ->with($this->request, $this->response, $ex)
-            ->andReturn($this->response)
-            ->once();
+            ->andReturn($response)
+            ->times(1);
 
-        $this->expectOutputString($expected);
-        $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
+        $handler = new ExceptionHandler($this->contentHandler, $this->responseFactory);
+        $handler->attachRequest($this->request);
+
+        ob_start();
         $handled = $handler->handle($ex);
+        $output = ob_get_clean();
 
         $this->assertSame(true, $handled);
+        $this->assertSame('sample response', $output);
     }
 
-    public function testHandlerRendersThroughSlim()
+    public function testExceptionIsHandledAsSlimMiddleware()
     {
         $ex = new ErrorException('exception message');
 
+        $response = (new ResponseFactory)->createResponse();
+
         $this->contentHandler
-            ->shouldReceive('handleException')
+            ->shouldReceive('handleThrowable')
             ->with($this->request, $this->response, $ex)
-            ->andReturn($this->response)
-            ->once();
+            ->andReturn($response)
+            ->times(1);
 
-        $slim = Mockery::mock(App::class);
-        $slim
-            ->shouldReceive('respond')
-            ->with($this->response)
-            ->once();
+        $handler = new ExceptionHandler($this->contentHandler, $this->responseFactory);
+        $actual = $handler($this->request, $ex, true, true, true);
 
-        $handler = new ExceptionHandler($this->contentHandler, $this->request, $this->response);
-        $handler->attachSlim($slim);
-        $handled = $handler->handle($ex);
+        $this->assertSame($response, $actual);
+    }
+    public function testSlimExceptionsAreHandledUniquelyAsSlimMiddleware()
+    {
+        $ex1 = new HttpMethodNotAllowedException($this->request);
+        $ex1->setAllowedMethods(['THIS', 'THAT']);
+        $ex2 = new HttpNotFoundException($this->request);
 
-        $this->assertSame(true, $handled);
+        $response = (new ResponseFactory)->createResponse();
+
+        $this->contentHandler
+            ->shouldReceive('handleNotAllowed')
+            ->with($this->request, $this->response, ['THIS', 'THAT'])
+            ->andReturn($response)
+            ->times(1);
+        $this->contentHandler
+            ->shouldReceive('handleNotFound')
+            ->with($this->request, $this->response)
+            ->andReturn($response)
+            ->times(1);
+
+        $handler = new ExceptionHandler($this->contentHandler, $this->responseFactory);
+
+        $actual = $handler($this->request, $ex1, false, false, false);
+        $this->assertSame($response, $actual);
+
+        $actual = $handler($this->request, $ex2, false, false, false);
+        $this->assertSame($response, $actual);
     }
 }

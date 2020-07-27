@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor;
 
@@ -15,18 +10,6 @@ use Symfony\Component\Config\FileLocator;
 
 class SymfonyIntegrationTest extends TestCase
 {
-    public function testContainerCompilesWithYAML()
-    {
-        $configRoot = __DIR__ . '/../configuration';
-
-        $container = new ContainerBuilder;
-        $builder = new YamlFileLoader($container, new FileLocator($configRoot));
-        $builder->load('panthor.yml');
-        $builder->load('panthor-slim.yml');
-
-        $container->compile();
-    }
-
     public function testContainerCompilesWithPHP()
     {
         $configRoot = __DIR__ . '/../config';

@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\Bootstrap;
 
@@ -70,5 +65,5 @@ class DITest extends TestCase
 
 class TestDI extends DI
 {
-    const PRIMARY_CONFIGURATION_FILE = 'configuration/panthor-slim.yml';
+    const PRIMARY_CONFIGURATION_FILE = 'config/slim.php';
 }

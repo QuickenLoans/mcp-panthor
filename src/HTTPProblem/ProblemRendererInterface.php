@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -17,19 +17,19 @@ interface ProblemRendererInterface
      *
      * @return int
      */
-    public function status(HTTPProblem $problem);
+    public function status(HTTPProblem $problem): int;
 
     /**
      * @param HTTPProblem $problem
      *
      * @return string[]
      */
-    public function headers(HTTPProblem $problem);
+    public function headers(HTTPProblem $problem): array;
 
     /**
      * @param HTTPProblem $problem
      *
      * @return string
      */
-    public function body(HTTPProblem $problem);
+    public function body(HTTPProblem $problem): string;
 }

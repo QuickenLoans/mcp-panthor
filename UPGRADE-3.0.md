@@ -15,8 +15,8 @@ and **response** is completely different. The good news is as this is unlikely t
 It is recommended you read the [Slim 3 Upgrade Guide](http://www.slimframework.com/docs/start/upgrade.html) before
 reading the rest of this one.
 
-Confused on the exact process required to update? Check out the [Panthor Skeleton App]((https://github.com/quickenloans-mcp/panthor-skeleton)
-and compare the [diff between skeleton v2.4.0 and v3.0.0](https://github.com/quickenloans-mcp/panthor-skeleton/compare/2.4.0...3.0.0)
+Confused on the exact process required to update? Check out the [Panthor Skeleton App]((https://github.com/quickenloans/panthor-skeleton)
+and compare the [diff between skeleton v2.4.0 and v3.0.0](https://github.com/quickenloans/panthor-skeleton/compare/2.4.0...3.0.0)
 
 ### Table of Contents
 - [Dependencies](#dependencies)
@@ -398,7 +398,7 @@ class MyMiddleware extends MiddlewareInterface
 
 Encrypted Cookies are now handled in a global middleware [EncryptedCookiesMiddleware](src/Middleware/EncryptedCookiesMiddleware.php)
 using [dflydev/fig-cookies](https://github.com/dflydev/dflydev-fig-cookies). In addition, while in memory - Cookies
-are stored in **OpaqueProperty** from [MCP Common](https://github.com/quickenloans-mcp/mcp-common). This ensures in
+are stored in **OpaqueProperty** from [MCP Common](https://github.com/quickenloans/mcp-common). This ensures in
 case the request or response are ever accidently output or logged that sensitive decrypted cookies are not passed in the clear.
 
 To use encrypted cookies, attach the middleware to slim before running it in your `public/index.php`. Alternatively,

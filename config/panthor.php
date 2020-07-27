@@ -2,11 +2,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use const E_ALL;
-use const E_DEPRECATED;
-use const E_USER_DEPRECATED;
-use const JSON_UNESCAPED_SLASHES;
 use Closure;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use QL\MCP\Common\Clock;
@@ -34,10 +31,18 @@ use QL\Panthor\Twig\TwigExtension;
 use QL\Panthor\Utility\ClosureFactory;
 use QL\Panthor\Utility\JSON;
 use QL\Panthor\Utility\URI;
+use Slim\Interfaces\RouteParserInterface;
+use Slim\Middleware\BodyParsingMiddleware;
+use Slim\Middleware\ErrorMiddleware;
+use Slim\Middleware\RoutingMiddleware;
 use Twig\Cache\FilesystemCache;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TemplateWrapper;
+use const E_ALL;
+use const E_DEPRECATED;
+use const E_USER_DEPRECATED;
+use const JSON_UNESCAPED_SLASHES;
 
 return function (ContainerConfigurator $container) {
     $s = $container->services();
@@ -46,35 +51,36 @@ return function (ContainerConfigurator $container) {
     $p
         ('env(PANTHOR_APPROOT)', __DIR__ . '/../../../..')
 
-        ('env(PANTHOR_DEBUG)',                   false)
-        ('env(PANTHOR_TWIG_DEBUG)',              true)
-        ('env(PANTHOR_ROUTES_DISABLE_CACHE_ON)', true)
+        ('env(PANTHOR_DEBUG)',         '0')
+        ('env(PANTHOR_TWIG_DEBUG)',    '1')
 
         ('env(PANTHOR_TIMEZONE)',      'America/Detroit')
         ('env(PANTHOR_COOKIE_SECRET)', '')
     ;
 
     $p
-        ('routes',                      [])
-        ('routes.cached',               '%env(PANTHOR_APPROOT)%/config/routes.cached.php')
-        ('routes.cache_disabled',       '%env(bool:PANTHOR_ROUTES_DISABLE_CACHE_ON)%')
-
-        ('global_middleware',           [])
+        ('routes',            [])
+        ('global_middleware', [
+            ErrorMiddleware::class,
+            BodyParsingMiddleware::class,
+            RoutingMiddleware::class,
+        ])
 
         ('debug',                       '%env(bool:PANTHOR_DEBUG)%')
 
-        ('date.timezone',               '%env(PANTHOR_TIMEZONE)%')
+        ('date.timezone',               '%env(string:PANTHOR_TIMEZONE)%')
         ('panthor.internal.timezone',   'UTC')
 
         ('twig.debug',                  '%env(bool:PANTHOR_TWIG_DEBUG)%')
-        ('twig.template.dir',           '%env(PANTHOR_APPROOT)%/templates')
-        ('twig.cache.dir',              '%env(PANTHOR_APPROOT)%/.twig')
+        ('twig.template.dir',           '%env(string:PANTHOR_APPROOT)%/templates')
+        ('twig.cache.dir',              '%env(string:PANTHOR_APPROOT)%/.twig')
 
         ('cookie.settings.lifetime',    '+1 year')
         ('cookie.settings.secure',      false)
         ('cookie.settings.http_only',   true)
+        ('cookie.settings.same_site',   'lax')
         ('session.lifetime',            '+1 week')
-        ('cookie.encryption.secret',    '%env(PANTHOR_COOKIE_SECRET)%')
+        ('cookie.encryption.secret',    '%env(string:PANTHOR_COOKIE_SECRET)%')
 
         ('cookie.unencrypted',          [])
         ('cookie.delete_invalid',       true)
@@ -84,12 +90,14 @@ return function (ContainerConfigurator $container) {
             'domain'    => '',
             'secure'    => '%cookie.settings.secure%',
             'httpOnly'  => '%cookie.settings.http_only%',
+            'sameSite'  => '%cookie.settings.same_site%',
         ])
 
         ('error_handling.levels',           E_ALL)
         ('error_handling.thrown_errors',    E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED)
         ('error_handling.logged_errors',    E_ALL)
         ('error_handling.log_stacktrace',   false)
+        ('error_handling.stacktrace_limit', 0)
         ('error_handling.html_template',    'error.html.twig')
 
         ('middleware.session_options', [
@@ -104,13 +112,11 @@ return function (ContainerConfigurator $container) {
 
     // Core services. Available for use by applications
     $s
-        ('router', CacheableRouter::class)
-            ->call('setCaching', ['%routes.cached%', '%routes.cache_disabled%'])
         (RouteLoader::class)
             ->arg('$routes', '%routes%')
 
         (URI::class)
-            ->arg('$router', ref('router'))
+            ->arg('$router', ref(RouteParserInterface::class))
         (JSON::class)
         (Clock::class)
             ->arg('$current', 'now')
@@ -120,14 +126,13 @@ return function (ContainerConfigurator $container) {
         (ErrorHandler::class)
             ->arg('$handler', ref(ExceptionHandler::class))
             ->arg('$logger', ref(LoggerInterface::class))
-            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%'])
+            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%', '%error_handling.stacktrace_limit%'])
             ->call('setThrownErrors', ['%error_handling.thrown_errors%'])
             ->call('setLoggedErrors', ['%error_handling.logged_errors%'])
 
         (ExceptionHandler::class)
             ->arg('$handler', ref('content_handler'))
-            ->arg('$request', ref('request'))
-            ->arg('$response', ref('response'))
+            ->arg('$responseFactory', ref(ResponseFactoryInterface::class))
         ('problem.renderer', JSONRenderer::class)
             ->arg('$json', ref('panthor.problem.json'))
 
@@ -143,7 +148,9 @@ return function (ContainerConfigurator $container) {
         ('cookie.encryption', LibsodiumCookieEncryption::class)
             ->arg('$crypto', ref('panthor.libsodium.encryption'))
         (CookieHandler::class)
+            ->arg('$encryption', ref('cookie.encryption'))
             ->arg('$cookieSettings', '%cookie.settings%')
+            ->arg('$unencryptedCookies', '%cookie.unencrypted%')
 
         ('twig.template', LazyTwig::class)
             ->arg('$environment', ref(Environment::class))
@@ -174,22 +181,6 @@ return function (ContainerConfigurator $container) {
             ->arg('$options', '%middleware.session_options%')
     ;
 
-    // Overrides. Change built-in Slim handlers to Panthor handlers
-    $s
-        ('notFoundHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleNotFound'])
-        ('notAllowedHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleNotAllowed'])
-        ('phpErrorHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleThrowable'])
-        ('errorHandler', Closure::class)
-            ->factory([ClosureFactory::class, 'buildClosure'])
-            ->args([ref('content_handler'), 'handleException'])
-    ;
-
     // Support classes. Users shouldn't need to interact with these
     $s
         ('panthor.libsodium.encryption', LibsodiumSymmetricCrypto::class)
@@ -212,18 +203,18 @@ return function (ContainerConfigurator $container) {
         ('panthor.content_handler.html', HTMLTemplateContentHandler::class)
             ->arg('$template', ref('panthor.handler.twig'))
             ->arg('$displayErrorDetails', '%slim.settings.display_errors%')
-            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%'])
+            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%', '%error_handling.stacktrace_limit%'])
         ('panthor.content_handler.problem', HTTPProblemContentHandler::class)
             ->arg('$renderer', ref('problem.renderer'))
             ->arg('$displayErrorDetails', '%slim.settings.display_errors%')
-            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%'])
+            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%', '%error_handling.stacktrace_limit%'])
         ('panthor.content_handler.json', JSONContentHandler::class)
             ->arg('$json', ref(JSON::class))
             ->arg('$displayErrorDetails', '%slim.settings.display_errors%')
-            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%'])
+            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%', '%error_handling.stacktrace_limit%'])
         ('panthor.content_handler.text', PlainTextContentHandler::class)
             ->arg('$displayErrorDetails', '%slim.settings.display_errors%')
-            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%'])
+            ->call('setStacktraceLogging', ['%error_handling.log_stacktrace%', '%error_handling.stacktrace_limit%'])
 
         ('panthor.handler.twig', TwigTemplate::class)
             ->arg('$twig', ref('panthor.handler.twig_environment'))

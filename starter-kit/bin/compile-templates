@@ -9,6 +9,7 @@ use Twig\Environment;
 
 $root = realpath(__DIR__ . '/..');
 $_ENV['PANTHOR_APPROOT'] = $root;
+$_ENV['PANTHOR_TWIG_DEBUG'] = false;
 
 $container = require "${root}/config/bootstrap.php";
 
@@ -46,7 +47,7 @@ if (!file_exists("${twigCacheDir}")) {
 echo "Templates:\n";
 foreach ($files as $file) {
     echo $file->getRelativePathname() . "\n";
-    $template = $twig->loadTemplate($file->getRelativePathname());
+    $template = $twig->load($file->getRelativePathname());
     $template->render([]);
 }
 

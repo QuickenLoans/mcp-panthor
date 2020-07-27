@@ -86,7 +86,7 @@ class DI
             return null;
         }
 
-        $cacheDisabled = getenv(static::ENV_CACHE_DISABLED);
+        $cacheDisabled = $_SERVER[static::ENV_CACHE_DISABLED] ?? false;
         if ($cacheDisabled) {
             return self::buildContainer($root, $class, $options);
         }

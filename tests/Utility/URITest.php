@@ -1,17 +1,12 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\Utility;
 
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
-use Slim\Http\Uri as SlimUri;
-use Slim\Router;
+use Slim\Interfaces\RouteParserInterface;
+use Slim\Psr7\Factory\UriFactory;
 
 class URITest extends TestCase
 {
@@ -21,7 +16,7 @@ class URITest extends TestCase
 
     public function setUp()
     {
-        $this->router = Mockery::mock(Router::class);
+        $this->router = Mockery::mock(RouteParserInterface::class);
     }
 
     public function testUrlForReturnsEmptyStringIfNone()
@@ -34,7 +29,7 @@ class URITest extends TestCase
     public function testUrlGetsRouteAndAppendsQueryString()
     {
         $this->router
-            ->shouldReceive('relativePathFor')
+            ->shouldReceive('relativeUrlFor')
             ->with('route.name', ['param1' => '1'], ['query1' => '2'])
             ->andReturn('/path?query1=2');
 
@@ -46,10 +41,10 @@ class URITest extends TestCase
 
     public function testAbsoluteUrlGetsRoute()
     {
-        $uri = SlimUri::createFromString('https://example.com/path/page?query=1');
+        $uri = (new UriFactory)->createUri('https://example.com/path/page?query=1');
 
         $this->router
-            ->shouldReceive('relativePathFor')
+            ->shouldReceive('relativeUrlFor')
             ->with('route.name', ['param1' => '1'], [])
             ->andReturn('/test-route-page');
 
@@ -61,10 +56,10 @@ class URITest extends TestCase
 
     public function testAbsoluteUrlGetsRouteAndAppendsPortWhenNotStandard()
     {
-        $uri = SlimUri::createFromString('http://host:8443/path/page?query=1');
+        $uri = (new UriFactory)->createUri('http://host:8443/path/page?query=1');
 
         $this->router
-            ->shouldReceive('relativePathFor')
+            ->shouldReceive('relativeUrlFor')
             ->with('route.name', ['param1' => '1'], [])
             ->andReturn('/test-route-page');
 

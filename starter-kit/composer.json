@@ -7,21 +7,22 @@
     },
 
     "require": {
-        "php": "~7.1",
-        "ext-sodium": "~2.0 || ~7.2",
+        "php": ">=7.3",
+        "ext-sodium": "*",
 
-        "ql/mcp-panthor": "~3.3",
+        "ql/mcp-panthor": "~4.0",
         "ql/mcp-common":  "~2.0",
 
-        "slim/slim":                    "~3.10",
-        "symfony/config":               "~4.0",
-        "symfony/dotenv":               "~4.0",
-        "symfony/dependency-injection": "~4.0",
-        "symfony/finder":               "~4.0",
-        "symfony/process":              "~4.0",
-        "symfony/proxy-manager-bridge": "~4.0",
-        "symfony/yaml":                 "~4.0",
+        "slim/slim":                    "~4.5",
+        "slim/psr7":                    "~1.0",
+        "symfony/config":               "~5.0",
+        "symfony/dotenv":               "~5.0",
+        "symfony/dependency-injection": "~5.0",
+        "symfony/finder":               "~5.0",
+        "symfony/process":              "~5.0",
+        "symfony/proxy-manager-bridge": "~5.0",
+        "symfony/yaml":                 "~5.0",
 
-        "twig/twig": "~2.4"
+        "twig/twig": "~3.0"
     }
 }

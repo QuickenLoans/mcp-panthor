@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright (c) 2016 Quicken Loans Inc.
+ * @copyright (c) 2020 Quicken Loans Inc.
  *
  * For full license information, please view the LICENSE distributed with this source code.
  */
@@ -31,7 +31,7 @@ class JSONRenderer implements ProblemRendererInterface
      *
      * @return int
      */
-    public function status(HTTPProblem $problem)
+    public function status(HTTPProblem $problem): int
     {
         return $problem->status();
     }
@@ -41,7 +41,7 @@ class JSONRenderer implements ProblemRendererInterface
      *
      * @return array
      */
-    public function headers(HTTPProblem $problem)
+    public function headers(HTTPProblem $problem): array
     {
         return [
             'Content-Type' => 'application/problem+json',
@@ -53,7 +53,7 @@ class JSONRenderer implements ProblemRendererInterface
      *
      * @return string
      */
-    public function body(HTTPProblem $problem)
+    public function body(HTTPProblem $problem): string
     {
         $data = [
             'status' => $problem->status(),

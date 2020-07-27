@@ -1,9 +1,4 @@
 <?php
-/**
- * @copyright (c) 2016 Quicken Loans Inc.
- *
- * For full license information, please view the LICENSE distributed with this source code.
- */
 
 namespace QL\Panthor\Twig;
 
@@ -36,7 +31,7 @@ class ContextTest extends TestCase
         }
     }
 
-    public function testMergingContextPreservesChildren()
+    public function testMergingContextIsNotRecursive()
     {
         $context = new Context([
             'test1' => 'value1',
@@ -49,7 +44,6 @@ class ContextTest extends TestCase
 
 
         $expected = [
-            'test3' => 'value3',
             'test4' => 'value4'
         ];
 
@@ -86,7 +80,6 @@ class ContextTest extends TestCase
         $expected = [
             'test1' => 'value2',
             'test2' => [
-                'test3' => 'value3',
                 'test4' => 'value4'
             ]
         ];
