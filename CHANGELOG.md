@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [4.0.1] - 2020-09-22
+
+### Fixed
+- Fixed usage of route groups in `RouteLoader`. Since 4.0, routes were not correctly placed into groups.
+
 ## [4.0.0] - 2020-07-26
 
 ### Added
