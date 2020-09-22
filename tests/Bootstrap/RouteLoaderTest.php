@@ -180,6 +180,8 @@ class RouteLoaderTest extends TestCase
 
         $this->assertSame('test3', $route1->getName());
         $this->assertSame('test', $route2->getName());
+
+        $this->assertSame('/hello/test3', $route1->getPattern());
     }
 }
 
