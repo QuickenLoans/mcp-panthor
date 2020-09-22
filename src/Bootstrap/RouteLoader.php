@@ -79,7 +79,7 @@ class RouteLoader
     /**
      * Load routes into the application.
      *
-     * @param RouteCollectorProxyInterface $slim
+     * @param RouteCollectorProxyInterface $router
      * @param array $routes
      *
      * @return void
