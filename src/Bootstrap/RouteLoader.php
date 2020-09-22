@@ -7,7 +7,7 @@
 
 namespace QL\Panthor\Bootstrap;
 
-use Slim\App;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Interfaces\RouteInterface;
 
 /**
@@ -59,7 +59,7 @@ class RouteLoader
      *
      * @return void
      */
-    public function addRoutes(array $routes)
+    public function addRoutes(array $routes): void
     {
         $this->routes = array_merge($this->routes, $routes);
     }
@@ -67,24 +67,24 @@ class RouteLoader
     /**
      * Load routes into the application.
      *
-     * @param App $slim
+     * @param RouteCollectorProxyInterface $router
      *
      * @return void
      */
-    public function __invoke(App $slim)
+    public function __invoke(RouteCollectorProxyInterface $router): void
     {
-        $this->loadRoutes($slim, $this->routes);
+        $this->loadRoutes($router, $this->routes);
     }
 
     /**
      * Load routes into the application.
      *
-     * @param App $slim
+     * @param RouteCollectorProxyInterface $slim
      * @param array $routes
      *
      * @return void
      */
-    public function loadRoutes(App $slim, array $routes)
+    public function loadRoutes(RouteCollectorProxyInterface $router, array $routes): void
     {
         // capture as a callable because slim will re-bind $this
         $loader = [$this, 'loadRoutes'];
@@ -94,17 +94,17 @@ class RouteLoader
                 $middlewares = $details['stack'] ?? [];
                 $prefix = $details['route'] ?? '';
 
-                $groupLoader = function () use ($slim, $children, $loader) {
-                    $loader($slim, $children);
+                $groupLoader = function (RouteCollectorProxyInterface $router) use ($children, $loader) {
+                    $loader($router, $children);
                 };
 
-                $group = $slim->group($prefix, $groupLoader);
+                $group = $router->group($prefix, $groupLoader);
                 while ($mw = array_pop($middlewares)) {
                     $group->add($mw);
                 }
 
             } else {
-                $this->loadRoute($slim, $name, $details);
+                $this->loadRoute($router, $name, $details);
             }
         }
     }
@@ -112,13 +112,13 @@ class RouteLoader
     /**
      * Load a route into the application.
      *
-     * @param App $slim
+     * @param RouteCollectorProxyInterface $router
      * @param string $name
      * @param array $details
      *
      * @return RouteInterface
      */
-    private function loadRoute(App $slim, string $name, array $details)
+    private function loadRoute(RouteCollectorProxyInterface $router, string $name, array $details): RouteInterface
     {
         $methods = $this->methods($details);
         $pattern = $details['route'] ?? '';
@@ -126,7 +126,7 @@ class RouteLoader
 
         $controller = array_pop($stack);
 
-        $route = $slim->map($methods, $pattern, $controller);
+        $route = $router->map($methods, $pattern, $controller);
         $route->setName($name);
 
         while ($middleware = array_pop($stack)) {
