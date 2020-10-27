@@ -42,7 +42,9 @@
         "symfony/dependency-injection": "~5.0",
         "symfony/yaml":                 "~5.0",
         "symfony/proxy-manager-bridge": "~5.0",
-        "twig/twig":                    "~3.0"
+        "twig/twig":                    "~3.0",
+
+        "ocramius/package-versions": "~1.5"
     },
 
     "scripts": {
