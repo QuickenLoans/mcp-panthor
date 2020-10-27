@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [4.0.2] - 2020-10-27
+
+### Fixed
+- Fixed usage of stacktrace limits with parameter `error_handling.stacktrace_limit`. When used (set to other than `0`),
+  no stack trace at all would be logged instead of the number of entries configured.
+
 ## [4.0.1] - 2020-09-22
 
 ### Fixed

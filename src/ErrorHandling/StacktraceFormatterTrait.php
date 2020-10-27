@@ -130,7 +130,7 @@ trait StacktraceFormatterTrait
         }
 
         foreach ($exception->getTrace() as $index => $entry) {
-            if ($this->logStacktracesEntryLimit && $this->logStacktracesEntryLimit > $index) {
+            if ($this->logStacktracesEntryLimit && $index > $this->logStacktracesEntryLimit) {
                 break;
             }
 
