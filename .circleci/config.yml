@@ -6,22 +6,22 @@ executors:
         docker:
           - image: 'circleci/php:7.3'
             auth:
-              username: $DOCKERHUB_USERNAME
-              password: $DOCKERHUB_PASSWORD
+                username: $DOCKERHUB_USERNAME
+                password: $DOCKERHUB_PASSWORD
     php74:
         working_directory: '~/project'
         docker:
           - image: 'circleci/php:7.4'
             auth:
-              username: $DOCKERHUB_USERNAME
-              password: $DOCKERHUB_PASSWORD
+                username: $DOCKERHUB_USERNAME
+                password: $DOCKERHUB_PASSWORD
     php80:
         working_directory: '~/project'
         docker:
           - image: 'circleci/php:8.0'
             auth:
-              username: $DOCKERHUB_USERNAME
-              password: $DOCKERHUB_PASSWORD
+                username: $DOCKERHUB_USERNAME
+                password: $DOCKERHUB_PASSWORD
 commands:
     php--install-composer:
         steps:
@@ -48,16 +48,6 @@ commands:
             - run:
                 name: 'Run unit tests'
                 command: 'phpdbg -qrr vendor/bin/phpunit'
-
-            - store_test_results:
-                path: '.phpunit/report'
-            - run:
-                name: 'Upload test coverage to Codacy (PHP 7.3 only)'
-                command: |
-                    php_version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-                    if [ "${php_version}" == "7.3" ] ; then
-                        ./vendor/bin/codacycoverage clover .phpunit/clover.xml
-                    fi
 
     php--run-static-analysis:
         steps:
