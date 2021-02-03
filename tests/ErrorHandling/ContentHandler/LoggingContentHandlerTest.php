@@ -16,7 +16,7 @@ class LoggingContentHandlerTest extends TestCase
     private $logger;
     private $config;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = (new RequestFactory)->createRequest('GET', '/path');
         $this->response = (new ResponseFactory)->createResponse();

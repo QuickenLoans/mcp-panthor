@@ -21,7 +21,7 @@ class TwigExtensionTest extends TestCase
     public $uri;
     public $clock;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->uri = Mockery::mock(URI::class);
         $this->clock = Mockery::mock(Clock::class);
@@ -42,13 +42,13 @@ class TwigExtensionTest extends TestCase
     public function testGetFunctionsDoesNotBlowUp()
     {
         $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
-        $this->assertInternalType('array', $ext->getFunctions());
+        $this->assertIsArray($ext->getFunctions());
     }
 
     public function testGetFiltersDoesNotBlowUp()
     {
         $ext = new TwigExtension($this->uri, $this->clock, 'America\Detroit', false);
-        $this->assertInternalType('array', $ext->getFilters());
+        $this->assertIsArray($ext->getFilters());
     }
 
     public function testGetTimepointReadsFromClock()

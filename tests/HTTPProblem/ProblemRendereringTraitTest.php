@@ -12,7 +12,7 @@ class ProblemRendereringTraitTest extends TestCase
     public $response;
     public $renderer;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->response = (new ResponseFactory)->createResponse();
         $this->renderer = new JSONRenderer;

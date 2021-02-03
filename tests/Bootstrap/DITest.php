@@ -9,7 +9,7 @@ class DITest extends TestCase
 {
     public $root;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->root = __DIR__ . '/../../';
     }
@@ -27,7 +27,7 @@ class DITest extends TestCase
 
         $cachedDI = TestDI::cacheDI($di, [ 'class' => 'MyDIClass' ]);
 
-        $this->assertContains('class MyDIClass extends Container', $cachedDI);
+        $this->assertStringContainsString('class MyDIClass extends Container', $cachedDI);
     }
 
     public function invalidOptionsForGetReturnsNull()

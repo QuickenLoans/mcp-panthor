@@ -25,7 +25,7 @@ class ExceptionHandlerTest extends TestCase
     private $request;
     private $response;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = (new RequestFactory)->createRequest('GET', '/path');
         $this->response = (new ResponseFactory)->createResponse();
@@ -55,7 +55,7 @@ class ExceptionHandlerTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertSame(true, $handled);
-        $this->assertContains('Internal Server Error. The application failed to launch.', $output);
+        $this->assertStringContainsString('Internal Server Error. The application failed to launch.', $output);
     }
 
     public function testHandlerReturnsBadResponse()

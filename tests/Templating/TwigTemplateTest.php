@@ -11,7 +11,7 @@ class TwigTemplateTest extends TestCase
 {
     public $twig;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->twig = new Environment(new ArrayLoader([]));
     }

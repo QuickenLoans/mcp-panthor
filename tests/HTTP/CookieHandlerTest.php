@@ -19,7 +19,7 @@ class CookieHandlerTest extends TestCase
     private $request;
     private $reponse;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->encryption = Mockery::mock(CookieEncryptionInterface::class);
 
@@ -177,12 +177,12 @@ class CookieHandlerTest extends TestCase
         $response = $handler->withCookie($this->response, 'testcookie1', 'value1', '+5 minutes');
 
         $cookie = $response->getHeaderLine('Set-Cookie');
-        $this->assertContains('testcookie1=encrypted_value_here3;', $cookie);
-        $this->assertContains('Domain=example.com;', $cookie);
-        $this->assertContains('Path=/page;', $cookie);
-        $this->assertContains('Secure;', $cookie);
-        $this->assertContains('HttpOnly', $cookie);
+        $this->assertStringContainsString('testcookie1=encrypted_value_here3;', $cookie);
+        $this->assertStringContainsString('Domain=example.com;', $cookie);
+        $this->assertStringContainsString('Path=/page;', $cookie);
+        $this->assertStringContainsString('Secure;', $cookie);
+        $this->assertStringContainsString('HttpOnly', $cookie);
 
-        $this->assertContains('Max-Age=300', $cookie);
+        $this->assertStringContainsString('Max-Age=300', $cookie);
     }
 }

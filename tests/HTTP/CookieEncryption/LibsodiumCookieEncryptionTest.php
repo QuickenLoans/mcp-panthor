@@ -15,7 +15,7 @@ class LibsodiumCookieEncryptionTest extends TestCase
     public $crypto;
     public $binaryData;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->crypto = Mockery::mock(LibsodiumSymmetricCrypto::class);
         $this->binaryData = hex2bin('f09f8f80f09f9384f09f9aa7f09f9a80e28fb0f09f9aa8');

@@ -13,7 +13,7 @@ class CacheableRouteCollectorConfiguratorTest extends TestCase
 
     public $collector;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->collector = Mockery::mock(RouteCollector::class);
     }

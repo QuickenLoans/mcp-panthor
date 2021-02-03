@@ -11,6 +11,11 @@ executors:
         docker:
           - image: 'circleci/php:7.4'
 
+    php80:
+        working_directory: '~/project'
+        docker:
+          - image: 'circleci/php:8.0'
+
 commands:
     php--install-composer:
         steps:
@@ -85,10 +90,20 @@ workflows:
                 executor_version: 'php74'
                 requires: [ php74_install ]
 
+            - php--install-dependencies:
+                name: 'php80_install'
+                executor_version: 'php80'
+                requires: [ fetch_code ]
+            - php--testing:
+                name: 'php80_testing'
+                executor_version: 'php80'
+                requires: [ php80_install ]
+
             - fan_in:
                 requires:
                     - 'php73_testing'
                     - 'php74_testing'
+                    - 'php80_testing'
 
 jobs:
 

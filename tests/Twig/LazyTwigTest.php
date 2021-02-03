@@ -2,6 +2,7 @@
 
 namespace QL\Panthor\Twig;
 
+use InvalidArgumentException;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
@@ -15,7 +16,7 @@ class LazyTwigTest extends TestCase
 
     public $twigEnvironment;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->twigEnvironment = new Environment(
             new ArrayLoader([
@@ -25,11 +26,10 @@ class LazyTwigTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testMissingTemplateThrowsException()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $env = Mockery::mock(Environment::class);
         $twig = new LazyTwig($env, new Context);
 

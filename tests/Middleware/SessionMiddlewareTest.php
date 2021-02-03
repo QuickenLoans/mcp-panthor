@@ -22,7 +22,7 @@ class SessionMiddlewareTest extends TestCase
     public $reqHandler;
     public $capturedRequest;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->handler = Mockery::mock(CookieHandler::class);
 

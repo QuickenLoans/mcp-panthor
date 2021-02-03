@@ -12,7 +12,7 @@ class PlainTextContentHandlerTest extends TestCase
     private $request;
     private $response;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = (new RequestFactory)->createRequest('GET', '/path');
         $this->response = (new ResponseFactory)->createResponse();
@@ -191,8 +191,8 @@ class PlainTextContentHandlerTest extends TestCase
         $this->assertSame($expectedStatusCode, $actualStatusCode);
         $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
         $this->assertSame($expectedHeaders, $actualHeaders);
-        $this->assertContains($expectedBody, $rendered);
-        $this->assertContains('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:161', $rendered);
-        $this->assertContains('Error Details:', $rendered);
+        $this->assertStringContainsString($expectedBody, $rendered);
+        $this->assertStringContainsString('ErrorHandling/ContentHandler/PlainTextContentHandlerTest.php:161', $rendered);
+        $this->assertStringContainsString('Error Details:', $rendered);
     }
 }

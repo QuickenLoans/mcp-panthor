@@ -14,7 +14,7 @@ class URITest extends TestCase
 
     private $router;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->router = Mockery::mock(RouteParserInterface::class);
     }

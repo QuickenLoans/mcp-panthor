@@ -10,7 +10,7 @@ class NewBodyTraitTest extends TestCase
     public $dummy;
     public $response;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->response = (new ResponseFactory)->createResponse();
 

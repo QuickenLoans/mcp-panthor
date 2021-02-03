@@ -17,7 +17,7 @@ class ErrorHandlerTest extends TestCase
 
     public $exHandler;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->exHandler = Mockery::mock(ExceptionHandler::class);
     }

@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 See [keepachangelog.com](http://keepachangelog.com) for reference.
 
+## [4.1.0] - 2021-02-03
+
+### Changed
+- Added support for PHP 8.
+- Updated unit tests to PHP Unit 9.
+- Removed support for PHP 7.1 and PHP 7.2.
+- Upgraded `dflydev/fig-cookies` from 2.0 to 3.0.
+
 ## [4.0.2] - 2020-10-27
 
 ### Fixed

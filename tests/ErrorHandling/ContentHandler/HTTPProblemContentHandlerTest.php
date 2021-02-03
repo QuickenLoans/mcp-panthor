@@ -12,7 +12,7 @@ class HTTPProblemContentHandlerTest extends TestCase
     private $request;
     private $response;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = (new RequestFactory)->createRequest('GET', '/path');
         $this->response = (new ResponseFactory)->createResponse();
@@ -181,7 +181,7 @@ class HTTPProblemContentHandlerTest extends TestCase
         $this->assertSame($expectedStatusCode, $actualStatusCode);
         $this->assertSame($expectedReasonPhrase, $actualReasonPhrase);
         $this->assertSame($expectedHeaders, $actualHeaders);
-        $this->assertContains('"detail":"exception message"', $rendered);
-        $this->assertContains('"error_details":"ERR ', $rendered);
+        $this->assertStringContainsString('"detail":"exception message"', $rendered);
+        $this->assertStringContainsString('"error_details":"ERR ', $rendered);
     }
 }

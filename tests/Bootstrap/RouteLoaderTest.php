@@ -14,7 +14,7 @@ class RouteLoaderTest extends TestCase
     public $request;
     public $slim;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = (new RequestFactory)->createRequest('GET', '/test');
 

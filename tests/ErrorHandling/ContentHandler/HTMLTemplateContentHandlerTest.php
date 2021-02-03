@@ -20,7 +20,7 @@ class HTMLTemplateContentHandlerTest extends TestCase
     private $response;
     private $template;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = (new RequestFactory)->createRequest('GET', '/path');
         $this->response = (new ResponseFactory)->createResponse();
@@ -240,6 +240,6 @@ class HTMLTemplateContentHandlerTest extends TestCase
         $this->assertSame(500, $captured['status']);
         $this->assertSame('E_ERROR', $captured['severity']);
         $this->assertSame($ex, $captured['throwable']);
-        $this->assertContains('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:202', $captured['details']);
+        $this->assertStringContainsString('ErrorHandling/ContentHandler/HTMLTemplateContentHandlerTest.php:202', $captured['details']);
     }
 }

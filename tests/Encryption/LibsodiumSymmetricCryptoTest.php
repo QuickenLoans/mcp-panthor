@@ -15,7 +15,7 @@ class LibsodiumSymmetricCryptoTest extends TestCase
 {
     private $secret;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->secret = 'e1d4ca14194e027629e4446e7c534eb24b8953c3b7cf62cbb7b95977f0ab965cd8d2e8ac0dc1d9174ff401e86bf500112987eea4e552f9e201f3afe759b1a7dc';
     }

@@ -26,7 +26,7 @@ class EncryptedCookiesMiddlewareTest extends TestCase
     public $reqHandler;
     public $capturedRequest;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->encryption = Mockery::mock(CookieEncryptionInterface::class);
 
